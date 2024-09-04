@@ -1,0 +1,550 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ECSchema schemaName="ReinSchema" nameSpacePrefix="AEP" version="1.0" xmlns="http://www.bentley.com/schemas/Bentley.ECXML.2.0">
+	<ECSchemaReference name="EditorCustomAttributes" version="01.00" prefix="beca" />
+	<ECClass typeName="IReinFormCore" displayLabel="Rein Common" isDomainClass="False">
+        <ECProperty propertyName="ReinBarDiameter" typeName="int" displayLabel="Диаметр">
+            <ECCustomAttributes>
+				<Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>Bar</Name>
+                    <DisplayLabel>Стержень</DisplayLabel>
+                    <Priority>100999</Priority>
+                </Category>
+                <StandardValues xmlns="EditorCustomAttributes.01.00">
+                    <ValueMap>
+                        <ValueMap>
+                            <Value>8</Value>
+                            <DisplayString>8</DisplayString>
+                        </ValueMap>
+                        <ValueMap>
+                            <Value>10</Value>
+                            <DisplayString>10</DisplayString>
+                        </ValueMap>
+                        <ValueMap>
+                            <Value>12</Value>
+                            <DisplayString>12</DisplayString>
+                        </ValueMap>
+                        <ValueMap>
+                            <Value>16</Value>
+                            <DisplayString>16</DisplayString>
+                        </ValueMap>
+                        <ValueMap>
+                            <Value>20</Value>
+                            <DisplayString>20</DisplayString>
+                        </ValueMap>
+                        <ValueMap>
+                            <Value>25</Value>
+                            <DisplayString>25</DisplayString>
+                        </ValueMap>
+                        <ValueMap>
+                            <Value>28</Value>
+                            <DisplayString>28</DisplayString>
+                        </ValueMap>
+                        <ValueMap>
+                            <Value>32</Value>
+                            <DisplayString>32</DisplayString>
+                        </ValueMap>
+                        <ValueMap>
+                            <Value>36</Value>
+                            <DisplayString>36</DisplayString>
+                        </ValueMap>
+                        <ValueMap>
+                            <Value>40</Value>
+                            <DisplayString>40</DisplayString>
+                        </ValueMap>
+                    </ValueMap>
+                </StandardValues>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinBarLenType" typeName="int" displayLabel="Расчет длины">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>Bar</Name>
+                    <DisplayLabel>Стержень</DisplayLabel>
+                    <Priority>100998</Priority>
+                </Category>
+                <StandardValues xmlns="EditorCustomAttributes.01.00">
+                    <ValueMap>
+                        <ValueMap>
+                            <DisplayString>штуки</DisplayString>
+                            <Value>0</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>пог.метры</DisplayString>
+                            <Value>1</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>перем.длина</DisplayString>
+                            <Value>2</Value>
+                        </ValueMap>
+                    </ValueMap>
+                </StandardValues>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinBarBend" typeName="int" displayLabel="Радиус гиба">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>Bar</Name>
+                    <DisplayLabel>Стержень</DisplayLabel>
+                    <Priority>100997</Priority>
+                </Category>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinPosSet" typeName="int" displayLabel="Набор позиций">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>Bar</Name>
+                    <DisplayLabel>Стержень</DisplayLabel>
+                    <Priority>100996</Priority>
+                </Category>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinTerm1" typeName="int" displayLabel="Доп.элемент">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>BarOrg</Name>
+                    <DisplayLabel>Начало стержня</DisplayLabel>
+                    <Priority>90</Priority>
+                </Category>
+                <StandardValues xmlns="EditorCustomAttributes.01.00">
+                    <ValueMap>
+                        <ValueMap>
+                            <DisplayString/>
+                            <Value>0</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>загиб</DisplayString>
+                            <Value>1</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>резьба</DisplayString>
+                            <Value>2</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>муфта</DisplayString>
+                            <Value>3</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>скоба</DisplayString>
+                            <Value>4</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>сварка</DisplayString>
+                            <Value>10</Value>
+                        </ValueMap>
+                    </ValueMap>
+                </StandardValues>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinTerm2" typeName="int" displayLabel="Доп.элемент">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>BarEnd</Name>
+                    <DisplayLabel>Конец стержня</DisplayLabel>
+                    <Priority>90</Priority>
+                </Category>
+                <StandardValues xmlns="EditorCustomAttributes.01.00">
+                    <ValueMap>
+                        <ValueMap>
+                            <DisplayString/>
+                            <Value>0</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>загиб</DisplayString>
+                            <Value>1</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>резьба</DisplayString>
+                            <Value>2</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>муфта</DisplayString>
+                            <Value>3</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>скоба</DisplayString>
+                            <Value>4</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>сварка</DisplayString>
+                            <Value>10</Value>
+                        </ValueMap>
+                    </ValueMap>
+                </StandardValues>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinBendType1" typeName="int" displayLabel="Как гнуть">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>BarOrg</Name>
+                    <DisplayLabel>Начало стержня</DisplayLabel>
+                    <Priority>88</Priority>
+                </Category>
+                <HideProperty xmlns="EditorCustomAttributes.01.00">
+                    <If>this.ReinTerm1 &lt;&gt; 1</If>
+                </HideProperty>
+                <StandardValues xmlns="EditorCustomAttributes.01.00">
+                    <ValueMap>
+                        <ValueMap>
+                            <DisplayString/>
+                            <Value>0</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>U</DisplayString>
+                            <Value>180</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>V</DisplayString>
+                            <Value>135</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>L</DisplayString>
+                            <Value>90</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>U обратно</DisplayString>
+                            <Value>-90</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>V обратно</DisplayString>
+                            <Value>-135</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>L обратно</DisplayString>
+                            <Value>-180</Value>
+                        </ValueMap>
+                    </ValueMap>
+                </StandardValues>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinBendType2" typeName="int" displayLabel="Как гнуть">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>BarEnd</Name>
+                    <DisplayLabel>Конец стержня</DisplayLabel>
+                    <Priority>88</Priority>
+                </Category>
+                <HideProperty xmlns="EditorCustomAttributes.01.00">
+                    <If>this.ReinTerm2 &lt;&gt; 1</If>
+                </HideProperty>
+                <StandardValues xmlns="EditorCustomAttributes.01.00">
+                    <ValueMap>
+                        <ValueMap>
+                            <DisplayString/>
+                            <Value>0</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>U</DisplayString>
+                            <Value>180</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>V</DisplayString>
+                            <Value>135</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>L</DisplayString>
+                            <Value>90</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>U обратно</DisplayString>
+                            <Value>-90</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>V обратно</DisplayString>
+                            <Value>-135</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>L обратно</DisplayString>
+                            <Value>-180</Value>
+                        </ValueMap>
+                    </ValueMap>
+                </StandardValues>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinBendLen1" typeName="int" displayLabel="Длина загиба">
+            <ECCustomAttributes>
+                <HideProperty xmlns="EditorCustomAttributes.01.00">
+                    <If>this.ReinTerm1 &lt;&gt; 1</If>
+                </HideProperty>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>BarOrg</Name>
+                    <DisplayLabel>Начало стержня</DisplayLabel>
+                    <Priority>85</Priority>
+                </Category>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinBendLen2" typeName="int" displayLabel="Длина загиба">
+            <ECCustomAttributes>
+                <HideProperty xmlns="EditorCustomAttributes.01.00">
+                    <If>this.ReinTerm2 &lt;&gt; 1</If>
+                </HideProperty>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>BarEnd</Name>
+                    <DisplayLabel>Конец стержня</DisplayLabel>
+                    <Priority>85</Priority>
+                </Category>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinMuftType1" typeName="int" displayLabel="Тип муфты">
+            <ECCustomAttributes>
+                <HideProperty xmlns="EditorCustomAttributes.01.00">
+                    <If>this.ReinTerm1 &lt;&gt; 3</If>
+                </HideProperty>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>BarOrg</Name>
+                    <DisplayLabel>Начало стержня</DisplayLabel>
+                    <Priority>80</Priority>
+                </Category>
+                <StandardValues xmlns="EditorCustomAttributes.01.00">
+                    <ValueMap>
+                        <ValueMap>
+                            <DisplayString/>
+                            <Value>0</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>позиционная</DisplayString>
+                            <Value>1</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>стопорная гайка</DisplayString>
+                            <Value>2</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>обжимная</DisplayString>
+                            <Value>3</Value>
+                        </ValueMap>
+                    </ValueMap>
+                </StandardValues>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinMuftType2" typeName="int" displayLabel="Тип муфты">
+            <ECCustomAttributes>
+                <HideProperty xmlns="EditorCustomAttributes.01.00">
+                    <If>this.ReinTerm2 &lt;&gt; 3</If>
+                </HideProperty>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>BarEnd</Name>
+                    <DisplayLabel>Конец стержня</DisplayLabel>
+                    <Priority>80</Priority>
+                </Category>
+                <StandardValues xmlns="EditorCustomAttributes.01.00">
+                    <ValueMap>
+                        <ValueMap>
+                            <DisplayString/>
+                            <Value>0</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>позиционная</DisplayString>
+                            <Value>1</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>стопорная гайка</DisplayString>
+                            <Value>2</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>обжимная</DisplayString>
+                            <Value>3</Value>
+                        </ValueMap>
+                    </ValueMap>
+                </StandardValues>
+            </ECCustomAttributes>
+        </ECProperty>
+        <!-- <ECProperty propertyName="ReinBarFlags" typeName="int" displayLabel="Сочетание флагов (скрытый параметр)">
+            <ECCustomAttributes>
+				<HideProperty xmlns="EditorCustomAttributes.01.00">
+					<If2D>True</If2D> 
+					<If3D>True</If3D> 
+				</HideProperty>            
+			 </ECCustomAttributes>
+        </ECProperty> -->
+        <ECProperty propertyName="ReinBarSegmIndex" typeName="int">
+            <ECCustomAttributes>
+				<HideProperty xmlns="EditorCustomAttributes.01.00">
+					<If2D>True</If2D> 
+					<If3D>True</If3D> 
+				</HideProperty>            
+			 </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinBarEDOffset" typeName="int">
+            <ECCustomAttributes>
+				<HideProperty xmlns="EditorCustomAttributes.01.00">
+					<If2D>True</If2D> 
+					<If3D>True</If3D> 
+				</HideProperty>            
+			 </ECCustomAttributes>
+        </ECProperty>
+    </ECClass>
+    <ECClass typeName="IReinFormSpace" isDomainClass="False">
+        <ECProperty propertyName="ReinBarSpacing" typeName="int" displayLabel="Шаг стержней">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>SpaceZone</Name>
+                    <DisplayLabel>Зона раскладки</DisplayLabel>
+                    <Priority>11000</Priority>
+                </Category>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinBarOffset1" typeName="int" displayLabel="Оступ первого стержня">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>SpaceZone</Name>
+                    <DisplayLabel>Зона раскладки</DisplayLabel>
+                    <Priority>10010</Priority>
+                </Category>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinBarOffset2" typeName="int" displayLabel="Оступ последнего стержня">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>SpaceZone</Name>
+                    <DisplayLabel>Зона раскладки</DisplayLabel>
+                    <Priority>10009</Priority>
+                </Category>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinLap" typeName="int" displayLabel="Четность разбежки">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>SpaceZone</Name>
+                    <DisplayLabel>Зона раскладки</DisplayLabel>
+                    <Priority>102</Priority>
+                </Category>
+                <StandardValues xmlns="EditorCustomAttributes.01.00">
+                    <ValueMap>
+                        <ValueMap>
+                            <DisplayString>четная</DisplayString>
+                            <Value>0</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>нечетная</DisplayString>
+                            <Value>1</Value>
+                        </ValueMap>
+                    </ValueMap>
+                </StandardValues>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinLap1" typeName="int" displayLabel="Разбежка в начале">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>SpaceZone</Name>
+                    <DisplayLabel>Зона раскладки</DisplayLabel>
+                    <Priority>101</Priority>
+                </Category>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinLap2" typeName="int" displayLabel="Разбежка в конце">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>SpaceZone</Name>
+                    <DisplayLabel>Зона раскладки</DisplayLabel>
+                    <Priority>100</Priority>
+                </Category>
+            </ECCustomAttributes>
+        </ECProperty>
+	</ECClass>
+    <ECClass typeName="IReinFormContour" isDomainClass="False">
+        <ECProperty propertyName="ReinContourType" typeName="int" displayLabel="Тип контура">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>ContourZone</Name>
+                    <DisplayLabel>Контуры раскладки</DisplayLabel>
+                    <Priority>1001</Priority>
+                </Category>
+                <StandardValues xmlns="EditorCustomAttributes.01.00">
+                    <ValueMap>
+                        <ValueMap>
+                            <DisplayString>радиальный</DisplayString>
+                            <Value>1</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>нарезка</DisplayString>
+                            <Value>2</Value>
+                        </ValueMap>
+                        <ValueMap>
+                            <DisplayString>свободный</DisplayString>
+                            <Value>3</Value>
+                        </ValueMap>
+						<!-- <ValueMap>
+                            <DisplayString>резерв</DisplayString>
+                            <Value>0</Value>
+                        </ValueMap> -->                    
+					</ValueMap>
+                </StandardValues>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinSpacingRad" typeName="int" displayLabel="Радиус дуги шага">
+            <ECCustomAttributes>
+                <HideProperty xmlns="EditorCustomAttributes.01.00">
+                    <If>this.ReinContourType &lt;&gt; 1</If>
+                </HideProperty>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>ContourZone</Name>
+                    <DisplayLabel>Контуры раскладки</DisplayLabel>
+                    <Priority>1000</Priority>
+                </Category>
+            </ECCustomAttributes>
+        </ECProperty>
+	</ECClass>
+    <ECClass typeName="IReinContourElem" isDomainClass="False">
+        <ECProperty propertyName="ReinContNum" typeName="int" displayLabel="Номер загибающего контура">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>ContElem</Name>
+                    <DisplayLabel>Элемент контура</DisplayLabel>
+                    <Priority>1000</Priority>
+                </Category>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="ReinElementID" typeName="long">
+            <ECCustomAttributes>
+				<HideProperty xmlns="EditorCustomAttributes.01.00">
+					<If2D>True</If2D> 
+					<If3D>True</If3D> 
+				</HideProperty>            
+			 </ECCustomAttributes>
+        </ECProperty>
+	</ECClass>
+    <ECClass typeName="ReinBar" displayLabel="Стержень" isDomainClass="True">
+        <BaseClass>IReinFormCore</BaseClass>
+    </ECClass>
+    <ECClass typeName="ReinSpace" displayLabel="Область" isDomainClass="True">
+        <BaseClass>IReinFormCore</BaseClass>
+        <BaseClass>IReinFormSpace</BaseClass>
+    </ECClass>
+    <ECClass typeName="ReinCont" displayLabel="Область" isDomainClass="True">
+        <BaseClass>IReinFormCore</BaseClass>
+        <BaseClass>IReinFormSpace</BaseClass>
+        <BaseClass>IReinFormContour</BaseClass>
+    </ECClass>
+    <ECClass typeName="ReinContElem" displayLabel="Область" isDomainClass="True">
+        <BaseClass>IReinFormCore</BaseClass>
+        <BaseClass>IReinContourElem</BaseClass>
+    </ECClass>
+    <ECClass typeName="ReinModel" isDomainClass="True" displayLabel="Reinforcement model" >
+        <ECProperty propertyName="DisplayForming" typeName="boolean" displayLabel="Образующие элементы">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>ReinDisplay</Name>
+                    <DisplayLabel>Отображение арматуры</DisplayLabel>
+                    <Priority>2000</Priority>
+                </Category>
+                <BooleanDisplay xmlns="EditorCustomAttributes.01.00">
+                    <TrueString>On</TrueString>
+                    <FalseString>Off</FalseString>
+                </BooleanDisplay>
+            </ECCustomAttributes>
+        </ECProperty>
+        <ECProperty propertyName="DisplayDerived" typeName="boolean" displayLabel="Производные элементы">
+            <ECCustomAttributes>
+                <Category xmlns="EditorCustomAttributes.01.00">
+                    <Name>ReinDisplay</Name>
+                    <DisplayLabel>Отображение арматуры</DisplayLabel>
+                    <Priority>2000</Priority>
+                </Category>
+                <BooleanDisplay xmlns="EditorCustomAttributes.01.00">
+                    <TrueString>On</TrueString>
+                    <FalseString>Off</FalseString>
+                </BooleanDisplay>
+            </ECCustomAttributes>
+        </ECProperty>
+    </ECClass>
+</ECSchema>

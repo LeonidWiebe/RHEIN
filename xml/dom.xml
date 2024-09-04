@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="Windows-1251"?>
+<InternalDOM>
+	<ElementFragments>
+		<Fragment Schema="ConcreteExposure">
+			<ConcreteExposure XC="XC3" XD="N/A" XS="N/A" XF="N/A" XA="N/A"/>
+		</Fragment>
+		<Fragment Schema="ConcreteProperties">
+			<ConcreteProperties C="C35/45" G="2400" D="Normal" WT="false" FCC="Composition 1" CCW="0.30 mm" SC="MUO B" OSTC="0.17" MM="Cast in-situ" APC="PS" EC="3" RC="B500C1" CC="1"/>
+		</Fragment>
+		<Fragment Schema="IFC_Override">
+			<IFC_Override IfcOverride=""/>
+		</Fragment>
+		<Fragment Schema="ObjectClassification">
+			<ObjectClassification MasterFormat="" OmniClass="" UniFormat="" NATSPEC="" CBI2011="" NTE="" Uniclass=""/>
+		</Fragment>
+		<Fragment Schema="ObjectDiscipline">
+			<ObjectDiscipline Discipline=""/>
+		</Fragment>
+		<Fragment Schema="ObjectFireResistance">
+			<ObjectFireResistance Rating="" ReferenceID="" ReferenceURL="" IsCombustible="false" Compartmentation="false" SurfaceSpreadofFlame=""/>
+		</Fragment>
+		<Fragment Schema="ObjectIdentity">
+			<ObjectIdentity Mark="" InstanceMark="" NameAlt="" Description="" Keynote="" Tag="" Notes=""/>
+		</Fragment>
+		<Fragment Schema="ObjectLEED">
+			<ObjectLEED PercentRecycled="0" IsRegionalMaterial="false" PercentPostConsumer="0"/>
+		</Fragment>
+		<Fragment Schema="ObjectMaterial">
+			<ObjectMaterial PartDefinition="Concrete_Standart::Colums"/>
+		</Fragment>
+		<Fragment Schema="ObjectPhasing">
+			<ObjectPhasing Phasing=""/>
+		</Fragment>
+		<Fragment Schema="ObjectSpaceBounding">
+			<ObjectSpaceBounding IsSpaceBounding="true"/>
+		</Fragment>
+		<Fragment Schema="ObjectStructuralUsage">
+			<ObjectStructuralUsage StructuralFunction="Structural" StructuralMaterial="Concrete"/>
+		</Fragment>
+		<Fragment Schema="ObjectThermalTransmittance">
+			<ObjectThermalTransmittance IsExternal="false" IsBelowGrade="false"/>
+		</Fragment>
+		<Fragment Schema="ReinforcementRod">
+			<ReinforcementRod As1="" As2="" As3="" As4="" Asw=""/>
+		</Fragment>
+		<Fragment Schema="StructProp">
+			<StructProp StructNumber="1" StructCode="50UCB25_CC0001" ShortCode="CC0001" FC="R120" SC="S1" NSC="3"/>
+		</Fragment>
+		<Fragment Schema="StructuralFramingCommon">
+			<StructuralFramingCommon sectionname="800x800" structuraltype="Column" structuralfinish=""/>
+		</Fragment>
+		<Fragment Schema="StructuralQuantities">
+			<StructuralQuantities Length="300000.000000" AreaCrossSection="0.000000" AreaCrossSectionModeled="9600000000.000004" FeatureVolume="0.000000" VolumeGross="0.000000" VolumeGrossModeled="2880000000000001.000000" VolumeNet="0.000000" VolumeNetModeled="2880000000000001.000000" UnitWeight="0.000000" MaterialDensity="2400.000000" LengthXUnitWeight="0.000000" VolumeGrossXDensity="0.000000" VolumeGrossModeledXDensity="6912.000000" VolumeNetXDensity="0.000000" VolumeNetModeledXDensity="6912.000000"/>
+		</Fragment>
+	</ElementFragments>
+	<DataGroupInstances guid="{8BAD2EC8-2456-4604-8335-67839E2CA688}">
+		<DataGroup appType="APP" catalogType="Concrete Column" catalogItem="UCB Column int C35 XS1 G2400"/>
+	</DataGroupInstances>
+</InternalDOM>

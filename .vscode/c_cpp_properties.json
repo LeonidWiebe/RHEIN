@@ -1,0 +1,56 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "c:/Program Files (x86)/Bentley/MicroStation V8i (SELECTseries)/MicroStation/mdl/include/**",
+                "c:/Program Files (x86)/Bentley/MicroStation V8i (SELECTseries)/MicroStation/mdl/MicroStationAPI/**"
+            ],
+            "defines": [
+                "_DEBUG"
+                //"UNICODE",
+                //"_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.17763.0",
+            "compilerPath": "c:/Program Files (x86)/Microsoft Visual Studio 8/VC/bin/cl.exe",
+            "cStandard": "c99",
+            "cppStandard": "c++03",
+            "intelliSenseMode": "msvc-x86",
+            "compilerArgs": [],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**",
+                    "c:/Program Files (x86)/Bentley/MicroStation V8i (SELECTseries)/MicroStation/mdl/include/**",
+                    "c:/Program Files (x86)/Bentley/MicroStation V8i (SELECTseries)/MicroStation/mdl/MicroStationAPI/"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        },
+        {
+            "name": "Win64",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "c:\\Program Files\\Bentley\\MicroStationCONNECTSDK\\include\\**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.17763.0",
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "msvc-x64",
+            "compilerArgs": [],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,28 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "ms v8i",
+            "type": "shell",
+            "command": "cmd.exe",
+            "args": [
+                "/x",
+                "/k",
+                "c:/Progra~2/Bentley/micros~1/MicroStation/mdl/bin/mstndevvars.bat c:/Progra~2/Bentley/micros~1/MicroStation/ c:/Progra~2/Bentley/micros~1/MicroStation/",
+                "c:/Progra~2/Bentley/micros~1/MicroStation/mdl/bin/"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "clear": true,
+                "focus": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}

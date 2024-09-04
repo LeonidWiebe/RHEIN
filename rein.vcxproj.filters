@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\rein.cpp" />
+    <ClCompile Include="src\reinbar.cpp" />
+    <ClCompile Include="src\reinvar.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\reinelem.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\rein.h" />
+    <ClInclude Include="src\reintxt.h" />
+    <ClInclude Include="src\reintxte.h" />
+    <ClInclude Include="src\reinbar.h" />
+    <ClInclude Include="src\vers.h" />
+    <ClInclude Include="src\reinelem.h" />
+    <ClInclude Include="src\reinsgn.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\rein.fdf" />
+    <None Include="src\reinvers.r" />
+    <None Include="src\rein.r" />
+    <None Include="src\reincmd.r" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\rein8i.rc" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,45 @@
+#--------------------------------------------------------------------------------------
+#
+#     $Source: MstnExamples/DialogBoxes/myapp/myapprsc.mki $
+#
+#  $Copyright: (c) 2015 Bentley Systems, Incorporated. All rights reserved. $
+#
+#--------------------------------------------------------------------------------------
+rCompOpts + -i$(o)
+
+maRscs = $(o)$(appName).mi      \
+         $(o)$(appName).rsc
+		 
+		 
+# mdlapps -> reinsrc
+
+reinsrc = c:/Offtake/rein14/
+
+#------------------------------------------------------------------------
+# Create & compile the app's dialog resources using rcomp
+#------------------------------------------------------------------------
+$(o)$(appName).rsc      : $(baseDir)$(appName).r        \
+                          $(privateInc)$(appName).h     \
+                          $(baseDir)$(appName)cmd.h
+
+#----------------------------------------------------------------------
+#   The final step in building the application is lib'ing the applications
+#   intermediate application with the translatable resources built in
+#   this makefile. This step generates the final, and possibly translated,
+#   MDL application.
+#----------------------------------------------------------------------
+
+$(mdlapps)$(appName).ma         : $(maRscs)
+    $(msg)
+    > $(o)make.opt
+    -o$@
+    $(maRscs)
+    <
+    $(RLibCmd) @$(o)make.opt
+    ~time
+
+# End of build.  NOTE: This line is helpful by terminating the
+#                      last rule with a blank line. This is necessary
+#                      to prevent concatenation with other '.mki'
+#                      rules in the Foreign Language Translation Kit.
+

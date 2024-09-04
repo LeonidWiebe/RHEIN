@@ -1,0 +1,9 @@
+{
+    "files.encoding": "windows1251",
+    "files.autoGuessEncoding": true,
+    "files.associations": {
+        "*.fdf": "cpp",
+        "*.mke": "makefile",
+        "*.cfg": "makefile"
+    }
+}

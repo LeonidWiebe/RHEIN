@@ -1,0 +1,1690 @@
+
+////////////////////////////////////////////////////
+
+//		V A R I A B L E S
+
+////////////////////////////////////////////////////
+
+
+
+	extern time_t tloc[3];
+
+	//==================================
+	//==================================
+	extern int iModelVers; // MODEL VERSION
+	extern int iModelVersInFile; // MODEL VERSION
+	extern int iModelType; // was bIsModel
+	//==================================
+	//==================================
+	extern int bModelOutOfDate;
+	extern int bModelCheckRefs;
+
+	extern int iModePosCatch; // 
+
+	extern int bUseDB;
+
+	extern UInt32 curggn;
+
+	extern int bRef;
+
+	extern ReinElement* reFoundP;
+	extern ReinBar* rbFoundP;
+
+	extern vector<long> arPos;
+	extern vector<long> arPosCount; // количество стержней на контуре
+	extern long iPosCount;
+
+	extern vector<vector<long>> arPosQty;
+
+	//ReinPos* curPosP = NULL;
+	extern char sArCurPosPtsC[500];
+	extern char sArCurPosPtsA[500];
+	extern UInt32 curPos_rn; // номер слота референса
+	extern wstring curPos_refpath;
+	extern long curPos_ind; // текущий индекс в arCurPos
+	//int curPos_rnn; // номер слота вложенного референса
+	extern int ipnsave;
+	extern WCH sCurPos[5000];
+	//MSWCH wsCurPos[5000];
+
+	//extern WCH sCurRef[500];
+
+	extern CatInfo curCat;
+
+	extern ReinElm reCopyFrom;
+	extern Transform tmCopySrc;
+	extern Transform tmCopyDst;
+
+	extern ReinElm* reNoteP[2];
+	extern ReinNote curNote;
+
+	extern int ilev; // level for log
+
+
+	extern DVec3d pts[MAX_VERTICES];
+	extern DVec3d ptsBar[MAX_BAR_VERTICES];
+	extern DVec3d ptsUnRotCompare[MAX_BAR_VERTICES];
+	extern DVec3d ptsUnRotForDraw[MAX_BAR_VERTICES];
+	extern long ptsFlag[MAX_BAR_VERTICES];
+
+	extern int updevents[100];
+
+	extern deque <STRING> possort;
+
+	//extern RotMatrix arViewRM[8];
+	extern ReinView arViewPlanes[8];
+	//extern double arViewDepth[8];
+	//extern DVec3d arViewDelta[8];
+
+	extern int BRYS;
+
+	extern TransDescrP arTransNodes;
+	extern TransDescrP arTransMufts;
+
+	extern short	ats[MAX_ATTRIBSIZE];
+	extern int		atlen;
+
+	extern int optmir[3];
+
+	extern int hTimer;
+	extern UInt32 iDblClickFP;
+
+
+	extern ELID elidDisplayCopy;
+	extern ELID elidReinBar;
+
+	extern int iSketchScale[2];
+	extern UInt32 iSketchBarWeight;
+	extern UInt32 iSketchTxtWeight;
+
+	extern int	timerHandle;
+
+	//extern UInt32    arFP[MAX_UPD_ELEMS];
+	//extern ELID arID[MAX_UPD_ELEMS];
+	extern ELID arElemID[MAX_BAR_VERTICES];
+
+	//extern UInt32 iFPcount;
+	//extern UInt32 iIDcount;
+	extern UInt32 iElemIDcount;
+
+	extern int iNewRefNum;
+
+	//extern UInt32    arHideFP[MAX_UPD_HIDE_ELEMS][MAX_REF_SLOT];
+	//extern UInt32	  arHideFPcount[MAX_REF_SLOT];
+
+	extern int shift[2];
+
+
+
+	//============================================
+	extern ReinModel curRMod;
+	extern ReinModel* curRM;
+	//============================================
+	extern ReinAxis raxis;
+	extern ReinElm arelm;
+	extern ReinElm crelm;
+	extern ReinElm drelm;
+	extern ReinElm urelm;
+	extern DVec3d ptsCalc[MAX_BAR_VERTICES];
+	extern DVec3d calcTrPts[MAX_BAR_VERTICES];
+	extern DVec3d calcPts[MAX_BAR_VERTICES];
+	extern DVec3d calcPtsX[MAX_BAR_VERTICES];
+	extern DVec3d calcCPts[MAX_BAR_VERTICES];
+	extern DVec3d calcCPta[MAX_BAR_VERTICES];
+	extern long calcRfa[MAX_BAR_VERTICES];
+	extern int calcF[MAX_BAR_VERTICES]; // флаги для переменных сегментов, 1 - гориз., 2 - верт.
+	extern DVec3d ptstmp[MAX_BAR_VERTICES];
+	extern ReinElement rrelem;
+	extern ReinBar rrb;
+	extern DVec3d arPtsX[MAX_BAR_VERTICES];
+	extern DVec3d arPtsO[MAX_BAR_VERTICES];
+	extern double arDepthX[MAX_BAR_VERTICES];
+	extern double arDepthO[MAX_BAR_VERTICES];
+	extern MSBsplineCurve crv;
+	extern MSBsplineCurve dcrv[2];
+	//============================================
+
+	//extern UInt32   arCurUpdateFP[MAX_UPD_ELEMS];
+	//DgnModelRefP   arCurUpdateMR[MAX_UPD_ELEMS];
+	extern UInt32   iCurUpdateCount;
+
+	extern UInt32 iBarEndsCount;
+	extern UInt32 iBarCapsCount;
+
+	extern ReinInfo	 rInfo;
+	extern MSWCH strReinInfo[10010];
+
+	extern ReinInfo	 rInfoFile;
+
+	extern ReinDopInfo	 rDopInfo;
+	extern MSWCH strReinDopInfo[10010];
+
+	extern ReinDopInfo	 rDopInfoPref;
+
+	extern ReinDopInfo	 rBarOverInfo;
+	extern MSWCH strBarOverInfo[10010];
+
+	extern ReinBar      rBarInfo;
+
+	extern ReinInfoRef rInfoRef;
+
+
+
+	extern double dCfgVar_CoverEdge;
+	extern double dCfgVar_CoverFace;
+	extern double dCfgVar_BarFace; // from REIN_BAR_FACE
+	//extern double dCfgVar_BarSign;
+	extern double dCfgVar_PosNumSize;
+	extern double dCfgVar_BarViewScale;
+	extern double dCfgVar_BarMaxLength;
+	extern double dCfgVar_BarSecScale;
+
+	extern double dCfgVar_SketchHgt;
+	extern double dCfgVar_SketchWdtNum;
+	extern double dCfgVar_SketchWdtDrw;
+	extern double dCfgVar_SketchGap;
+
+	extern int iCfgVar_PosCalc_Groups; // учитывать именованые группы при группировке позиций
+	extern int iCfgVar_PosCalc_Laps; // учитывать четность разбежки при группировке позиций
+	extern int iCfgVar_BarBendTypeAuto; // тип линии контура автоматически
+	extern int iCfgVar_BarCompare_3d; // трехмерное сравнение позиций
+	extern int iCfgVar_NullFillet; // нулеовй филлет
+	extern int iCfgVar_BendNewDraw; // 1 - новая отрисовка загиба, 2 - честный загиб
+	extern int iCfgVar_UseGhostContour; // 
+	extern int iCfgVar_SpaceHoldLine; // держать шаг стержней при косом вытягивании поверхности
+	extern int iCfgVar_SortPlus; // sort by parameters
+	extern int iCfgVar_SectionPoints; // make transient section points
+	extern int iCfgVar_ProjectID_Override;
+
+	extern int iCfgVar_PosListMerge;
+	extern int iRefLvl;
+
+	extern int iCfgVar_Class_Elm;
+	extern int iCfgVar_Class_Spc;
+	extern int iCfgVar_Class_Bar;
+
+	extern int iCfgVar_SymbStyle_Spc;
+	extern int iCfgVar_SymbWeight_Elm;
+	extern int iCfgVar_SymbColor_Elm;
+
+	extern int iCfgVar_CbUpdateElement;
+
+	extern int iCfgVar_Transp_Elm_Out;
+	extern int iCfgVar_Transp_Elm_Inn;
+
+	extern double dCfgVar_FilletRadiusKoef; // если отрицательный, использовать fillets[diam].radius
+	extern double dCfgVar_FilletRadiusKoefDef;
+	extern int iCfgVar_FilletStartingDiam;
+	extern double dCfgVar_BarBendLengthRoundSnap; // снап округления длины дуги загиба стержня 
+	extern double dCfgVar_BarLineLengthRoundSnap; // снап округления длины стержня 
+	extern double dCfgVar_MuftWdtKoef;
+	extern double dCfgVar_MuftHgtKoef;
+
+
+	//extern int iCfgVar_DiamRifDelta; 
+
+	extern int iCfgVar_ComparisonTol; // для сравнения позиций
+	extern int iCfgVar_MuftTol; // расстояние между стержнями при определении переходных муфт
+
+	extern int iCfgVar_MinSegment; // минимальная длина сегмента (если меньше - точка удаляется)
+
+	extern int iCfgVar_MuftLapType; // тип муфты которая ставится на стыке стержней когда длина позиции больше 11700
+	extern int iCfgVar_NewMuftDraw; // муфта и резьба рисуется как муфта со сдвигом - так чтобы центр прямоугольника оказался на конце стержня
+	extern int iCfgVar_MuftTypeEnabled[3]; // тип муфты вкл/выкл
+
+	extern vector<int> arPlotCfgVar; // значения: 1 - печатать, 0 - по общ. настройкам, -1 - не печатать
+
+	//extern int iCfgVar_ViewCacheMode; // REIN_VIEW_CACHE_MODE
+	//extern int iCfgVar_ViewCacheWorkShow; // REIN_VIEW_CACHE_SHOW
+
+	extern int iCfgVar_EnableOptions;
+
+	extern int iCfgVar_CheckDups;
+
+	extern int iCfgVar_Clash_Mode;
+	//#0 - не проверять,
+	//#1 - проверять всегда,
+	//#2 - проверять только при манипуляции с элементами(не проверять при загрузке файла)
+
+	extern int iCfgVar_Clash_Tol; // tolerance
+
+	extern char sCfgVar_PicAnker[1000];
+	extern char sCfgVar_LoadsNodes[300];
+	extern char sCfgVar_LoadsValues[300];
+
+	extern double dLoadNodeSpacing; // mm
+
+	extern int iCfgVar_Ground_Clr;
+	extern int iCfgVar_Ground_Wgt;
+
+	extern int iCfgVar_BarBendRepair;
+	extern int iCfgVar_BarBendNotchDiam;
+
+	extern double dDupTol; // mm (сначала было 5., изменено на 50. для коллизий)
+
+	extern int	     nSearchTypes;
+	extern int	     searchType[10];
+
+	extern UShort appID; // 22875 for spbaep, max 65535
+
+	//extern UShort appTypeReinSpace
+	//extern UShort appTypeReinBa
+	//extern UShort appTypeOrgPoints
+	//extern UShort appTypeEndPoints
+	//extern UShort appTypeReinElm
+	//extern UShort appTypeBarPoints
+	//extern UShort appTypeBarVerts
+	//extern UShort appTypeIsModel
+	//extern UShort appTypeTrans
+
+	extern UShort appTypeReinSpace;
+	extern UShort appTypeReinBar;
+	extern UShort appTypeOrgPoints;
+	extern UShort appTypeEndPoints;
+	extern UShort appTypeReinElm;
+	extern UShort appTypeBarPoints;
+	extern UShort appTypeBarVerts;
+	extern UShort appTypeIsModel;
+	extern UShort appTypeReinCache;
+	extern UShort appTypeReinAssem;
+	extern UShort appTypeBarOver;
+	extern UShort appTypeReinNote;
+
+	extern UShort appTypeCatInfo;
+	extern UShort appTypeReinAxis;
+	extern UShort appTypeHidePos; // [refnum]
+	extern UShort appTypeBarSet; // [refnum]
+	extern UShort appTypeReinPos; // сохра позиции в файле
+	extern UShort appTypeSegment; // запись параметров сегмента на REINELEM
+	extern UShort appTypeReinData; // данные REINLINE
+	//extern UShort appTypeReinLine =	(UShort)8801; // линия определяющая точки позиций
+	extern UShort appTypeShowInfo; // [refnum] сохранение настроек отображения
+
+	extern UShort appTypeRndResult;
+
+//ArrayObjectHdr* daCurBars = NULL; // массив элементов референсов с точками, учитывающими clip boundary
+	// сделан исключительно потому что функции mdlClip_... в хуке callbackUpdateElement() вызывают сброс трансформа и клипа
+	// побороть не получилось, поэтому создаем массив точек обрезанных элементов заранее
+	//extern UInt32 iCurBarsCount;
+
+	extern RscFileHandle   rfRein;
+
+	extern vector<LoadNode> daCurLoadNodes;
+	extern vector<LoadVert> daCurLoadVerts;
+	//extern vector<ReinPos> daCurBarSet;
+	extern vector<ReinExcl> daCurPosExcl;  // исп. только для сохранения галок при перегрузке списка
+	extern vector<ReinPos> daCurPosHide;
+	extern vector<ReinLap> daBaseLaps;
+	extern vector<ReinVert> daMufts;
+	extern vector<SpecLine> daDrawLines;
+	extern vector<SpecText> daDrawTexts;
+
+	extern map <wstring, ReinPos> mapBarSet;
+	extern map <STRING, ReinPrm> mapSimPos;
+
+	extern MSWCH sset[10000];
+	extern deque<wstring> setstr;
+
+	extern BINT bPosSepByRefs;
+
+	//vector<ReinBar> vCurBars;
+
+	//extern DVec3d* arLoadVerts = NULL;
+
+	extern BINT bLoadsOk; // параметры расчета загружены нормально или нет
+
+	// параметры для отрисовки спецификации
+	extern double dTextRightX;
+
+	extern DVec3d pZero; // zero
+	extern DVec3d pZ; // 0 0 1
+
+	extern RotMatrix rmIdent;
+	extern RotMatrix rmIso;
+
+	extern ScanCriteria* pIterScanCrit; // для iterateReloadBarsData()
+
+	extern MSElementDescr* edpRot; // элемент, получаемы при LOCATE, в котором убран поворот и смещение
+	extern MSElementDescr* edpShapeForPoints;
+
+	extern DgnModelRefP mrPlot;
+
+
+	extern long muftqtyext[50][50][10]; // количество переменных муфт для каждого диаметра и типа
+	extern long skobqtyext[50][50]; // количество скоб 
+	extern long skobqtydop[50][50]; // количество вкладок для скоб  
+
+	//extern DVec3d arDataLinePts[1000][MAX_BAR_VERTICES];
+	//extern int arDataLinePtsQty[1000];
+
+	extern ReinBar arDataBars[1000];
+	//vector<ReinBar>arDataBars(500); // производные элементы
+
+	extern ReinBar arDataPreps[MAX_BAR_VERTICES];
+	//vector<ReinBar>arDataPreps(MAX_BAR_VERTICES); // предварительно считываемые образующие элементы
+
+	//ReinBar arDataCopy[MAX_BAR_VERTICES];
+
+	extern int arDataNums[MAX_BAR_VERTICES]; // количество точек на образующем элементе, через которые проходят пересекающие его производные элементы
+	//vector<int>arDataNums(MAX_BAR_VERTICES);
+
+	extern LoadVert arDataSpaces[MAX_BAR_VERTICES]; // шаг для образующего элемента, так как он может отличаться в случае переллельного построения (BT_PAR)
+	//vector<double>arDataSpaces(MAX_BAR_VERTICES);
+
+	extern int iDataCopyCount; // количество предварительно выделенных
+	extern ELID dataCopyNewElemID;
+
+	extern int iBarTypeAuto;
+
+	extern int bFlag;
+
+	extern int ankers[5][11];
+
+
+	extern ReinSpace rsMon;     //for callbackElementUpdating{}
+	//ReinCalc rcMon;      //for callbackElementUpdating{}
+
+	extern TrackBarInfo tbi;
+	extern UInt32 elemCount;
+	extern UInt32 elemCount2;
+	extern UInt32 elemCount3;
+	extern UInt32 elemCount4;
+	extern UInt32 elemIterCount;
+	extern UInt32 elemIterCount2;
+	extern UInt32 elemIterCount3;
+	extern UInt32 elemIterCount4;
+	extern ReinVert rvMuftScan[2];
+
+	extern UInt32 iDataElemCount; // arDataPreps.size()
+	extern UInt32 iDataBarsCount; // arDataPreps.size()
+
+	extern UInt32 posCount;
+	extern UInt32 enumCount;
+
+
+#if defined (MSVERSION) && (MSVERSION == 0xa00)
+	extern TextParamWide     txtParam[9];
+	extern DSegment3d       locSegmVector;
+
+#else
+	extern TextParam     txtParam[9];
+	extern DVector3d       locSegmVector;
+
+#endif
+
+
+	extern ReinFillet fillets[100];
+
+	extern int iSketchFilletRadius;
+
+	extern int		iListColsNum;
+
+
+	extern char tooltip[500];
+	extern int bTT;
+
+#if defined (MSVERSION) && (MSVERSION == 0xa00)
+	extern unsigned __int64 iAC;
+	extern EditElementHandle eeh;
+#else
+	extern int iAC;
+#endif
+	extern int iACStep;
+
+	extern DVec3d pInt; // intersection for note placing
+	extern DVec3d pBar; // bar point
+	extern DVec3d pExt[3][2]; // extension lines
+
+	extern DVec3d ptsLine[2];
+
+	extern DVec3d ptsShape[42];
+
+	extern UInt32 filePosRein;
+	extern UInt32 filePosReinBar;
+	extern UInt32 filePosReinSpace;
+	extern UInt32 filePosReinSurf;
+	extern UInt32 filePosReinFrom;
+	//extern UInt32 filePosReinOver;
+
+	extern BOOL bDropReinData;
+
+	extern int iReinBarSelectedQty;
+
+	extern UInt32 filePosRSElementOffset;
+	extern DgnModelRefP curElemModelRef;
+
+
+	extern MSElementDescr* edCopyP;
+	extern MSElementDescr* edBarCopyP;
+
+	extern int posNumMax;
+
+	extern int       locVertexIndex;
+	extern int       locSegmIndex;
+
+	extern BINT bCopyFromRef;
+
+
+	extern UInt32 lvlReinId;
+	extern UInt32 lvlTextId;
+
+	extern char sLineLens[200];
+	extern char sArcLens[200];
+
+	extern DPoint3d arLinPts[100];
+	extern long arLineLens[100];
+	extern long arLineRads[100];
+	extern double arLineAngs[100];
+	extern int arArcLens[100];
+	extern int iNumLens;
+	extern int iNumTxtPts;
+
+	extern WCH s[5000];
+	extern WCH ss[5000];
+	extern WCH sss[5000];
+	extern MSWCH wss[5000];
+	extern MSWCH wLog[5000];
+	//extern MSWCH wsread[5000];
+
+	extern UInt32 lvlSaveID; // level for saveplot
+
+	extern bool bNoLoad;
+
+	//extern UInt32 fpmax;
+
+	extern DVec3d arpg[1000]; // array points global
+	extern long arlg[1000]; // array long global
+
+	extern StatusInt gst;
+
+	extern int iCfgVar_SavedViewClip;
+	extern int iCfgVar_LoadRefsOnStart;
+
+
+	extern ReinNoteSet curNoteSet;
+	extern 	MSWCH strCurNoteSet[10010];
+
+
+	//extern RscFileHandle   rfHandle;
+
+	extern int iSpaceDefault; // шаг по умолчанию
+
+	extern int bSketchPoint;
+	extern double dSketchPointX;
+	extern double dSketchPointY;
+	extern double dSketchPointZ;
+
+	extern int iEmpty;
+
+	extern int iDebug;
+	extern char sLogMes[5000];
+
+//#if defined (MSVERSION) && (MSVERSION == 0xa00)
+	extern ofstream fileLog;
+//#else
+//	extern FILE* fileLog;
+//#endif
+
+
+	extern WCH sFileLog[300];
+	extern char sLog[5000];
+	extern char sLogMesOut[5000];
+
+
+	extern LEVID levClash; // слой для элементов коллизий
+
+
+	extern map<RelmPair, ReinPos> mapPosMem;
+
+	extern MAP<UInt32pair, ReinClash> mapClash; // д.б. парный ключ...
+	extern UInt32 iClashShtamp; // идентификатор коллизии
+
+
+	extern TransDescrP tedBarsP;
+
+
+
+	extern MSElement c0w0s0;
+	extern MSElement c0w1s0;
+	extern MSElement c0w1s0_nofill;
+	extern MSElement c0w0s1;
+	extern MSElement c0w0s2;
+	extern MSElement c3w1s0;
+	extern MSElement c3w5s0;
+	extern MSElement c3w9s0;
+	extern MSElement c0w0s4;
+
+	extern MSElement el;
+	extern MSElement eCell;
+	extern MSElement elCl;
+	extern MSElement elAr[2];
+	extern MSElement elCr;
+	extern MSElement elTxt[2];
+	extern MSElement elExt[3];
+
+	extern MSElement elLine;
+	extern MSElement elMon;
+	extern MSElement elForTT;
+	extern MSElement elTmp;
+	extern MSElement elShape;
+	extern MSElement elBar[3];
+
+	extern MSElement elTest;
+	extern MSElement elLocate;
+
+
+	extern MSElement el1;
+	extern MSElement el2;
+	extern MSElement el3;
+
+	extern MSElement elSpec;
+
+
+
+	extern MSDLGP dlgProgressP;
+
+	extern bool bExportSolids;
+
+	extern vector<ReinPoint> gvpt;
+
+	extern ReinPos curPos;
+
+	extern DgnModelRefP mrRefPlotFromP;
+
+
+
+////////////////////////////////////////////////////
+
+//		F U N C T i O N S
+
+////////////////////////////////////////////////////
+
+	BINT	checkClosest(MSElementDescr**);
+
+UInt32 getReinElmCount(int bReset, DgnModelRefP mrP, UInt32* elemCountP);
+UInt32 getRefNum(DgnModelRefP mrP);
+
+
+////// DECLARE /////////////
+UInt32 xmlAddReinElmdAttr(
+	MSElementDescrP* edPP,   // elem where add
+	ELID prid,
+	int type,
+	ReinBar* rbP,
+	UInt32* lev,
+	DgnModelRefP mrToAddP,
+	UInt32* ggN,
+	BINT bLocked,
+	int iLap,
+	BINT bVisible,
+	int iNumber
+);
+
+
+void writeLog(char* str, int ld, char* strdop = NULL);
+void writeLogIn(char* sFuncName, char* str);
+void writeLogOut(char* sFuncName, char* str, int bReset = FALSE);
+
+
+
+void loadSchemaFile(bool bImportIfNotFound, WCHCP sModInst);
+
+void setSegmLength(DVec3d* arPts, int numPts, int iSgm, double dSgmLen);
+
+void setLap(
+	DVec3d* barpts,
+	int ptnum,
+	double dlap,
+	int ilap // 0 - begin, 1 - end
+);
+
+void checkBarsSetElem(MSElementDescr*       edP);
+
+int scanPlotProcessElmd(UInt32 fpos, DgnModelRefP mrP, ReinElm* relmP, int view, int iBar);
+
+//void destroyModel(ReinModel** rmPP, int bDelElmArray, int bDelPrefs, int bDelMe);
+//int getModelRefNum(DgnModelRefP mrP);
+
+int getPosListMode(void);
+
+long addConttNum(ReinBar* rbP);
+
+void updateAllViews(void);
+
+void showLicense();
+
+void deleteReinElms(ELID id, int bBrys, ScanRange* srP, DgnModelRefP mrP = NULL);
+
+int scanForDuplicate(
+MSElementDescr  *edP,
+ReinPrm*  prmP,
+ScanCriteria    *pScanCriteria					
+);
+
+int scanCheckCatInfo(
+	MSElementDescr* edP,
+	CatInfo* ciP,
+	ScanCriteria* pScanCriteria
+);
+
+int scanReinElmExport(
+	MSElementDescr* edP,
+	//NamedGroupP ngP,
+	DgnModelRefP mrP,
+	ScanCriteria* pScanCriteria);
+
+int scanCageElmExport(
+	MSElementDescr* edP,
+	MSElementDescr** edpCagePP,
+	ScanCriteria* pScanCriteria
+);
+
+UInt32 checkDrawElem(MSElementDescrCP edp, 
+					 bool bPlot, 
+					 MSElementDescrH* newEdPPP,
+					 DrawPurpose drawPurpose,
+					 ReinModel* rmP,
+					 int* bDrawModeP,
+					 ReinElm** relmPP,
+					 ViewportP vpP,
+					 ReinInfoRef* rirP
+);
+
+//void hookLicenseButton(
+//	DialogItemMessage* dimP	/* => a ptr to a dialog item message */
+//);
+
+int savePlotFile(ReinModel* rmP);
+
+int xmlAddCacheInfo(ReinElm* relmP, MSElementDescr** edpP, MSWCH* stadd = NULL, bool bClear = false);
+
+int readReinCacheFromElement(
+	ReinCache* rcP,
+	MSElement* el
+);
+
+void saveBarSetInfo(void);
+
+void hookNoteCombo(
+	DialogItemMessage* dimP
+);
+void hookLevelCombo(
+	DialogItemMessage* dimP
+);
+
+//void hookBarDialog(
+//		DialogMessage   *dimP	/* => a ptr to a dialog item message */
+//);
+void hookAnkerDialog(
+		DialogMessage   *dimP	/* => a ptr to a dialog item message */
+);
+void hookShowOptions(
+		DialogMessage   *dimP	/* => a ptr to a dialog item message */
+);
+void hookToggleDraw(
+		DialogItemMessage   *dimP	/* => a ptr to a dialog item message */
+);
+void hookToggleDrawEnds(
+		DialogItemMessage   *dimP	/* => a ptr to a dialog item message */
+);
+
+void hookModifyDialog(
+		DialogItemMessage   *dimP
+);
+
+void	reinPlaceFirstPoint(
+DVec3d    *pt
+);
+
+void setPosString(ReinPos* rpP, int bPoints);
+
+// get Comlex Bar Points - сбор точек в вектор vpt (И ВСЁ)
+int getComlexBarPoints(MSElementDescr* edp, ReinBar* rbP, int bReset, int* elemIndexP, int bUpdateMainLine, int bGetAngles);
+
+int getComponentPoints(MSElementDescr* edp, ReinBar* rbP, int* elemIndexP, int bUpdateMainLine);
+
+void setReinInfoString(ReinInfo& ri, wstring* wstr);
+void setReinInfoString(ReinDopInfo& ri, wstring* wstr);
+void setReinInfoString(ReinNoteSet& ri, wstring* wstr);
+void getReinInfoFromString(ReinInfo& ri, MSWCH* str);
+void getReinInfoFromString(ReinDopInfo& ri, MSWCH* str);
+void getReinInfoFromString(ReinNoteSet& ri, MSWCH* str);
+
+//void reinSpaceLoads(UInt32 fpos, DgnModelRefP mrP);
+
+//int extractLinear(
+//MSElementDescr *elmdP ,
+//DVec3d* arPts
+//) ;
+
+int reinCreateComplexBarAxis ( 
+MSElementDescr **edPchn, 
+MSElementDescr *elmdP, 
+int irad,
+DVec3d* arPts
+) ;
+
+int scanForReinNote(
+	MSElementDescr* edP,
+	int* wzt, // was zu tun
+	ScanCriteria* pScanCriteria
+);
+
+void reinSetOverInSpace(int baract);
+void reinSetBarInSpace(DVec3d *ptP, UInt32 fp, DgnModelRefP mrP, int idrawmode, BINT bPlaceDim);
+
+int xmlAddNoteInfo(ReinNote* rnP, WCH* strNoteFmt, MSElementDescr** edpP, int ielem, bool bClear = false);
+
+//void displayReinMains(ElementID id, int iType, int bVisible);
+
+void reinCalcAnker(void);
+
+int reinGetLevelMask(MSElementDescrCP edP, UInt32 fp, DgnModelRefP mrP);
+
+//int callbackViewPlot( int plotEvent, MSWindow* wP);
+
+//long removeCurVecMember(ArrayObjectHdr* daP, int view, DgnModelRefP mrP, UInt32 fpos);
+
+long myListCell_getInfoFieldInt32(ListCell* pListCell, int index, StatusInt* gstP);
+
+
+UInt32 reinSweepBarByPath(
+	ReinBar* rbP,
+	int diameter,
+	int iRadiusOption,
+	DgnModelRefP mrInP,
+	MSElementDescr* edPathP,
+	int barnum,
+	UInt32* ilevP,
+	MSElementDescr** edElemOutPP,
+	double dShellUor
+);
+
+//Public int callbackElementUpdating(                                   
+//MSElementUnion     *euP,             /*  => element being drawn      */
+//int                drawmode,         /*  => NORMALDRAW, ERASE, or HILITE */
+//void               *windowP,         /*  => pointer to current window */
+//ExtraElementInfo   *extraInfoP,      /*  => additional information   */
+//int                view,             /*  => view number to draw into */
+//int       		   *priorityP,
+//MSElementDescr 	   *edPa, 			   
+//int       		   allowDefer		  
+//);
+
+
+void	hookPosition(
+DialogItemMessage   *dimP
+);
+
+void reinListBoxDrawPos(MSDLGP dbP,  DialogItem* diP);
+
+int isReinElemInner(int barnum, int barqty, int lapbeg, int lapend, bool bgnd);
+
+void reinHilitePos(ReinPos* rpP);
+void reinSelectPosRow(int num);
+
+void saveCatInfo(DgnModelRefP mrInP = NULL);
+void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle);
+void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle, bool bCheckUnder);
+
+void reinUpdateBarFacesAllViews(int drawmode, DgnModelRefP mrP, ELID elid);
+
+void createTransMufts(void);
+void deleteTransMufts(void);
+
+void updateListBoxColumn(ListModel* pListModel, int iColNum);
+ListModel* getPosListModel(RawItemHdr** rihP);
+void setListBoxPosRow(ListModel* lmP, int ind, RawItemHdr* rihP);
+
+//int processPosNumber(UInt32 fp, UInt32 numref, int* pnumP, int* lenP, BINT bSet, ReinBar* rbPtr);
+
+void syncToolbox(void);
+
+//ELID saveReinData(ReinBar* rbP, ELID datelemid);
+
+int readReinDataFromElmd(ReinData* rdP, MSElementDescr  *edP, ReinBar* rbP);
+
+UInt32 reinSpaceElmdCreate(UInt32 fpos, DgnModelRefP mrP, ReinSpace* rsP, int bUpdateConfig, ReinElement* reP = NULL);
+
+int getBendRadius(ReinBar* rbP, ReinSpace* rsP);
+
+void reinCreateDataBars(int bCopy, ReinData* rdP, ReinBar* rbP, MSElementDescr* edP);
+
+void scanFileReinData(DgnModelRefP mrP);
+
+//int getTrueEnd(int iend);
+int getTrueEnd(ReinBar* rbP, int ind);
+
+int connectDB(int iMessage = 0);
+
+//int refPathsEQ(UInt32* a1, UInt32* a2);
+int refPathsEQ(deque <UInt32> &a1, deque <UInt32> &a2);
+
+
+int readPointsFromElement(BarPoint* arPtsOut,  MSElement* el, UShort* appTypeP );
+
+void updateReinBarSegments(ReinBar* rbP, int iClip, BarPoint* bpBendOneP = NULL, BarPoint* bpBendTwoP = NULL);
+
+int readReinSpaceFromElmd(ReinElement* rsP, MSElementDescrCP edP, int bReadPoints);
+int readReinSpaceFromElement(ReinElement* rsP, MSElementCP el, int bReadPoints);
+int readReinSpaceFromString(ReinSpace* rsP, wstring str);
+UInt32 createReinSpaceElement(MSElementDescr** edP, ReinSpace* rsP, UInt32 fpos, DgnModelRefP mrP, int bUpdateConfig, int bAdd, ReinElement* reP = NULL);
+
+int readReinBarFromElement(ReinBar* rsP, MSElementDescrCP el, int bClear);
+int readReinBarFromElement(ReinBar* rsP, MSElementDescrCP el, int bClear, int bReadData);
+
+//UInt32 createReinBarElement(MSElementDescr** edP, ReinBar* rbP, UInt32 fpos, DgnModelRefP mrP, int bAdd);
+//XMLFragmentListP createReinBarElement(ReinBar* rbP);
+
+int readReinBarFromString(ReinBar* rbP, wstring str);
+
+int readBarOverFromString(BarOver* boP, wstring str);
+int readBarOversFromElement(ReinElement* reP, MSElement* elP);
+
+
+#if defined (MSVERSION) && (MSVERSION == 0xa00) // ECX
+int readFromECInstance(ReinBar* rbP, DgnECInstancePtr insP);
+int readFromECInstance(ReinSpace* rsP, DgnECInstancePtr insP);
+#endif
+
+//UInt32 getRefNum(DgnModelRefP mrP);
+int readReinBarFromElem(ReinBar* rbP, MSElementCP elBarP);
+
+
+//int readReinElmFromString(ReinElm* reP, wstring str, DgnModelRefP mrP);
+//int readReinElmFromElement(ReinElm* rsP, MSElementCP el, DgnModelRefP mrP);
+int readReinElmIso(ReinElm* rsP, MSElementDescr* el, int bLoadAxis, int bUpdVecs);
+int readReinElmIso(ReinElm* reP, MSElementDescr* edP, int bLoadAxis, int bUpdVecs, DgnModelRefP mrP);
+
+int getPosFromString(ReinPos* rpP, wstring str);
+
+void getSegms(MSElementDescr* edP, ReinBar* rbP, int* kosP);
+
+int xmlAddBarPoints(ReinBar* rbP, MSElementDescr** edpP);
+//int xmlAddBarVerts(ReinVert* rvP, MSElementDescr** edpP, int segm_index, int vert_index);
+
+void setPosition(ReinPos* rpP, ReinElm* relmP, ReinModel* rmP, int dirout);
+void scanFilePositions(ReinModel* rmP, DgnModelRefP mrP);
+
+int readBarPointsFromElement(ReinBar* rbP, MSElement* el);
+
+
+//int readBarPointFromString(DVec3d* vP, Point3d* pbP, Point3d* peP, long* rfaP, WCH* str);
+int readBarPointFromString(ReinBar* rbP, int index, wstring str);
+
+//int readBarVertsFromElement(ReinBar* rbP, MSElement* el);
+//int readBarVertFromString(ReinVert* rvP, char* str, int* siP, int* viP);
+
+int iterateLoadReinBars(
+MSElementDescr  *edP,
+CatInfo            *ciP,
+ScanCriteria    *pScanCriteria
+);
+
+int scanModelCount(
+MSElementDescr  *edP,
+long            *elemCountP,
+ScanCriteria    *pScanCriteria
+);
+
+int sortReinPos(ReinPos* rp1, ReinPos* rp2);
+
+void loadAllPositions(int bReloadBase);
+
+void destroyCurBars(DgnModelRefP mrP);
+
+//void insertCurBarsMember(ReinElm* relmP, MSElementDescr* edP, ArrayObjectHdr* da);
+//void removeCurBarsMembers(DgnModelRefP mrP, ReinBar* rbP);
+
+//void reloadCurBars(ReinModel* rmP, bool bScan, bool bUpdateListBox );
+
+int getCfgVar(WCH* val, WCH* nam);
+
+
+int readPointFromString(BarPoint* ptP, wstring str);
+
+void clearBarsData(int bDelete);
+void reinUpdateVecsLevelMask(DgnModelRefP mrP);
+
+int iterateReloadBarsData(
+MSElementDescr  *edP,
+int            *args,
+ScanCriteria    *pScanCriteria
+);
+
+void checkDuplicates(int view);
+void clearClash(int view);
+
+int getBarEndsCount(DgnModelRefP mrP);
+
+int scanBarEndsCount(
+MSElementDescr  *edDstP,
+void  *arg,
+ScanCriteria    *pScanCriteria					
+);
+
+int elmFunc    (
+    MSElement       *element,     //=> element to act upon 
+    int            *params,      //=> passed from original call 
+    int             operation,    //=> why you were called 
+    UInt32           offset,       //=> offset from header 
+    MSElementDescr  *elemDscrP    //=> element descr 
+    );
+
+int scanCheckDuplicate(MSElementDescr  *edP,ReinPrm* prmP,ScanCriteria    *pScanCriteria	);				
+int scanCheckDuplicateCount(MSElementDescr  *edP,int* bCheckClashP,ScanCriteria    *pScanCriteria	);				
+
+void insertCurBarsMember2(ReinElm* reToAddP, MSElementDescr* edP, UInt32 iBarFP, CatInfo* ciP, Int64 iCurElmIndex);
+
+int readReinAxisFromElement(ReinAxis* raP, MSElementCP el);
+
+
+int iterateRedrawSpaces(
+MSElementDescr  *edP,
+void            *args,
+ScanCriteria    *pScanCriteria
+);
+
+void reloadBarsData(int iREType, int bRegen, int iStep = 0);
+//void reinRedrawSpaces(int dm);
+
+int readReinAxisFromString(ReinAxis* raP, wstring str);
+
+int intersectElements(MSElementDescr* edpLine, MSElementDescr* edpShape, DVec3d* pIntP, ReinBar* contP);
+
+void prepareSketchPoints(DVec3d* ptsh, int numpts, double prefWdt, double prefHgt, int bUnrot);
+//int checkPos(ReinPos* rpP, int* bExP);
+
+int scanForCopyDataBars(
+MSElementDescr  *edP,
+ELID*         elidP,
+ScanCriteria    *pScanCriteria
+);
+
+int reinCalcSpace(
+	MSElement* elP, 
+	MSElementDescr* edP, 
+	ReinSpace* rsP,  
+	ReinCalc* rcP, 
+	DgnModelRefP mrP, 
+	int bUors, 
+	int bReserved,
+	int bAddElem // not using
+	);
+
+void setDefaultStyles(void);
+
+//void  callbackOpeningDgnFile (
+//char      *filenameP,         /* => name of file */
+//int      state      /* => SYSTEM_NEWFILE_CLOSE, SYSTEM_NEWFILE_COMPLETE */
+//);
+
+#if defined (MSVERSION) && (MSVERSION == 0xa00) // ECX
+bool attachECInstance(
+	MSElementDescrP edP,   // elem where add
+	ReinBar* rbP,
+	WCharP className
+);
+
+void  callbackAttrChanged(
+	XAttributeHandleCP xAttr, 
+	DgnPlatform::ChangeTrackInfo *info, 
+	bool *cantBeUndoneFlag
+);
+
+#endif
+
+//void  callbackModelChanged (
+//DgnModelRefP  modelRef,  
+//int  changeTypeId  );
+
+int iterateHilitePos(
+MSElementDescr  *edP,
+CatInfo*        ciP,
+ScanCriteria    *pScanCriteria
+);
+
+
+
+int iterateForExclusivePos(
+MSElementDescr  *edP,
+int*        iShowP,
+ScanCriteria    *pScanCriteria
+);
+
+int scanMuftCountExt(
+MSElementDescr  *edDstP,
+ReinVert  *rvP,
+ScanCriteria    *pScanCriteria					
+);
+
+//void  callbackDgnFileUndoRedo
+//(
+//	MSElementDescr*       afterUndoRedo,
+//	MSElementDescr*       beforeUndoRedo,
+//#if defined (MSVERSION) && (MSVERSION == 0xa00)
+//	ChangeTrackAction       action,
+//	bool       isUndo,
+//	ChangeTrackInfo const*    info,
+//	ChangeTrackSource       source
+//#else
+//	CHANGE_TRACK_Action       action,
+//	BoolInt       isUndo,
+//	CHANGE_TRACK_Source       source,
+//	ChangeTrackInfo const*       info
+//#endif
+//);
+
+
+void setPosArrayInfo(ReinModel* rmP, bool bScan);
+
+double roundExtD(double val, int digs, double snap, int shft);
+long roundExt(double val, int digs, double snap, int shft);
+long roundExt(double val, int typ);
+
+//ReinElm* reinmodel::getReinElm(UInt32 fp);
+
+void updateViewArrays(void);
+
+double roundex( double );
+
+//void createBarFace(
+//				   MSElement* eltmplP, 
+//				   DVec3d* pAddP, 
+//				   Transform* tmP, 
+//				   Transform* tmRefP, 
+//				   DVec3d* pDir, 
+//				   int drawmode, 
+//				   MSElementDescr** edPP,
+//				   int view
+//				   );
+			
+//void barCalcComparePoints(
+//						  ReinBar* rbP, 
+//						  Transform* tmP, // для переменных сегментов - вертикальные или горизонтальные
+//						  int bReverse,
+//						  double* dScaleP
+//						  );
+
+
+int reinCalcSpacePoints(
+MSElementDescr  *edpRot, // converted to curve
+ReinSpace* rsP,
+ReinCalc* rcP, // range must be ready
+double d, // distance
+DVec3d* arPoints,
+DVec3d* arPtsUnRot,
+DVec3d* arPtsDraw,
+int bFullBar,
+int lapbeg,
+int lapend
+);				   
+
+//void setExPos(int iShow);
+
+double CalcRad(DVec3d *ptsIn, DVec3d *pNrm, DVec3d* pCenterP);
+
+int getReinLapBend(int diam, int index);
+
+//int checkBarPoints(ReinBar* rbP, int bBends);
+//int checkBarPoints(DVec3d* arPtsP, DVec3d* arCntP, long* arF, int cnt, ReinBar* rbSrc, int bBends); // проверка на вершины в одной точке
+//int checkBarPoints(vector<DVec3d> &arPtsP, vector<DVec3d> &arCntP, vector<long> &arF, ReinBar* rbSrc); // проверка на вершины в одной точке
+//int checkBarPoints(ReinBar* rbP, ReinBar* rbSrc);
+
+int barsEqual(ReinBar* rbOneP, ReinBar* rbTwoP, int* dirout);
+int barsEqual(ReinBar* rbOneP, // from file
+			  ReinBar* rbTwoP );
+
+void barCalcComparePoints(ReinBar* rbP, int bUseRealPts, Transform* tmP);
+
+void loadDBLaps(void);
+
+//void loadDBPositions(void);
+
+int createReinSign(void);
+
+void reinNoteDynamics( 
+DVec3d*  ptP,  
+int  view
+);
+
+void	reinLocateNoteShow(void);
+
+int	reinNotePoint(
+DVec3d    *pt,
+int	    view);
+
+void reinLocateReset(void);
+
+int	reinLocatePoint(
+DVec3d    *ptP,
+int	    view);
+
+int	reinLocateNotePoint(
+DVec3d    *ptP,
+int	    view);
+
+int extractComponentLinearByIndex ( 
+MSElementDescr *elmdP ,
+ReinCalc** rcPP,
+DVec3d* arPts,
+int elEDoffset
+) ;
+
+
+
+
+#if defined (MSVERSION) && (MSVERSION == 0x8b0) //  MSWideChar
+extern "C"
+{   //These functions return the number of characters (not strictly bytes) inserted into the destination buffer
+  int MSWideCharStringToMSWCharString (MSWChar* pOutString, 
+	   UInt32 nOutChars, MSWideChar const * pInString, UInt32 codePage);
+  int MSWCharStringToMSWideCharString (MSWideChar* pOutString, 
+       UInt32 nOutChars, MSWChar const * pInString, UInt32 codePage);
+}
+#endif
+
+int readReinFilletFromString(ReinPrm* rpP, wstring str);
+
+
+//void drawPreview(MSDialogP   dbP);
+
+int iterateElmdGetElmOffset    (
+MSElement       *element,   //  => element to act upon 
+void            *params,    //  => passed from original call 
+int             operation,  //  => why you were called 
+UInt32           offset,     //  => offset from header 
+MSElementDescr  *elemDscrP  //  => element descr 
+);
+
+
+int getBarSetInfo(MSElementDescr* edP, ReinPrm* prmP);
+int getModelInfo(MSElementDescr* edP, ReinPrm* prmP);
+
+void vecAllocInt(vector<vector<int>>* vecP, int iSize);
+void vecAllocLong(vector<vector<long>>* vecP, int iSize);
+
+extern RscFileHandle   rfHandle;
+
+
+//#if defined (MSVERSION) && (MSVERSION == 0x8b0)
+//int readFromString(char* func, deque<wstring>* setP, wstring wstr, wstring sep = L";", size_t iLenChk = 1900);
+//#else
+int readFromString(char* func, deque<wstring>* setP, wstring wstr, wchar_t* sep = L";", size_t iLenChk = 1900);
+//#endif
+
+void reinUpdateConfigWindow(int index);
+
+int reinCalcSurfRevolution(
+						MSElementDescr* edpBar, // may be complex element, full calculation
+						ReinElement* reP,
+						DVec3d* pCent,
+						DVec3d* pAxis,
+						double swan,
+						ELID prid,
+						DgnModelRefP mrP
+						);
+
+void setBarTermPar6to4(int* trmp, ReinBar* rbP);
+void setBarTermPar4to6(int* trmp, ReinBar* rbP)
+;
+
+int loadFilePositions(void);
+int savePosition(ReinPos* rpP, int bOverwrite, int bUpdateBaseInfo);
+void deleteFilePosition(int num);
+int checkFilePosition(int num);
+
+int scanMuftCount(
+MSElementDescr  *edP,
+long            *elemCountP,
+ScanCriteria    *pScanCriteria					
+);
+
+//Private  void hookComboBoxLineStyle(
+//DialogItemMessage   *dimP
+//);
+
+int scanElemPointInside(
+	MSElementDescr* edP,
+	ReinPrm* prm,
+	ScanCriteria* pScanCriteria
+);
+
+int scanReinCache(
+	MSElementDescr* edP,
+	ReinPrm* prmP,
+	ScanCriteria* pScanCriteria
+);
+
+int scanMuftInArray(
+MSElementDescr  *edP,
+long            *elemCountP,
+ScanCriteria    *pScanCriteria					
+);
+
+void createOptionShow(void);
+int getShowInfo2(void);
+
+void updateListBoxPos(int bKeepSelection);
+
+void startModify(void);
+
+ListModel* createListBoxPos(int);
+ListModel* createListBoxRefs(void);
+//ListModel* createListBoxLineStyle(void);
+
+void saveShowInfo2(ReinInfo* riCopyFromP);
+
+void ZeroTrackBar(TrackBarInfo* tbiP);
+
+void    hookListCellEditor(DialogItemMessage   *dimP);
+
+void hookAnkerChange(		DialogItemMessage   *dimP);
+void hookAnkerButton(		DialogItemMessage   *dimP);
+
+void hookToolBox(
+		DialogMessage   *dmP	/* => a ptr to a dialog item message */
+);
+
+
+UInt32  iterateElmdSketchTextSave   (
+MSElement       *element,   //  => element to act upon 
+void            *params,    //  => passed from original call 
+int             operation,  //  => why you were called 
+UInt32           offset,     //  => offset from header 
+MSElementDescr  *elemDscrP  //  => element descr 
+);
+
+void saveThisFileIsModel(DgnModelRefP mrInP = NULL, int iModType = -1, bool bSyncTB = true);
+void checkThisFileIsModel(DgnModelRefP mrP);
+
+
+void setReinSegmForView(ReinSegm* sgmP, int view, int bFreeTransient, int bCalc);
+void setReinVertForView(ReinVert* rvtP, int view, int bFreeTransient, int bCalc);
+
+int updateReinBarForView(ReinBar* rbP, int view);
+
+void hookListBoxItem(
+DialogItemMessage   *dimP
+);
+void hookComboBoxItem(
+DialogItemMessage   *dimP
+);
+void hookComboRefShow(
+DialogItemMessage   *dimP
+);
+
+//Public int reinCreateBar(
+//	MSElementDescr* edP, // complex element
+//	ReinBar* rbP,  
+//	DgnModelRefP mrP, 
+//	int bBarReady, // do not calc points
+//	int bAddElem,
+//	double* distP,
+//	DVec3d* dirP,
+//	int barnum,
+//	int barqty,
+//	int lapbeg,
+//	int lapend,
+//	int bReinBar = FALSE
+//	);
+	
+void reinSketchDynamics( 
+DVec3d*  pt,  
+int  view,  
+DRAWMODE  drawMode  );
+
+int reinCreateComplexBarAxis2(
+	MSElementDescr** edp,
+	MSElementDescr** edpT,
+	DVec3d* arPtsP,
+	long* rfa,
+	int cnt,
+	int radius,
+	MSElement* elTmplP
+	);
+
+int reinCreateComplexBarAxis2(
+	MSElementDescr** edp,
+	MSElementDescr** edpT,
+	DVec3d* arPtsP,
+	long* rfa,
+	int cnt,
+	int radius,
+	MSElement* elTmplP,
+	ReinBar* rbP,
+	int bZeroFillet
+	);
+
+int reinCreateComplexBarAxis2(
+	MSElementDescr** edp,
+	MSElementDescr** edpT, // later - ReinPos* ???
+	vector <DVec3d> &vecPts,
+	vector<long> &vrfa,
+	int cnt_,
+	int radius,
+	MSElement* elTmplP
+);
+
+int reinCreateComplexBarAxis2(
+	MSElementDescr** edp,
+	MSElementDescr** edpT, // later - ReinPos* ???
+	vector <DVec3d> &vecPts,
+	vector<long> &vrfa,
+	int cnt_,
+	int radius,
+	MSElement* elTmplP,
+	ReinBar* rbP,
+	int bZeroFillet
+);
+
+
+int buildViewShape(
+	int view,
+	int drawmode
+);
+
+
+
+void copySpaceData(ReinSpace* rsP, ReinBar* rbP, int bSpaceToBar, ReinSpace* rsOptP, int iCopySegmIndex);
+void copySpaceData(ReinSpace* rsP, ReinBar* rbP, int bSpaceToBar, ReinSpace* rsOptP, int iCopySegmIndex, int bIncrContNum);
+
+
+bool coordIsEqual(double v1, double v2, int bConvertToUors);
+bool coordIsEqual(int v1, int v2);
+bool pointIsEqual(DVec3d* p1, DVec3d* p2, int bConvertToUors);
+
+void drawPosNum(int pnum, DVec3d* pOrgP, VCNTXP context, RotMatrixCP rmP, Transform* tmP, Transform* tmRevP, DgnModelRefP mrP = NULL, UInt32* clrP = NULL);
+void drawPosNum_(int pnum, DVec3d* pOrgP, VCNTXP context, RotMatrixCP rmP, Transform* tmP, Transform* tmRevP, DgnModelRefP mrP = NULL);
+
+Public int reinCreateBarAxis(
+			MSElementDescr** edp,
+			MSElementDescr** edpText,
+			DVec3d* arP,
+			int cnt,
+			int radius,
+			Transform* tmP,
+			DgnModelRefP mrP,
+			int bUseActiveSymb
+			);
+
+void getBarUnrotatedPoints(
+DVec3d* ptsOut,
+DVec3d* ptsIn,
+DVec3d* pNormal,
+int nmpts,
+int indPointRotateAbout,
+int bStayIfVert,
+double* dScaleP
+);
+
+
+//void savePlotCreateElem(DVec3d* ppp, MSElementDescr* edCellP, Transform* tmP, MSElementDescr  *edAddP);
+void savePlotCreateElem(DVec3d* ppp, MSElementDescr* edCellP, Transform* tmP, Transform* tmRevP = NULL, MSElementDescr  *edAddP = NULL);
+
+
+int scanPlotSchCells(
+MSElementDescr  *edP,
+void*        prm,
+ScanCriteria    *pScanCriteria
+);
+
+//void getBarDrawPoints(
+//DVec3d* pNormal,  // нормаль к плоскости стержня
+//ReinBar* rbP,
+//double* dScaleP
+//);
+
+int scanMerge(
+	MSElementDescr* edP,
+	long* cntP,
+	ScanCriteria* pSC
+);
+
+void hookOptionPref(		DialogItemMessage   *dimP);
+
+void checkClipAxis(ReinBar* rbP, ReinBar* rbTrP, MSElementDescr* edP, DgnModelRefP mrP, int view);
+
+void checkOptionTermItems(MSDLGP   dbP, int bSetTrem);
+
+void hookOptionTerm(
+		DialogItemMessage   *dimP	/* => a ptr to a dialog item message */
+);
+void hookOptionDiam(
+		DialogItemMessage   *dimP	/* => a ptr to a dialog item message */
+);
+
+//int testIsPointInsideView(DVec3d* pTestP, ViewportP viewPortP, Transform* tmRefP);
+int testIsPointInsideView2(DVec3d* pTestP, VCNTXP context, DVec3d* pViewNrm);
+
+
+int testSegmentInView(DVec3d* pTestFrstP, DVec3d* pTestScndP, ViewportP viewPortP, Transform* tmP, DVec3d* pActDepP);
+int testActiveZPoint(ReinModel* rmodP, ReinSegm* sgmP, int view, VCNTXP context, DVec3d* pZ, double an, double param, DVec3d* pViewNrm);
+int testVecInsideRefClip(DgnModelRefP mrP, DVec3d* pTest1P, DVec3d* pTest2P, int view);
+
+
+void enableItems(MSDLGP dbP, int rtype, BINT isEnabled, BINT bResetValue = TRUE);
+
+ReinLap* getReinLap(int diam);
+
+ELID reinCreateBarAxisLine(
+			MSElement* elP,
+			ReinBar* rbP,
+			BINT bVisible,
+			LEVID iLev
+			);
+
+int iterateFindReinElm(
+MSElementDescr  *edP,
+ReinBar*        barP,
+ScanCriteria    *pScanCriteria
+);
+
+void reloadHidingPositions(bool onlyHidePos = false);
+
+extern "C" 
+{
+
+	DLLEXPORT void cmdReinNote(	char	*unparsedP	);
+	DLLEXPORT void cmdPosClear(	char	*unparsedP	);
+	DLLEXPORT void cmdReinMerge(	char* unparsedP);
+
+	int             mdlSurface_extractExtrusionExt
+	(
+	MSElementDescr  **edPP,
+	DVec3d          *directionP,
+	double          *distanceP,
+	MSElementDescr  *surfaceEdP,
+	int             ignoreSkew
+	);
+
+
+}
+
+extern "C" DLLEXPORT void cmdPosEnum(
+	char* unparsedP
+);
+
+extern "C" DLLEXPORT void cmdPosCatch(
+	char* unparsedP
+);
+
+long getReinLapSrtmID(int diam, long defsrtmID);
+long getReinLapMatID(int diam, long defmatID);
+
+
+void loadRefModel(ReinModel* rmP, ReinModel* prPrntP, DgnModelRefP modelRef, UInt32* elcntP);
+
+//ReinModel* getReinModelP(DgnModelRefP mrP);
+
+void syncShowInfo();
+//int getShowInfo(ReinInfo* riP, DgnModelRefP mrP);
+//void saveShowInfo(ReinInfo* riP, ReinDopInfo* rdiP);
+
+wstring getCurRefShowPath(void);
+
+void saveHidePosInfo(void);
+//void updateHidePosArray(int bReload, int refnum);
+void saveHidePosInfo(void);
+void deleteHidePosInfo(int bAllPosForRef);
+void deleteBarSetInfo(int bAllPosForRef);
+
+int iterateForHidingPos(
+MSElementDescr  *edP,
+CatInfo*        ciP,
+ScanCriteria    *pScanCriteria
+);
+
+ReinInfoRef* getCurRefPrefs(int refn, int refnn);
+
+BINT listModelSearchFunc
+ (   
+ ListModel   *pModel,        // => The ListModel to process 
+ ValueDescr  *pValueDescr,   // => Value of data to search for (if string, use value.charPFormat) 
+ long        *pInfoFields,   // => InfoFields to search for 
+ ListRow     *pRow,          // => ListRow in question 
+ int         columnIndex     // => columnIndex passed from mdlListModel_search 
+ );
+
+int scanCheckShowInfo2(
+MSElementDescr  *edP,
+ReinPrm*       prmP,
+ScanCriteria    *pScanCriteria
+);
+
+void copyRefPrefsFromRef(ReinInfo* riP, ReinInfoRef* rirP);
+void copyRefPrefsToRef(ReinInfoRef* rirP, ReinInfo* riP);
+
+void dialogPosList_checkButton(MSDLGP dbInP);
+
+void updateModelElmNumbers(ReinModel* rmP, bool bSkipIfLot);
+
+int scanClearDataBars(
+	MSElementDescr* edP,
+	ELID* elidP,
+	ScanCriteria* pScanCriteria
+);
+
+int findReinElmsAroundPoint(BarPoint* ptP);
+
+double CalcRad2(DVec3d* pIn, DVec3d* pNrm, DVec3d* pCenterP);
+
+void hookComboBoxModel(
+	DialogItemMessage* dimP
+);
+
+void toolBoxComboSync(void);
+
+LEVID getOrCreateLevel(DgnModelRefP mrP, MSWCHCP levName, bool bUseActiveIfNotSuccess);
+
+int scanJustDeleteElement(
+	MSElementDescr* edP,
+	void* args,
+	ScanCriteria* pScanCriteria
+);
+
+MSElementDescr* makePlate(
+	double dHeight,
+	double dWidth,
+	double dLength,
+	DPoint3d offset,
+	DVec3d vdir
+);
+
+void makeAssemblyElem(ReinElm* crelmP, MSElementDescr* edP, MSElementDescr** edpCagePP, DgnModelRefP mrP, bool bSolid = true);
+int getReinModelType(DgnModelRefP mrP);
+
+
+MSElementDescr* makeAssemblyMuft(
+	int bardiam,
+	DVec3d vorg,
+	DVec3d vdir,
+	DgnModelRefP mrP
+);
+
+XMLFragmentListP makeXmlForElement(ReinElm* reP, LEVID iLevID);
+XMLFragmentListP makeXmlForMuft(ReinElm* reP, LEVID iLevID);
+XMLFragmentListP makeXmlForCage(MSWCH* cagename, LEVID iLevID);
+
+bool isLevelLocked(MSElementDescr* edP, DgnModelRefP mrP);
+
+int readReinClashFromElement(ReinClash* rcP, MSElement* elP);
+
+void removeClashByFP(UInt32 fp1, UInt32 fp2, BINT bDisplay);
+
+ELREF getElemRefByID(DgnModelRefP mrP, ELID id);
+ELREF getElemRefByFPos(DgnModelRefP mrP, UInt32 fp, int bSkipDeleted);
+
+void reloadCurBarsAll(int iLoadRefs);
+
+int getReinCacheCount(wstring* refpathP = NULL);
+
+void closeLogFile(void);
+void openLogFile(int bAppend);
+
+void posSaveDB(
+	char* unparsedP);
+
+int getCfgVarEx(WCH* valP, MSWCH* nam);
+
+void barSetFenceProcess(int step);
+
+MSDLGP findToolBox(void);
+
+int	reinChangeSelected(
+	DVec3d* ptP,
+	int	    view);
+
+DgnModelRefP getOrCreateModel(MSWCH* modname, DgnModelRefP mrWhereP);
+
+int getReducers(DgnModelRefP mrP, ReinVert* rvP, ScanRange* srP);
+
+void drawBarsTable(DVec3d* ptP, UInt32* iCountP);
+
+void	reinSketchTable(
+	DVec3d* pt,
+	int view
+);
+
+void setRienInfoDefaults(void);
+
+void drawReinElm(
+	ELHCP elemIterP,
+	MSElementDescrH newEdPP,
+	MSElementDescrCP edp,
+	ReinModel* rmP,
+	ReinElm* reP,
+	ViewportP viewPortP,
+	VCNTXP context,
+	UInt32 iBlock,
+	bool bPlot,
+	Transform* tmP,
+	int iDrwMode,
+	ReinInfoRef* rirP,
+	DrawPurpose drawPurpose
+);
+
+int setElemDescrTooltip(
+	ReinBar* rbP,
+	ReinSpace* rsP,
+	MSWCH* description,
+	double dlent,
+	int iselem,
+	MSWCH* fName,
+	MSWCH* mName,
+	MSWCH* levName,
+	long rad,
+	MSWCH* dopdescr
+);
+
+int myClip_getRefBoundary(
+	CLIPDESC* clipPP,
+	DgnModelRefP       mrP,
+	MSElementDescrP* edClipPP, // предполагаемый элемент клипа, надо потом освободить если получен клип
+	int       view
+);
+
+void myClip_free(CLIPDESC clipP, MSElementDescrP* edClipPP);
+
+int readRndFromElement(ELID* idP, UInt32* refnumP, MSElementCP elP);
+

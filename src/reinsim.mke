@@ -1,0 +1,194 @@
+#--------------------------------------------------------------------------------------
+#
+#     $Source: MstnExamples/DialogBoxes/myapp/myapp.mke $
+#
+#  $Copyright: (c) 2015 Bentley Systems, Incorporated. All rights reserved. $
+#
+#--------------------------------------------------------------------------------------
+#---------------------------------------------
+# Define macros specific to this example
+#---------------------------------------------
+PolicyFile = $(MDLMKI)MicroStationPolicy.mki
+
+appName   = rein
+
+# mdlapps -> reinsrc
+
+reinsrc = c:/Offtake/rein14/
+
+
+baseDir         = $(_MakeFilePath)
+privateInc      = $(baseDir)
+langSpec        = $(baseDir)english/
+
+MDLMKI = $(MSMDE)mki/
+MDLINC = ${MSMDE}include/
+
+
+%include $(MDLMKI)mdl.mki
+#rCompOpts + -i$(MDLINC)
+cIncs + -I$(MDLINC)
+#cIncs + -Ic:/projects/ups/include/
+
+
+DEF_CONNECT_BUILD = D_CONNECT
+
+CCompOpts + -D$(DEF_CONNECT_BUILD)
+
+RCompOpts + -d$(DEF_CONNECT_BUILD)
+
+moreRTypeOpts  + -d$(DEF_CONNECT_BUILD)
+
+
+%if defined (LANG_EN)
+	CCompOpts + -DLANG_EN
+
+	RCompOpts + -dLANG_EN
+
+	moreRTypeOpts  + -dLANG_EN
+%endif
+
+
+
+mdlLibs = $(MSMDE)library/
+abdLibs = $(ABDSDK)library/
+
+#privateInc = $(baseDir)
+#langSpec   = $(baseDir)english/
+#------------------------------------------------------------------------
+# mdl.mki contains the default rules for creating .rsc, .mo, etc files
+#------------------------------------------------------------------------
+#%include mdl.mki
+
+#----------------------------------------------------------
+# Create needed output directories in case they don't exist
+#----------------------------------------------------------
+always:
+    !~@mkdir $(o)
+    !~@mkdir $(rscObjects)
+    !~@mkdir $(reqdObjs)
+
+# Search in $(o) for command table resources
+dirToSearch = $(o)
+%include $(MDLMKI)cincapnd.mki
+	
+dirToSearch = $(ABDSDK)include/
+%include $(MDLMKI)cincapnd.mki
+
+#------------------------------------------------------------------------
+# Define macros for files included in our link and resource merge
+#------------------------------------------------------------------------
+
+bclassRscs = \
+   $(o)$(appName)cmd.rsc
+
+#------------------------------------------------------------------------
+# Generate command table include & resource file using rcomp
+#------------------------------------------------------------------------
+$(baseDir)$(appName)ccmd.h        : $(baseDir)$(appName)cmd.r $(baseDir)vers.h
+
+$(o)$(appName)cmd.rsc           : $(baseDir)$(appName)cmd.r
+
+#------------------------------------------------
+#   Set up to use dlmcomp.mki and dlmlink.mki
+#------------------------------------------------
+dlmObjs = \
+	$(o)main$(oext) \
+	$(o)$(appName)var$(oext) \
+	$(o)$(appName)bar$(oext) \
+	$(o)$(appName)elem$(oext) \
+	$(o)$(appName)$(oext) \
+	$(o)$(appName)8i.res
+
+#DLM_NO_DELAYLOAD        = 1
+DLM_NO_DLS              = 1             # USE DLLEXPORT IN .CPP
+DLM_NO_DEF              = 1
+DLM_NOENTRY             = 1
+DLM_NO_MANIFEST         = 1
+DLM_NO_SIGN             = 0
+DLM_OBJECT_DEST         = $(o)
+#DLM_LIBDEF_SRC          = $(baseDir)
+DLM_DEST                = $(mdlapps)
+DLM_NAME                = $(appName)
+DLM_OBJECT_FILES        = $(dlmObjs)
+DLM_SPECIAL_LINKOPT     = -fixed:no
+
+LINKER_LIBRARIES 	=	$(mdlLibs)bentley.lib \
+                        $(mdlLibs)BentleyAllocator.lib \
+                        $(mdlLibs)mdlbltin.lib \
+                        $(mdlLibs)RmgrTools.lib \
+                        $(mdlLibs)BentleyGeom.lib \
+                        $(mdlLibs)DgnPlatform.lib \
+                        $(mdlLibs)dgnview.lib \
+                        $(mdlLibs)mstntoolsubs.lib \
+                        $(mdlLibs)mspsolid.lib	\
+                        $(abdLibs)tfc.lib \
+                        $(abdLibs)CatalogInstanceCollection.lib \
+                        $(mdlLibs)PSolidCore.lib \
+						$(mdlLibs)ECObjects.lib
+						#c:/Projects/ups/msvc2013/dll_x64/upscaledb-2.2.0.lib
+
+#----------------------------------------------------------------------
+#   Compile the source files for the DLM
+#----------------------------------------------------------------------
+
+$(o)main$(oext)   	: $(baseDir)main.cpp
+
+$(o)$(appName)var$(oext)   	: $(baseDir)$(appName)var.cpp
+
+$(o)$(appName)bar$(oext)   	: $(baseDir)$(appName)bar.cpp	$(baseDir)$(appName)bar.h
+
+$(o)$(appName)elem$(oext)   	: $(baseDir)$(appName)elem.cpp	$(baseDir)$(appName)elem.h
+
+$(o)$(appName)$(oext)           : $(baseDir)$(appName).cpp    \
+                                  $(baseDir)$(appName)vers.h
+
+$(o)$(appName)8i.res  : $(baseDir)$(appName)8i.rc  $(baseDir)resource.h
+								  
+%include $(MDLMKI)dlmlink.mki
+
+#----------------------------------------------------------------------
+#       The following section generates the MDL Intermediate module using
+#       rlib. This module contains the MDL CODE module and any
+#       non-translatable resource modules.
+#----------------------------------------------------------------------
+$(o)$(appName).mi          : $(bclassRscs)
+        $(msg)
+        > $(o)temp.cmd
+        -o$@
+        $(bclassRscs)
+        <
+        $(RLibCmd) @$(o)temp.cmd
+        ~time
+
+#----------------------------------------------------------------------
+#       The last step to this makefile is to include the MANDATORY makefile
+#       used to compile the translatable resources and create the final
+#       MDL application. This file is typically located in the directory
+#       pointed to by the 'baseDir' macro defined by the user at the top
+#       of this file. The standard extension for this included makefile is
+#       '.mki' and the file is distributed as part of the Foreign Language
+#       Translation Kit.
+#----------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+#        document extraction from c code headers
+#-----------------------------------------------------------------------------
+#%if defined (cdoc)
+
+#%include cdoc.mki
+
+#cdocTarget = $(cdocRoot)myapp
+
+#$(cdocTarget)/$(tstdir):                $(cdocTarget)/$(tstdir)
+
+#$(cdocTarget)/myapp.html:              $(_MakeFilePath)myapp.mc
+
+#always:
+#    call %GEMADIR%/cdoc/createCDocIndex $(cdocRoot)
+
+
+#%endif
+
+
+%include $(baseDir)$(appName)rsc.mki

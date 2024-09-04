@@ -1,0 +1,101 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rein", "rein.vcxproj", "{1C1C8D19-F586-4ED7-839F-41745AF16DAF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E9A438CC-E8CE-4678-8E58-E65D9320F775}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cmd", "cmd", "{19F88410-2D29-497B-91DE-3B823CB0537A}"
+	ProjectSection(SolutionItems) = preProject
+		src\reinvers.cmd = src\reinvers.cmd
+		src\w.cmd = src\w.cmd
+		src\wd.cmd = src\wd.cmd
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fdf", "fdf", "{9133D1C3-B2A3-452C-91CE-C9CD3DE02AB8}"
+	ProjectSection(SolutionItems) = preProject
+		src\rein.fdf = src\rein.fdf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mke", "mke", "{2C021D68-23F3-4B7C-A4CD-EC7766FDD453}"
+	ProjectSection(SolutionItems) = preProject
+		src\rein.mke = src\rein.mke
+		src\rein8i.mke = src\rein8i.mke
+		src\reinrsc.mki = src\reinrsc.mki
+		src\reinsim.mke = src\reinsim.mke
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cpp", "cpp", "{59CD868A-DA55-4870-A517-9EC128A6D4FA}"
+	ProjectSection(SolutionItems) = preProject
+		src\rein.cpp = src\rein.cpp
+		src\StdAfx.cpp = src\StdAfx.cpp
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "h", "h", "{88EABB91-8A66-485F-8E3F-A6B2AE0D7F1B}"
+	ProjectSection(SolutionItems) = preProject
+		src\rein.h = src\rein.h
+		src\reincmd.h = src\reincmd.h
+		src\reintxt.h = src\reintxt.h
+		src\reintxte.h = src\reintxte.h
+		src\reinvers.h = src\reinvers.h
+		src\resource.h = src\resource.h
+		src\stdafx.h = src\stdafx.h
+		src\vers.h = src\vers.h
+		src\vers08.h = src\vers08.h
+		src\vers10.h = src\vers10.h
+		src\vers10obd.h = src\vers10obd.h
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "r", "r", "{EA74614E-2BC9-4652-B09F-228978394CDA}"
+	ProjectSection(SolutionItems) = preProject
+		src\rein.r = src\rein.r
+		src\rein8i.rc = src\rein8i.rc
+		src\reincmd.r = src\reincmd.r
+		src\reinvers.r = src\reinvers.r
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cfg", "cfg", "{CD0FB5C0-3361-4DD8-8A30-01A32B4607BD}"
+	ProjectSection(SolutionItems) = preProject
+		cfg\rein.cfg = cfg\rein.cfg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ecx", "ecx", "{1819F6DB-93FA-4962-B6D1-DA6ECB23F1BE}"
+	ProjectSection(SolutionItems) = preProject
+		ecx\ReinSchema.01.00.ecschema.xml = ecx\ReinSchema.01.00.ecschema.xml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		aecosim|x64 = aecosim|x64
+		aecosim|x86 = aecosim|x86
+		station|x64 = station|x64
+		station|x86 = station|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1C1C8D19-F586-4ED7-839F-41745AF16DAF}.aecosim|x64.ActiveCfg = aecosim|x64
+		{1C1C8D19-F586-4ED7-839F-41745AF16DAF}.aecosim|x86.ActiveCfg = aecosim|Win32
+		{1C1C8D19-F586-4ED7-839F-41745AF16DAF}.station|x64.ActiveCfg = station|x64
+		{1C1C8D19-F586-4ED7-839F-41745AF16DAF}.station|x86.ActiveCfg = station|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{19F88410-2D29-497B-91DE-3B823CB0537A} = {E9A438CC-E8CE-4678-8E58-E65D9320F775}
+		{9133D1C3-B2A3-452C-91CE-C9CD3DE02AB8} = {E9A438CC-E8CE-4678-8E58-E65D9320F775}
+		{2C021D68-23F3-4B7C-A4CD-EC7766FDD453} = {E9A438CC-E8CE-4678-8E58-E65D9320F775}
+		{59CD868A-DA55-4870-A517-9EC128A6D4FA} = {E9A438CC-E8CE-4678-8E58-E65D9320F775}
+		{88EABB91-8A66-485F-8E3F-A6B2AE0D7F1B} = {E9A438CC-E8CE-4678-8E58-E65D9320F775}
+		{EA74614E-2BC9-4652-B09F-228978394CDA} = {E9A438CC-E8CE-4678-8E58-E65D9320F775}
+		{CD0FB5C0-3361-4DD8-8A30-01A32B4607BD} = {E9A438CC-E8CE-4678-8E58-E65D9320F775}
+		{1819F6DB-93FA-4962-B6D1-DA6ECB23F1BE} = {E9A438CC-E8CE-4678-8E58-E65D9320F775}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AA4CB670-3194-4757-8DF1-DC4450F97607}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+EndGlobal

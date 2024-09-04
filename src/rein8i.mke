@@ -1,0 +1,150 @@
+appName		= rein
+sAppName	= rein
+
+baseDir    = $(_MakeFilePath)
+
+#DEBUG=1
+
+%include   mdl.mki
+
+%if defined (LANG_EN)
+	CCompOpts + -DLANG_EN
+
+	RCompOpts + -dLANG_EN
+
+	moreRTypeOpts  + -dLANG_EN
+%endif
+
+dirToSearch = $(MSMDE)mdl/MicroStationAPI
+%include cincapnd.mki
+
+dirToSearch = $(MSMDE)mdl/MicroStationAPI/interface
+%include cincapnd.mki
+
+#----------------------------------------------------------------------
+# Define macros for files included in our link and resource merge
+#----------------------------------------------------------------------
+appRscs = \
+    $(o)$(appName).rsc \
+    $(o)$(appName)cmd.rsc
+
+#----------------------------------------------------------------------
+# Create needed output directories if they don't exist
+#----------------------------------------------------------------------
+$(o)$(tstdir)			: $(o)$(tstdir)
+
+#-----------------------------------------------------------------------
+#	Generate non-language resource files
+#-----------------------------------------------------------------------
+$(baseDir)$(appName)cmd.h	: $(baseDir)$(appName)cmd.r
+
+$(o)$(appName)cmd.rsc	: $(baseDir)$(appName)cmd.r 
+
+$(o)$(appName).rsc	: $(baseDir)$(appName).r $(baseDir)$(appName)cmd.h
+
+#-----------------------------------------------------------------------
+#	Generate language resource files
+#-----------------------------------------------------------------------
+#............
+
+#-----------------------------------------------------------------------
+#  Build Native Code
+#-----------------------------------------------------------------------
+dlmObjs = \
+	$(o)main$(oext) \
+	$(o)$(appName)$(oext) \
+	$(o)$(appName)var$(oext) \
+	$(o)$(appName)bar$(oext) \
+	$(o)$(appName)elem$(oext) \
+	$(o)$(appName)8i.res \
+	$(o)StdAfx$(oext)
+
+DLM_NAME            = $(appName)
+DLM_DEST            = $(mdlapps)
+DLM_SYM_NAME        = $(appName)sym
+DLM_RESL_NAME       = $(appName)res
+DLM_OBJECT_DEST     = $(o)
+DLM_LIBDEF_SRC      = $(baseDir)
+DLM_OBJECT_FILES    = $(dlmObjs)
+DLM_LIBRARY_FILES   = $(dlmLibs)
+DLM_NO_DLS          = 1		    # use DLLEXPORT instead
+DLM_NO_DEF          = 1
+DLM_NOENTRY         = 1
+DLM_NO_DELAYLOAD    = 1
+#	The following two macros are apparently synonyms
+DLM_NO_SIGN         = 0             # this is an example and should not be signed.
+MSJ_SKIP_SIGNRSCS   = 0
+
+DLM_LIBRARY_FILES 	=	$(mdlLibs)BentleyDgn.lib	\
+						$(mdlLibs)toolsubs.lib		\
+						$(mdlLibs)ditemlib.lib		\
+						$(mdlLibs)mdlbltin.lib 		\
+						$(mdlLibs)kisolid.lib 		\
+						$(mdlLibs)mdlxml.lib 		\
+						$(mdlLibs)imagelib.lib 		\
+						$(mdlLibs)msbspline.lib 	\
+						$(mdlLibs)rdbmslib.lib  	\
+						$(mdlLibs)mtg.lib  	\
+						$(mdlLibs)mdllib.lib	
+
+
+#------------------------------------------------
+#	Compile the source files for the DLM
+#
+#	Precompiled header:
+#	You need to define CCPchOpts in the .mke before the compiling statement.
+#	You can change the name of StdAfx to whatever you like.
+#----------------------------------------------------------------------
+CCPchOpts = -Yc"StdAfx.h" -Fp$(o)stdafx.pch
+
+$(o)StdAfx$(oext)   		: $(baseDir)StdAfx.cpp $(baseDir)StdAfx.h
+
+$(o)main$(oext)   	: $(baseDir)main.cpp
+
+$(o)$(appName)var$(oext)   	: $(baseDir)$(appName)var.cpp
+
+$(o)$(appName)bar$(oext)   	: $(baseDir)$(appName)bar.cpp	$(baseDir)$(appName)bar.h
+
+$(o)$(appName)elem$(oext)   : $(baseDir)$(appName)elem.cpp	$(baseDir)$(appName)elem.h
+
+$(o)$(appName)$(oext)   	: $(baseDir)$(appName).cpp	$(baseDir)$(appName).h  	\
+                                                                $(baseDir)$(appName)vers.h		\
+                                                                $(baseDir)$(appName)cmd.h
+
+$(o)$(appName)8i.res  : $(baseDir)$(appName)8i.rc  $(baseDir)resource.h
+
+
+%include dlmlink.mki
+
+#-----------------------------------------------------------------------
+#	Merge Objects into one file
+#-----------------------------------------------------------------------
+$(o)$(sAppName).mi        : $(appRscs)
+	$(msg)
+	>$(o)make.opt
+	-o$@
+	$(appRscs)
+	<
+	$(RLibCmd) @$(o)make.opt
+	~time
+
+#----------------------------------------------------------------------
+# complete construction of the .ma
+#----------------------------------------------------------------------
+# %include $(sAppName)rsc.mki
+#
+
+appRscs =   \
+         $(o)$(sAppName).mi
+
+
+$(mdlapps)$(appName).ma		: $(appRscs)
+	$(msg)
+	> $(o)make.opt
+	-o$@
+	$(appRscs)
+	<
+	$(RLibCmd) @$(o)make.opt
+	~time
+
+

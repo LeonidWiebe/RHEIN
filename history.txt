@@ -1,0 +1,145 @@
+RHEIN
+Version history
+
+14.7.13
+The functionality of the new command "REIN NOTE" is almost complete
+Now the command is also valid for note element updating
+
+14.7.14
+A critical correction has been made. 
+Fixed a memory leak that becomes noticeable when using large models. 
+A new configuration variable has also been added (REIN_SPACE_HOLD_LINE)
+to correct spacing of bars with an oblique layout.
+The command 'PLACE NOTE' is in the final stage of testing.
+
+14.7.15
+Command 'PLACE NOTE' fixed.
+When collecting information of bars, the referenct clip is taken into account.
+
+14.7.16
+Positions list may be sorted by parameters: diameter, vertex quantity, end type, length
+The sorting is turning on by variable REIN_POS_SORT_BY_PARAMETERS, value 1
+
+14.7.17
+New presentation option - show only bars of ground countour 
+New feature - repair bar bends on fly, controled by variable REIN_BAR_BEND_REPAIR (0/1), see rein.cfg
+Fence is used now for removing bars from layout
+
+14.7.18
+Division into English and Russian versions introduced
+
+14.7.19
+- The option of bar properties "Comparison" named "variable" is divided into two options: 
+"vaariable horizontal" and "variable vertical". For more details, see the video on youtube.
+- Freezes fixed when double click on bar.
+- New option in presentation settings: line style for bars not in ground countour 
+
+14.7.20
+Optimized the program's work with memory
+
+14.7.21
+Optimized the program's work with memory
+New option - notches draw on bars only if diameter is greater or equal to value of variable REIN_DISPLAY_NOTCH_STARTING_D
+If valiable not defined starting diameter is 20
+
+14.7.22
+Gradual transition to a new project structure according to c++ standards
+Critical fixes
+
+14.7.23
+Fixed issue: now tooltip is shown when snap on solid bar
+Other fixes
+
+14.7.24
+New variable REIN_LOAD_REFERENCES_ONSTART (1/0/-1) - turn on/optionally/off reinforcement data loading for references
+Reference option "Dispay Raster References" turns on reinforcement data loading
+Other fixes
+
+14.7.25
+Hide/show bar command (REIN BARSET) work with memory optimized
+Other fixes
+
+14.7.26
+Added compilation compatible with AECOsim SS6
+New command added - REIN CONCERTE
+This command generates report for reinforcement bars according AECOsim (OpenBuildings) concrete structures
+Other fixes
+
+14.7.27
+Interface improved and bugs fixed 
+All dll files now contain correct information (planform and language)
+
+14.7.28
+Dramatic progress in the stability of CONNECT version
+
+14.8.00
+...
+14.8.05
+Upgrade program code according to C++ standards
+
+14.8.06
+View attribute "Boundary display" enables display of solid bar on view
+
+14.8.07
+Variable REIN_SYMB_WEIGHT_ELM sets the weight of derived elements (see rein.cfg)
+Other fixes
+
+14.8.08
+Log format chenged to xml
+Other fixes
+
+14.8.09
+Improvement of linear contours
+Fixed calculation of average length in positions list
+
+14.8.10
+Positions list sort order tuning by variable REIN_POS_SORT_PARAMETERS (see rein.cfg)
+Other fixes
+
+14.8.11
+Added new Automatic change intercept mode for positions. 
+If mode is ON then changes of bars are automatically sent to position
+Until position is not saved, numbers of position are displayed in red color
+Key-in: REIN POS CATCH [ON|OFF], new variable REIN_POSITION_CATCH = 0|1
+Also fixed copy operation for 3D solid bar
+Other fixes
+
+14.8.12
+Our app has now its own API!
+Any objects and functions are now with DLLEXPORT option
+Also we continue to upgrade code according to C++ standards
+
+14.8.13
+Improvement of bar sections (try to fix section snap when cutted bar is too short)
+Also drawing seed file added to make sections easier
+
+14.8.14
+Critical fix (reference scale now works correctly when nesting is greater than 0)
+
+14.8.15
+Fixes
+
+14.8.16
+New variable REIN_REF_BAR_SECTION_SNAP (=0|1) sets new snap mode for bar sections
+Other fixes
+
+14.8.17
+Drawing Note improvement 
+
+14.8.18
+New variable REIN_POSLIST_MERGE (=0|1)
+Merge positions list if used unified database catalog
+
+14.8.19
+3d bar fix - now it creates correctly when overlay
+
+14.8.20
+Display bar scale fix
+
+14.8.21
+Positions list and presentation settings use reference live nesting
+Fixes
+
+14.8.22
+Positions numbers batch set/clear by option in column named "@"
+Fixes
