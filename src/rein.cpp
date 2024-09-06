@@ -25007,6 +25007,7 @@ void dialogPosList_checkButton(MSDLGP dbInP)
 	WCH wtct[100];
 
 	DialogItem* diP = mdlDialog_itemGetByTypeAndId(dbP, RTYPE_PushButton, BUTTON_POSNUM, 0);
+	DialogItem* diDbP = mdlDialog_itemGetByTypeAndId(dbP, RTYPE_PushButton, BUTTON_DBSAVE, 0);
 
 	int imode = getPosListMode();
 
@@ -25041,6 +25042,23 @@ void dialogPosList_checkButton(MSDLGP dbInP)
 #endif
 
 		mdlDialog_itemSetLabel(dbP, diP->itemIndex, wtct);
+	}
+
+
+	if (diDbP)
+	{
+		int bEnable = FALSE;
+
+		if (curPos_rn == 0) // active model
+		{
+			if (curCat.catModID > 0)
+			{
+				bEnable = TRUE;
+			}
+		}
+
+		mdlDialog_itemSetEnabledState(dbP, diDbP->itemIndex, bEnable, TRUE);
+
 	}
 
 }
