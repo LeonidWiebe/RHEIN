@@ -2634,20 +2634,48 @@ extern "C" DLLEXPORT void cmdPosSaveDB(
 )
 //cmdNumber   CMD_REIN_POS_DBSAVE
 {
-	if (curPos_rn == 0) // кнопка "в базу"
-		posSaveDB(unparsedP);
-	else // кнопка кэщ/динамик
+
+	if (unparsedP && strcmp(unparsedP, "posnum") == 0)
 	{
-		DgnModelRefP mrRefP = NULL;
 
-		ReinModel* rmP = curRM->getRM(curPos_refpath);
+		int imode = getPosListMode();
 
-		if (rmP)
+		if (imode == REIN_POSLIST_MODE_ENUM)
 		{
-			savePlotFile(rmP);
+			cmdPosEnum("");
+			dialogPosList_checkButton(NULL);
+			return;
+		}
+		else if (imode == REIN_POSLIST_MODE_NUMSAVE)
+		{
+			cmdPosEnum("save");
+			dialogPosList_checkButton(NULL);
+			return;
+		}
+		else if (curPos_rn > 0) // кнопка кэщ/динамик
+		{
+			DgnModelRefP mrRefP = NULL;
+
+			ReinModel* rmP = curRM->getRM(curPos_refpath);
+
+			if (rmP)
+			{
+				savePlotFile(rmP);
+			}
+		}
+
+
+
+	}
+	else // dbsave
+	{
+		if (curPos_rn == 0) // кнопка "в базу"
+		{
+			posSaveDB(unparsedP);
 		}
 
 	}
+
 }
 
 

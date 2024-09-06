@@ -522,7 +522,8 @@ DialogBoxRsc    DLG_POSLIST =
 	//{{ 84.5*XC, 2.4*YC, 32.5*XC, 150}, Generic, 2, ON, 0, "", ""},
     {{ 12.0*XC, 0.5*YC, 23.0*XC, 0},   ComboBox, COMBOBOX_POSITIONS_REFS, ON, 0, "", ""},
     {{ 35.0*XC, 0.4*YC, 12.0*XC, 1.5*YC},   PushButton, BUTTON_POSLIST, ON, 0, "", ""},
-    {{ 81.5*XC, 0.4*YC, 12.0*XC, 1.5*YC},   PushButton, BUTTON_DBSAVE, ON, 0, "", ""},
+    {{ 77.5*XC, 0.4*YC, 12.0*XC, 1.5*YC},   PushButton, BUTTON_POSNUM, ON, 0, "", ""},
+    {{ 90.0*XC, 0.4*YC, 4.0*XC, 1.5*YC},   PushButton, BUTTON_DBSAVE, ON, 0, "", ""},
     {{ 50.0*XC, 0.4*YC, 12.0*XC, 1.5*YC},   PushButton, BUTTON_POSDRAW, ON, 0, "", ""},
 	{{ 70.0*XC, 0.5*YC, 0, 0}, Text, 101, ON, 0, "", ""},
 	{{ 1.0*XC, 25.0*YC, 90*XC, 1.5*YC}, Label, 1, ON, ALIGN_LEFT|LABEL_FONT_BOLD|LABEL_WORDWRAP, "", ""},
@@ -780,6 +781,12 @@ DItem_PushButtonRsc BUTTON_DBSAVE=
 { 
 	0, NOHELP, MHELP, 
 	NOHOOK, NOARG, CMD_REIN_POS_DBSAVE, LCMD, "", TXT_18 
+}
+
+DItem_PushButtonRsc BUTTON_POSNUM =
+{ 
+	0, NOHELP, MHELP, 
+	NOHOOK, NOARG, CMD_REIN_POS_DBSAVE, LCMD, "posnum", TXT_18_0
 }
 
 

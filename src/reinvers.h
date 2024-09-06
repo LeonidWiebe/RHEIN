@@ -1,7 +1,9 @@
-#define VERSAPP 10 
+#define VERSAPP 8 
 #define VERSMAJ 14 
 #define VERSMID 8 
 #define VERSMIN 22 
-#define VERDATE L"22.08.2024" 
-#define VERTIME L"15:19:33,68" 
-#define VER_FILE_DESCR Addin for MicroStation CONNECT (x64) 
+#define VERDATE L"06.09.2024" 
+#define VERTIME L"11:54:00,61" 
+#define VER_FILE_DESCR Addin for MicroStation V8i (x86) 
+#define AFX_RESOURCE_DLL 
+#define AFX_TARG_RUS 

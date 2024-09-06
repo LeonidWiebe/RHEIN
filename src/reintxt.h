@@ -15,7 +15,7 @@
 #define TXT_15						"Применить" // Apply
 #define TXT_16						"Рассчитать" // Calculate
 #define TXT_17						"Обновить" // Update
-#define TXT_18						"В базу" // DB
+#define TXT_18						"db" // DB
 #define TXT_18_0					"Нумерация" // DB
 #define TXT_18_00					"Сохранить" // DB
 #define TXT_18_1					"Dynamic" // DB

@@ -5203,21 +5203,21 @@ char	*unparsedP
 	//if (daCurPosAll == NULL) loadAllPositions(TRUE);
 	//else if (mdlDArray_nMembers(daCurPosAll) == 0) loadAllPositions(TRUE);
 
-	int imode = getPosListMode();
+	//int imode = getPosListMode();
 
-	if (imode == REIN_POSLIST_MODE_ENUM)
-	{
-		cmdPosEnum("");
-		dialogPosList_checkButton(NULL);
-		return;
-	}
-	else if (imode == REIN_POSLIST_MODE_NUMSAVE)
-	{
-		cmdPosEnum("save");
-		dialogPosList_checkButton(NULL);
-		return;
-	}
-	else if (curCat.catModID == 0) 
+	//if (imode == REIN_POSLIST_MODE_ENUM)
+	//{
+	//	cmdPosEnum("");
+	//	dialogPosList_checkButton(NULL);
+	//	return;
+	//}
+	//else if (imode == REIN_POSLIST_MODE_NUMSAVE)
+	//{
+	//	cmdPosEnum("save");
+	//	dialogPosList_checkButton(NULL);
+	//	return;
+	//}
+	if (curCat.catModID == 0) 
 	{
 		//mdlDialog_openMessageBox (DIALOGID_MsgBoxOK, 
 		//	L("Необходимо назначить модели каталог базы данных!\nСохранение не выполнено."), 
@@ -24943,7 +24943,7 @@ int getPosListMode()
 
 	if (curPos_rn == 0) // active model
 	{
-		if (curCat.catModID == 0)
+		//if (curCat.catModID == 0)
 		{
 			if (enumCount)
 			{
@@ -24956,24 +24956,24 @@ int getPosListMode()
 				ret = REIN_POSLIST_MODE_ENUM;
 			}
 		}
-		else // каталог определен
-		{
-			if (enumCount)
-			{
-				// сохранение нумерации
-				ret = REIN_POSLIST_MODE_NUMSAVE;
-			}
-			else if (bNumsEmpty)
-			{
-				// нумерация
-				ret = REIN_POSLIST_MODE_ENUM;
-			}
-			else
-			{
-				// слив в базу
-				ret = REIN_POSLIST_MODE_DBSAVE;
-			}
-		}
+		//else // каталог определен
+		//{
+		//	if (enumCount)
+		//	{
+		//		// сохранение нумерации
+		//		ret = REIN_POSLIST_MODE_NUMSAVE;
+		//	}
+		//	else // if (bNumsEmpty)
+		//	{
+		//		// нумерация
+		//		ret = REIN_POSLIST_MODE_ENUM;
+		//	}
+		//	//else
+		//	//{
+		//	//	// слив в базу
+		//	//	ret = REIN_POSLIST_MODE_DBSAVE;
+		//	//}
+		//}
 	}
 	else // reference
 	{
@@ -25006,7 +25006,7 @@ void dialogPosList_checkButton(MSDLGP dbInP)
 	char tct[100];
 	WCH wtct[100];
 
-	DialogItem* diP = mdlDialog_itemGetByTypeAndId(dbP, RTYPE_PushButton, BUTTON_DBSAVE, 0);
+	DialogItem* diP = mdlDialog_itemGetByTypeAndId(dbP, RTYPE_PushButton, BUTTON_POSNUM, 0);
 
 	int imode = getPosListMode();
 
@@ -25017,10 +25017,10 @@ void dialogPosList_checkButton(MSDLGP dbInP)
 		{
 			strcpy(tct, TXT_18_00);
 		}
-		else if (imode == REIN_POSLIST_MODE_DBSAVE)
-		{
-			strcpy(tct, TXT_18);
-		}
+		//else if (imode == REIN_POSLIST_MODE_DBSAVE)
+		//{
+		//	strcpy(tct, TXT_18);
+		//}
 		else if (imode == REIN_POSLIST_MODE_CACHED)
 		{
 			strcpy(tct, TXT_18_2);

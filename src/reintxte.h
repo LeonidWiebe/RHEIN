@@ -15,7 +15,7 @@
 #define TXT_15						"Apply" // Apply
 #define TXT_16						"Calculate" // Calculate
 #define TXT_17						"Update" // Update
-#define TXT_18						"Put in DB" // DB
+#define TXT_18						"db" // DB
 #define TXT_18_0					"Numbering" // DB
 #define TXT_18_00					"Save" // DB
 #define TXT_18_1					"now dynamic" // DB

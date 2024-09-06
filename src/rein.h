@@ -553,6 +553,7 @@ SEC = As summary
 #define BUTTON_DBSAVE	4
 #define BUTTON_POSDRAW	5
 #define BUTTON_AGREE	7
+#define BUTTON_POSNUM	8
 
 #define DLGITEM_TEXT_SPACE		3
 //#define DLGITEM_TEXT_SPACE_2	309
