@@ -322,6 +322,8 @@
 	extern map <wstring, ReinPos> mapBarSet;
 	extern map <STRING, ReinPrm> mapSimPos;
 
+	extern map <UInt32, CatInfo> mapCats;
+
 	extern MSWCH sset[10000];
 	extern deque<wstring> setstr;
 
@@ -536,7 +538,7 @@
 
 	extern map<RelmPair, ReinPos> mapPosMem;
 
-	extern MAP<UInt32pair, ReinClash> mapClash; // д.б. парный ключ...
+	extern map<UInt32pair, ReinClash> mapClash; // д.б. парный ключ...
 	extern UInt32 iClashShtamp; // идентификатор коллизии
 
 
@@ -621,7 +623,7 @@ UInt32 xmlAddReinElmdAttr(
 );
 
 
-void writeLog(char* str, int ld, char* strdop = NULL);
+void writeLog(char* str, int ld, char* strdop = NULL, int icmnt = 0);
 void writeLogIn(char* sFuncName, char* str);
 void writeLogOut(char* sFuncName, char* str, int bReset = FALSE);
 
@@ -736,7 +738,7 @@ void	reinPlaceFirstPoint(
 DVec3d    *pt
 );
 
-void setPosString(ReinPos* rpP, int bPoints);
+void setPosString(ReinPos* rpP, int bPoints, int bXml);
 
 // get Comlex Bar Points - сбор точек в вектор vpt (И ВСЁ)
 int getComlexBarPoints(MSElementDescr* edp, ReinBar* rbP, int bReset, int* elemIndexP, int bUpdateMainLine, int bGetAngles);
@@ -904,7 +906,7 @@ int xmlAddBarPoints(ReinBar* rbP, MSElementDescr** edpP);
 //int xmlAddBarVerts(ReinVert* rvP, MSElementDescr** edpP, int segm_index, int vert_index);
 
 void setPosition(ReinPos* rpP, ReinElm* relmP, ReinModel* rmP, int dirout);
-void scanFilePositions(ReinModel* rmP, DgnModelRefP mrP);
+void scanFilePositions(ReinModel* rmP, DgnModelRefP mrP, bool bClearCats, bool bCatInfo);
 
 int readBarPointsFromElement(ReinBar* rbP, MSElement* el);
 
@@ -1295,7 +1297,7 @@ UInt32           offset,     //  => offset from header
 MSElementDescr  *elemDscrP  //  => element descr 
 );
 
-void saveThisFileIsModel(DgnModelRefP mrInP = NULL, int iModType = -1, bool bSyncTB = true);
+void saveThisFileIsModel(DgnModelRefP mrInP = NULL, int iModType = -1, bool bSyncToolBox = true);
 void checkThisFileIsModel(DgnModelRefP mrP);
 
 
@@ -1557,7 +1559,7 @@ void copyRefPrefsToRef(ReinInfoRef* rirP, ReinInfo* riP);
 
 void dialogPosList_checkButton(MSDLGP dbInP);
 
-void updateModelElmNumbers(ReinModel* rmP, bool bSkipIfLot);
+//void updateModelElmNumbers(ReinModel* rmP, bool bSkipIfLot);
 
 int scanClearDataBars(
 	MSElementDescr* edP,
@@ -1622,8 +1624,9 @@ int getReinCacheCount(wstring* refpathP = NULL);
 void closeLogFile(void);
 void openLogFile(int bAppend);
 
-void posSaveDB(
-	char* unparsedP);
+void posSaveDB(	char* unparsedP);
+void posSaveFile(char* unparsedP);
+
 
 int getCfgVarEx(WCH* valP, MSWCH* nam);
 

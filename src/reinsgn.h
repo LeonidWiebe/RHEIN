@@ -164,7 +164,7 @@
 #define PDA(output,func) output ## . ## func(
 
 //#define MAP unordered_map
-#define MAP map
+//#define MAP map
 
 #define mdlKISolid_beginCurrTrans mdlSolid_beginCurrTrans
 #define mdlKISolid_makeCuboid mdlSolid_makeCuboid
@@ -317,7 +317,7 @@
 #define PD(output) output ## ->
 #define PDA(output,func) output ## -> ## func(&
 
-#define MAP map
+//#define MAP map
 
 #define SetIndLineColor SetIndexedLineColor
 

@@ -2,7 +2,7 @@
 #define CMD_REIN_PLACE                          0x01010000  /* PARAMETERS */ 
 #define CMD_REIN_MODIFY                         0x01020000  /* PARAMETERS */ 
 #define CMD_REIN_NOTE                           0x01030000  /* PARAMETERS */ 
-#define CMD_REIN_TOOLTIP                        0x01040000  /* PARAMETERS */ 
+#define CMD_REIN_MODE                           0x01040000  /* PARAMETERS */ 
 #define CMD_REIN_TOOLBOX                        0x01050000  /* PARAMETERS */ 
 #define CMD_REIN_VERSION                        0x01060000  /* PARAMETERS */ 
 #define CMD_REIN_RELOAD                         0x01070000  /* PARAMETERS */ 

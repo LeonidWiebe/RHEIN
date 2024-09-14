@@ -928,6 +928,10 @@ typedef struct catinfo
 	WCH catmodname[200];
 	WCH catfullname[1000];
 	BINT bAutoCats;
+
+	map<long, ReinPos> arCurPos;
+	long iPosIndex; // index for position with num=0
+
 } CatInfo;
 
 /// <summary>
@@ -1004,6 +1008,7 @@ typedef struct reinelm
 #ifdef _REIN_H_
 
 
+
 /// <summary>
 /// модель (активна€ или референсы)
 /// </summary>
@@ -1030,11 +1035,13 @@ typedef struct ReinModel
 	ReinModel* getRM(deque <UInt32> &aref);
 	ReinModel* getRM(wstring ws);
 	//ReinModel* getRM(UInt32* aref);
-	void reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int iLoadRefs);
+	void reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int iLoadRefs, bool bScanPos = true);
 	//UInt32 getIndMax();
 	UInt32 getElemCount(int iDpth);
 	long getPosByNum(long pnum);
+	ReinPos* getReinPosByNum(long pnum);
 	void setCached(bool bSetCached);
+	void updateModelElmNumbers(bool bSkipIfLot, map<long, ReinPos>* arCurPosP = NULL);
 
 	//int getRefPath(UInt32* ar);
 	size_t getRefPath(deque<UInt32>* ar);
@@ -1057,11 +1064,14 @@ typedef struct ReinModel
 	//ups_db_t *updb = NULL;
 
 	//ReinPos* arPos = NULL;
-	MAP<long, ReinPos> arCurPos;
+
+	map<long, ReinPos>& getPosMap(void);
+	CatInfo& getCat(void);
+
 	//vector<ReinPos> arCurPos; //x
 	//ReinPos arCurPos[1000];
-	int iPosQty; // for mem alloc
-	long iPosIndex; // index for position with num=0
+	//int iPosQty; // for mem alloc
+	//long iPosIndex; // index for position with num=0
 
 	ReinInfoRef* refPrefsP;
 	ReinInfoRef refPrefs;
@@ -1072,11 +1082,11 @@ typedef struct ReinModel
 	//UInt32 indmax;
 
 	//ReinModel* arMrP[MAX_REF_SLOT];
-	MAP<UInt32, ReinModel> arMrP;
+	map<UInt32, ReinModel> arMrP;
 
-	MAP<UInt32, ReinElm> mapElms;
-	MAP<ELID, UInt32> mapBars;
-	//MAP<ELID, ReinPos> mapBarSet;
+	map<UInt32, ReinElm> mapElms;
+	map<ELID, UInt32> mapBars;
+	//map<ELID, ReinPos> mapBarSet;
 
 	//vector<ReinElm> vecElms;
 	//vector<ELID> vExIds;
@@ -1091,6 +1101,9 @@ typedef struct ReinModel
 	CatInfo mrci; // model ref cat info
 
 	//	map <UInt32, ReinClash> mapClash; // точки коллизий
+
+//private:
+	//map<long, ReinPos> arCurPos; // see mrci
 
 } ReinModel;
 

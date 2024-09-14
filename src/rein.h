@@ -231,6 +231,9 @@
 #define SETSTR_BEGIN_ITER deque<wstring>::iterator it = setstr.begin()
 
 
+#define LOGIN writeLogIn(__FUNCTION__, 0);
+#define LOGOUT writeLogOut(__FUNCTION__, 0);
+#define RETURN_LOGOUT writeLogOut(__FUNCTION__, 0); return;
 
 
 
@@ -561,6 +564,7 @@ SEC = As summary
 #define MODTYPE_NONE						0
 #define MODTYPE_COMMON						1
 #define MODTYPE_CAGE						2
+//#define MODTYPE_MASTER						3 // NOT USED
 #define MODTYPE_ASSEMBLY					10
 
 #define BAROVER_ACTION_MOVE					0

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf - 8"?>
+<RHEIN>
+	<position  posID="0" srtmID="0" diam="36" runmet="0" mainPtsIndex="1" transp="21" bendrad="0" bendrad2="180" term1="0" term2="0" pnum="0" base_qty="0.000" base_length="0" file_qty_p="3" file_qty_rm="7.147" file_ms_min="7150" file_ms_mid="7150" file_ms_max="7150" base_ms_min="0" base_ms_mid="0" base_ms_max="0" length="7146.93929" trmp1="0" trmp2="0" trmp3="0" trmp4="0" lap_qty="0" pdID="1" muft_qty="0" pcatID="0" poscalc="0" noplanar="0">
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="0.00" y="1970.47" z="0.00"/>
+			<coords function="compare1" x="0" y="0" z="0"/>
+			<coords function="compare2" x="0" y="0" z="0"/>
+		</point>
+		<point isMn="1" isCn="0" i_rfa="0">
+			<coords function="sketch" x="0.00" y="0.00" z="0.00"/>
+			<coords function="compare1" x="1970" y="0" z="0"/>
+			<coords function="compare2" x="3041" y="0" z="0"/>
+		</point>
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="2220.33" y="0.00" z="0.00"/>
+			<coords function="compare1" x="1970" y="2220" z="0"/>
+			<coords function="compare2" x="4631" y="-1549" z="0"/>
+		</point>
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="4398.34" y="2121.90" z="0.00"/>
+			<coords function="compare1" x="-151" y="4398" z="0"/>
+			<coords function="compare2" x="3256" y="-2961" z="0"/>
+		</point>
+	</position>
+	<position  posID="0" srtmID="0" diam="40" runmet="0" mainPtsIndex="1" transp="21" bendrad="0" bendrad2="200" term1="0" term2="0" pnum="1" base_qty="8.000" base_length="0" file_qty_p="8" file_qty_rm="32.648" file_ms_min="5445" file_ms_mid="5445" file_ms_max="5445" base_ms_min="5445" base_ms_mid="5445" base_ms_max="5445" length="5441.26429" trmp1="0" trmp2="0" trmp3="0" trmp4="0" lap_qty="0" pdID="1" muft_qty="0" pcatID="0" poscalc="0" noplanar="0">
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="0.00" y="1812.90" z="0.00"/>
+			<coords function="compare1" x="0" y="0" z="0"/>
+			<coords function="compare2" x="0" y="0" z="0"/>
+		</point>
+		<point isMn="1" isCn="0" i_rfa="0">
+			<coords function="sketch" x="0.00" y="0.00" z="0.00"/>
+			<coords function="compare1" x="1813" y="0" z="0"/>
+			<coords function="compare2" x="1259" y="0" z="0"/>
+		</point>
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="2541.09" y="0.00" z="0.00"/>
+			<coords function="compare1" x="1813" y="2541" z="0"/>
+			<coords function="compare2" x="1259" y="2541" z="0"/>
+		</point>
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="2541.09" y="-1258.96" z="0.00"/>
+			<coords function="compare1" x="3072" y="2541" z="0"/>
+			<coords function="compare2" x="3072" y="2541" z="0"/>
+		</point>
+	</position>
+	<position  posID="0" srtmID="0" diam="40" runmet="0" mainPtsIndex="1" transp="21" bendrad="0" bendrad2="200" term1="0" term2="0" pnum="2" base_qty="11.000" base_length="0" file_qty_p="11" file_qty_rm="29.197" file_ms_min="5840" file_ms_mid="5840" file_ms_max="5840" base_ms_min="5840" base_ms_mid="5840" base_ms_max="5840" length="5839.42978" trmp1="0" trmp2="0" trmp3="0" trmp4="0" lap_qty="0" pdID="1" muft_qty="0" pcatID="0" poscalc="0" noplanar="0">
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="0.00" y="1094.67" z="0.00"/>
+			<coords function="compare1" x="0" y="0" z="0"/>
+			<coords function="compare2" x="0" y="0" z="0"/>
+		</point>
+		<point isMn="1" isCn="0" i_rfa="0">
+			<coords function="sketch" x="0.00" y="0.00" z="0.00"/>
+			<coords function="compare1" x="1095" y="0" z="0"/>
+			<coords function="compare2" x="1720" y="0" z="0"/>
+		</point>
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="3196.92" y="0.00" z="0.00"/>
+			<coords function="compare1" x="1095" y="3197" z="0"/>
+			<coords function="compare2" x="1720" y="-3197" z="0"/>
+		</point>
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="3196.92" y="1719.52" z="0.00"/>
+			<coords function="compare1" x="-625" y="3197" z="0"/>
+			<coords function="compare2" x="625" y="-3197" z="0"/>
+		</point>
+	</position>
+	<position  posID="0" srtmID="0" diam="36" runmet="0" mainPtsIndex="1" transp="21" bendrad="0" bendrad2="180" term1="0" term2="0" pnum="3" base_qty="2.000" base_length="0" file_qty_p="2" file_qty_rm="0.000" file_ms_min="6050" file_ms_mid="6050" file_ms_max="6050" base_ms_min="6050" base_ms_mid="6050" base_ms_max="6050" length="6046.87527" trmp1="0" trmp2="0" trmp3="0" trmp4="0" lap_qty="0" pdID="1" muft_qty="0" pcatID="0" poscalc="0" noplanar="0">
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="0.00" y="1970.47" z="0.00"/>
+			<coords function="compare1" x="0" y="0" z="0"/>
+			<coords function="compare2" x="0" y="0" z="0"/>
+		</point>
+		<point isMn="1" isCn="0" i_rfa="0">
+			<coords function="sketch" x="0.00" y="0.00" z="0.00"/>
+			<coords function="compare1" x="1970" y="0" z="0"/>
+			<coords function="compare2" x="1947" y="0" z="0"/>
+		</point>
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="2220.33" y="0.00" z="0.00"/>
+			<coords function="compare1" x="1970" y="2220" z="0"/>
+			<coords function="compare2" x="3246" y="1801" z="0"/>
+		</point>
+		<point isMn="0" isCn="0" i_rfa="0">
+			<coords function="sketch" x="3359.28" y="-1579.47" z="0.00"/>
+			<coords function="compare1" x="3550" y="3359" z="0"/>
+			<coords function="compare2" x="4844" y="648" z="0"/>
+		</point>
+	</position>
+</RHEIN>

@@ -19,7 +19,7 @@ typedef struct reinelement
 	DgnModelRefP  modelRef;
 	int iLevelMask;
 
-	MAP<int, BarOver> mapOvers;
+	map<int, BarOver> mapOvers;
 
 	int calcSurfRevolution(
 								MSElementDescr *pedBar, 					// [ IN] // pointer on elem descriptor of boundary profile (bar)

@@ -1104,7 +1104,7 @@ extern "C" DLLEXPORT void cmdConcrete(
 
 	dlgProgressP = mdlDialog_completionBarOpen(L("Process..."));
 
-	for (MAP<UInt32, ReinElm>::iterator it = curRM->mapElms.begin(); it != curRM->mapElms.end(); ++it)
+	for (map<UInt32, ReinElm>::iterator it = curRM->mapElms.begin(); it != curRM->mapElms.end(); ++it)
 	{
 		//prng[0] = it->second.bel.rpts[0];
 		//prng[1] = it->second.bel.rpts[0];
@@ -1262,7 +1262,7 @@ extern "C" DLLEXPORT void cmdConcrete(
 			SPRN(str, L("position;pieces;meters"));
 			mdlTextFile_putString(str, f, TEXTFILE_DEFAULT);
 
-			for (MAP<long, reinprm>::iterator itt = it->second.mapprm.begin(); itt != it->second.mapprm.end(); ++itt)
+			for (map<long, reinprm>::iterator itt = it->second.mapprm.begin(); itt != it->second.mapprm.end(); ++itt)
 			{
 				SPRN(str, L("%i;%u;%.3f"), itt->first, itt->second.uival[0], itt->second.dval[0] / 1000.);
 
@@ -1330,23 +1330,21 @@ extern "C" DLLEXPORT void cmdReinVersion(
 
 
 /////////////////////////////////
-extern "C" DLLEXPORT void cmdShowTooltip(
+extern "C" DLLEXPORT void cmdSetMode(
 	char* unparsedP
 )
-//cmdNumber   CMD_REIN_TOOLTIP
+//cmdNumber   CMD_REIN_MODE
 {
 
 	WCH v[500];
 
-	//if (getCfgVarEx(v, L"REIN_VIEW_CACHE_SHOW") == SUCCESS)
-	//	iCfgVar_ViewCacheWorkShow = STOI(v);
+	//if (unparsedP && strcmp(unparsedP, "master") == 0)
+	//{
+	//	saveThisFileIsModel(ACTIVEMODEL, MODTYPE_MASTER, true);
+	//	iModelType = MODTYPE_MASTER;
+	//}
 	//else
-	//	iCfgVar_ViewCacheWorkShow = 1;
-
-
-	saveThisFileIsModel();
-
-	//if (iCfgVar_ViewCacheWorkShow == 0) updateAllViews();
+		saveThisFileIsModel();
 
 }
 
@@ -2315,6 +2313,7 @@ extern "C" DLLEXPORT void cmdReinList(
 			}
 		}
 
+
 		curRM->reloadCurBars(false, true, iRefLvl, iRefLvl);
 
 
@@ -2323,7 +2322,7 @@ extern "C" DLLEXPORT void cmdReinList(
 		if (NULL != (dbP = mdlDialog_find(DLG_POSLIST, NULL)))
 		{
 			//updateListBoxPos(TRUE); // see reloadCurBars
-			updateModelElmNumbers(curRM, false);
+			curRM->updateModelElmNumbers(false);
 
 			dialogPosList_checkButton(dbP); // проверка кнопок
 		}
@@ -2369,8 +2368,12 @@ extern "C" DLLEXPORT void cmdPosSave( // using?
 	CatInfo ci;
 	int cnt = 0;
 
-	//tbi.update = UPDATE_Percent1 | UPDATE_Msg1;
-	//strcpy(tbi.msgText1, "Сохранение");
+
+	posSaveFile(unparsedP);
+
+	return;
+
+	//=============================
 
 	int bForce = FALSE;
 	int bUpdInfo = FALSE;
@@ -2381,22 +2384,16 @@ extern "C" DLLEXPORT void cmdPosSave( // using?
 		bUpdInfo = TRUE;
 	}
 
-
 	getCatInfo(&ci, ACTIVEMODEL, false);
 
 	mdlDialog_dmsgsPrint(L("begin to save positions..."));
 
-
-	//mdlDialog_trackBarStartProcessing(scanProcessing, NULL, NULL, scanCancel, "Отменено", FALSE, &tbi, "");
-
-	for (MAP<long, ReinPos>::iterator it = curRM->arCurPos.begin(); it != curRM->arCurPos.end(); ++it)
+	for (map<long, ReinPos>::iterator it = curRM->getPosMap().begin(); it != curRM->getPosMap().end(); ++it)
 	{
 		ReinPos* rpP = &it->second;
 
 		if (rpP->bar.pnum == 0) continue;
 
-
-		//if (ci.catModID > 0) rpP->pcatID = ci.catModID;
 
 		if (savePosition(rpP, bForce, bUpdInfo) == SUCCESS)
 		{
@@ -2410,14 +2407,9 @@ extern "C" DLLEXPORT void cmdPosSave( // using?
 			mdlDialog_dmsgsPrint(s);
 		}
 
-		//tbi.percentComplete1 = (long)(((double)cnt/(double)mdlDArray_nMembers(daCurPosBase))*100.);
-		//mdlDialog_trackBarUpdateDisplayInfo(&tbi);
-		//WaitMessage();
-
 
 	}
 
-	//mdlDialog_trackBarStopProcessing();
 
 	SPRN(s, L(" saved %i positions"), cnt);
 	mdlDialog_dmsgsPrint(s);
@@ -2513,21 +2505,23 @@ extern "C" DLLEXPORT void cmdPosClear(
 
 			if (ii <= 0) continue;
 
-			MAP<long, ReinPos>::iterator it = curRM->arCurPos.find(ii);
+			CatInfo& poscat = curRM->getCat();
 
-			if (it != curRM->arCurPos.end()) // found
+			map<long, ReinPos>::iterator it = poscat.arCurPos.find(ii);
+
+			if (it != poscat.arCurPos.end()) // found
 			{
 				deleteFilePosition(ii);
 
 				ReinPos rp = it->second;
 
-				curRM->arCurPos.erase(it);
+				poscat.arCurPos.erase(it);
 
 				rp.bar.pnum = 0;
 
-				rp.mapind = curRM->iPosIndex;
+				rp.mapind = poscat.iPosIndex;
 				
-				curRM->arCurPos.insert(pair<long, ReinPos>(rp.mapind, rp));
+				poscat.arCurPos.insert(pair<long, ReinPos>(rp.mapind, rp));
 
 				mdlListCell_setInfoFieldInt32(pListCell, 0, rp.mapind);
 				mdlListCell_setDisplayText(pListCell, L(""));
@@ -2536,7 +2530,7 @@ extern "C" DLLEXPORT void cmdPosClear(
 				// см выше
 				//mdlListCell_setIcon(pListCellch, ICONID_ToggleOff14Pt, RTYPE_Icon, NULL);
 
-				curRM->iPosIndex--;
+				poscat.iPosIndex--;
 
 				elemCount++;
 			}
@@ -2560,9 +2554,12 @@ extern "C" DLLEXPORT void cmdPosClear(
 
 		deleteFilePosition(0);
 
-		curRM->arCurPos.clear();
+		// curRM->getPosMap().clear();
+		// mapCats.clear(); // требутеся доработка
 
-		curRM->iPosIndex = -100;
+		CatInfo& poscat = curRM->getCat();
+
+		poscat.clear();
 
 		curRM->reloadCurBars(false, true, iRefLvl, iRefLvl);
 	}
@@ -2582,7 +2579,7 @@ extern "C" DLLEXPORT void cmdPosClear(
 	}
 
 
-	updateModelElmNumbers(0, false);
+	curRM->updateModelElmNumbers(false);
 
 }
 
@@ -2774,7 +2771,7 @@ int callbackUnloadProgram(
 
 #if defined (STD_INTERFACE)
 
-	writeLog("mdlDialog_userPrefFileOpen", 0);
+	writeLog("mdlDialog_userPrefFileOpen...", 0, 0, 1);
 
 	 //Open userpref.rsc to hold our small pref resource 
 	int st = ERROR;
@@ -2825,7 +2822,7 @@ int callbackUnloadProgram(
 //
 //
 
-		writeLog("save settings...", 0);
+		writeLog("save settings...", 0, 0, 1);
 
 		mdlResource_deleteByAlias(userPrefsH, RTYPE_REIN, RSCID_ReinPrefs, mdlSystem_getCurrTaskID());
 		mdlResource_addByAlias(userPrefsH, RTYPE_REIN, RSCID_ReinPrefs, &strReinInfo, sizeof(strReinInfo), mdlSystem_getCurrTaskID());
@@ -3432,17 +3429,15 @@ StatusInt  callbackSelectUserFunction(
 
 					long num = -1;
 
-					for (MAP<long, ReinPos>::iterator it = rmP->arCurPos.begin(); it != rmP->arCurPos.end(); ++it)
+					for (map<long, ReinPos>::iterator it = rmP->getPosMap().begin(); it != rmP->getPosMap().end(); ++it)
 					{
 
 						ReinPos* rpItP = &it->second;
 
 						if (barsEqual(&relm.bel, &rpItP->bar))
 						{
-							CatInfo ci;
-
-							getCatInfo(&ci, edp->h.dgnModelRef, false);
-
+							//CatInfo ci;
+							//getCatInfo(&ci, edp->h.dgnModelRef, false);
 							//if (rpItP->pcatID == ci.catModID)
 							{
 								num = it->first; // порядовый номер в массиве arCurPos
@@ -4096,7 +4091,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 					res = readReinClashFromElement(&rc, &el);
 
 
-				//MAP<UInt32, ReinClash>::iterator it = mapClash.find(elfp);
+				//map<UInt32, ReinClash>::iterator it = mapClash.find(elfp);
 				//if (it != mapClash.end()) // found
 				if (res == SUCCESS && relmP == NULL)
 				{
@@ -4358,7 +4353,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 							mdlLevel_getName(levName, 512, mdlDisplayPath_getPathRoot(path), levID);
 						}
 
-						for (MAP<UInt32, ReinElm>::iterator it = rmP->mapElms.begin(); it != rmP->mapElms.end(); ++it)
+						for (map<UInt32, ReinElm>::iterator it = rmP->mapElms.begin(); it != rmP->mapElms.end(); ++it)
 						{
 							if (it->second.bel.brid == elid)
 							{
@@ -4488,7 +4483,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 					//rn = getRefNum(edP->h.dgnModelRef);
 
-					for (MAP<long, ReinPos>::iterator it = rmP->arCurPos.begin(); it != rmP->arCurPos.end(); ++it)
+					for (map<long, ReinPos>::iterator it = rmP->getPosMap().begin(); it != rmP->getPosMap().end(); ++it)
 					{
 
 						ReinPos* rpItP = &it->second;
@@ -4561,7 +4556,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 					{
 					}
 
-					for (MAP<UInt32, ReinElm>::iterator it = rmP->mapElms.begin(); it != rmP->mapElms.end(); ++it)
+					for (map<UInt32, ReinElm>::iterator it = rmP->mapElms.begin(); it != rmP->mapElms.end(); ++it)
 						//for (UInt32 i = 0; rmP && i < rmP->vecElms.size(); i++)
 					{
 						ReinElm* rlmP = &(it->second);
@@ -4601,7 +4596,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 					ReinModel* rbmP = curRM->getRM(rb.modrefP);
 
-					for (MAP<UInt32, ReinElm>::iterator it = rbmP->mapElms.begin(); it != rbmP->mapElms.end(); ++it)
+					for (map<UInt32, ReinElm>::iterator it = rbmP->mapElms.begin(); it != rbmP->mapElms.end(); ++it)
 						//for (UInt32 i = 0; rbmP && i < rbmP->vecElms.size(); i++)
 					{
 						ReinElm* rlmP = &(it->second);
@@ -4633,7 +4628,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 					}
 				}
 
-				for (MAP<UInt32, ReinElm>::iterator it = rmP->mapElms.begin(); rbP && iPosCount > 0 && it != rmP->mapElms.end(); ++it)
+				for (map<UInt32, ReinElm>::iterator it = rmP->mapElms.begin(); rbP && iPosCount > 0 && it != rmP->mapElms.end(); ++it)
 					//for (UInt32 i = 0; rmP && rbP && iPosCount > 0 && i < rmP->vecElms.size(); i++)
 				{
 					ReinElm* rlmP = &(it->second);
@@ -5084,40 +5079,40 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 					token = STOK(queueElementP->u.fill, seps);
 
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					slP->arp[0].x = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					slP->arp[0].y = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					slP->arp[1].x = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					slP->arp[1].y = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					slP->smb.color = STOUL(token, 0, 0);
 
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					slP->smb.weight = STOUL(token, 0, 0);
 
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					slP->smb.style = STOI(token);
 
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					slP->lev = STOUL(token, 0, 0);
 					mdlLevel_getIdFromCode(&slP->lev, MASTERFILE, slP->lev);
 
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					slP->ggn = STOUL(token, 0, 0);
 
 					daDrawLines.push_back(sl);
@@ -5214,7 +5209,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 					token = STOK(s, seps);
 
 					token = STOK(NULL, seps); // TEXT
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					//cDot = strchr(token, '.');
 					//if (cDot != NULL) cDot[0] = ',';
 
@@ -5225,60 +5220,60 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 
 					token = STOK(NULL, seps); // POINT X
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->p.x = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps); // POINT Y
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->p.y = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps); // TEXT HEIGHT
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->tsp.size.height = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps); // TEXT WIDTH
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->tsp.size.width = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps); // LINE SPACING
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->tp.lineSpacing = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps); // JUSTIFICATION
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->tp.just = (TextElementJustification)STOI(token);
 
 					token = STOK(NULL, seps); // UNDERLINE
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->tp.flags.underline = STOI(token);
 
 					token = STOK(NULL, seps); // OVERLINE
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->tp.exFlags.overline = STOUL(token, 0, 0);
 
 					token = STOK(NULL, seps); // UNDERLINE SPACING
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->tp.underlineSpacing = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps); // OVERLINE SPACING
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->tp.overlineSpacing = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps); // LEVEL
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->lev = STOUL(token, 0, 0);
 					mdlLevel_getIdFromCode(&stP->lev, MASTERFILE, stP->lev);
 
 					token = STOK(NULL, seps); // COLOR
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->smb.color = STOUL(token, 0, 0);
 
 					token = STOK(NULL, seps); // MAX WIDTH
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->maxwidth = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps); // GG NUMBER
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					stP->ggn = STOUL(token, 0, 0);
 
 #if defined (MSVERSION) && (MSVERSION == 0xa00)
@@ -5370,35 +5365,35 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 				SCPY(s, queueElementP->u.fill);
 
 				token = STOK(s, seps);
-				if (token == NULL)	return;
+				if (token == NULL)	RETURN_LOGOUT
 
 				token = STOK(NULL, seps);
-				if (token == NULL)	return;
+				if (token == NULL)	RETURN_LOGOUT
 				p_org_cnt = STOI(token);
 
 				token = STOK(NULL, seps);
-				if (token == NULL)	return;
+				if (token == NULL)	RETURN_LOGOUT
 				p_end_cnt = STOI(token);
 
 				for (i = 0; i < p_org_cnt; i++)
 				{
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					p_org[i].pVrtx.x = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					p_org[i].pVrtx.y = mdlCnv_masterUnitsToUors(STOF(token));
 				}
 
 				for (i = 0; i < p_end_cnt; i++)
 				{
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					p_end[i].pVrtx.x = mdlCnv_masterUnitsToUors(STOF(token));
 
 					token = STOK(NULL, seps);
-					if (token == NULL)	return;
+					if (token == NULL)	RETURN_LOGOUT
 					p_end[i].pVrtx.y = mdlCnv_masterUnitsToUors(STOF(token));
 				}
 
@@ -5425,30 +5420,30 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 				SCPY(s, queueElementP->u.fill);
 
 				token = STOK(s, seps);
-				if (token == NULL)	return;
+				if (token == NULL)	RETURN_LOGOUT
 
 				token = STOK(NULL, seps);
-				if (token == NULL)	return;
+				if (token == NULL)	RETURN_LOGOUT
 				SCPY(curCat.dbase, token);
 
 				token = STOK(NULL, seps);
-				if (token == NULL)	return;
+				if (token == NULL)	RETURN_LOGOUT
 				curCat.projID = STOL(token);
 
 				token = STOK(NULL, seps);
-				if (token == NULL)	return;
+				if (token == NULL)	RETURN_LOGOUT
 				curCat.catID = STOL(token);
 
 				token = STOK(NULL, seps);
-				if (token == NULL)	return;
+				if (token == NULL)	RETURN_LOGOUT
 				SCPY(curCat.catname, token);
 
 				token = STOK(NULL, seps);
-				if (token == NULL)	return;
+				if (token == NULL)	RETURN_LOGOUT
 				SCPY(curCat.catfullname, token);
 
 				token = STOK(NULL, seps);
-				if (token == NULL)	return;
+				if (token == NULL)	RETURN_LOGOUT
 
 				curCat.bAutoCats = (STOI(token) != 0);
 
@@ -6152,7 +6147,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 					//re.mapOvers[bo.inum] = bo;
 
-					MAP<int, BarOver>::iterator it = relem.mapOvers.find(re.bel.inum);
+					map<int, BarOver>::iterator it = relem.mapOvers.find(re.bel.inum);
 					if (it != relem.mapOvers.end()) // found
 					{
 						tmMoveFirst = it->second.tmov;
@@ -7014,7 +7009,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 						long num = -1;
 
 
-						for (MAP<long, ReinPos>::iterator it = rmP->arCurPos.begin(); it != rmP->arCurPos.end(); ++it)
+						for (map<long, ReinPos>::iterator it = rmP->getPosMap().begin(); it != rmP->getPosMap().end(); ++it)
 						{
 
 							ReinPos* rpItP = &it->second;
@@ -7235,7 +7230,7 @@ extern "C" DLLEXPORT  int MdlMain
 		{ (CmdHandler)cmdToolBox,		CMD_REIN_TOOLBOX			},
 		{ (CmdHandler)cmdAnker,			CMD_REIN_ANKER				},
 		{ (CmdHandler)cmdReinModify,		CMD_REIN_MODIFY				},
-		{ (CmdHandler)cmdShowTooltip,	CMD_REIN_TOOLTIP			},
+		{ (CmdHandler)cmdSetMode,		CMD_REIN_MODE			},
 		{ (CmdHandler)cmdReload,			CMD_REIN_RELOAD				},
 		{ (CmdHandler)cmdDrawEnds,		CMD_REIN_DRAWENDS			},
 		{ (CmdHandler)cmdRefPrefsDel,	CMD_REIN_REFPDEL			},

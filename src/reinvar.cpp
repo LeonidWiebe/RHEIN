@@ -550,6 +550,8 @@ map <STRING, ReinPrm> mapSimPos;
 MSWCH sset[10000];
 deque<wstring> setstr;
 
+map <UInt32, CatInfo> mapCats;
+
 //vector<SpecText> daDrawCells;
 //ArrayObjectHdr* daDrawCells = NULL;
 
@@ -817,7 +819,7 @@ LEVID levClash = 0; // слой для элементов коллизий
 
 map<RelmPair, ReinPos> mapPosMem;
 
-MAP<UInt32pair, ReinClash> mapClash; // д.б. парный ключ...
+map<UInt32pair, ReinClash> mapClash; // д.б. парный ключ...
 UInt32 iClashShtamp = 0; // идентификатор коллизии
 
 

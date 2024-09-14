@@ -1232,6 +1232,8 @@ void reinnote::clear()
 
 void catinfo::clear()
 {
+	writeLogIn(__FUNCTION__, 0);
+
 	projID = 0;
 	catID = 0;
 	catModID = 0;
@@ -1240,11 +1242,23 @@ void catinfo::clear()
 	SCPY(catmodname, L(""));
 	SCPY(catfullname, L(""));
 	bAutoCats = FALSE;
+
+	if (iDebug) sprintf(sLogMes, "arCurPos.size() = %u\n", (UInt32)arCurPos.size()); writeLog(0, 0, 0, 1);
+
+	writeLog("arCurPos.clear()", 0);
+	arCurPos.clear();
+	iPosIndex = -100;
+
+	writeLogOut(__FUNCTION__, 0);
 }
 
 catinfo::catinfo()
 {
+	writeLogIn(__FUNCTION__, 0);
+
 	clear();
+
+	writeLogOut(__FUNCTION__, 0);
 }
 
 
@@ -1303,7 +1317,7 @@ void ReinModel::Init()
 
 	elcount = 0;
 	refscale = 1.0;
-	iPosQty = 0;
+	//iPosQty = 0;
 	bCached = false;
 	bRefPlus = false;
 
@@ -1313,9 +1327,7 @@ void ReinModel::Init()
 
 	rnum = 0;
 
-
-	arCurPos.clear();
-	iPosIndex = -100;
+	mrci.clear();
 
 	arMrP.clear();
 
@@ -1583,7 +1595,7 @@ UInt32 ReinModel::getExFpCount(int iDpth)
 {
 	UInt32 icnt = 0;
 
-	for (MAP<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
 	{
 		icnt = icnt + it->second.getExFpCount(iDpth - 1);
 	}
@@ -1602,7 +1614,7 @@ UInt32 ReinModel::getExIdCount(int iDpth)
 {
 	UInt32 icnt = 0;
 
-	for (MAP<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
 	{
 		icnt = icnt + it->second.getExIdCount(iDpth - 1);
 	}
@@ -1623,7 +1635,7 @@ UInt32 ReinModel::getElemCount(int iDpth) // -1 unlimited
 
 	writeLogIn(__FUNCTION__, 0);
 
-	for (MAP<UInt32, ReinModel>::iterator it = arMrP.begin(); iDpth != 0 && it != arMrP.end(); ++it)
+	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); iDpth != 0 && it != arMrP.end(); ++it)
 		//for (int i = 0; iDpth != 0 && i < MAX_REF_SLOT; i++)
 	{
 		icnt = icnt + it->second.getElemCount(iDpth - 1);
@@ -1979,7 +1991,7 @@ void ReinModel::Init(DgnModelRefP mrP, long reinelemcnt)
 
 	if (reinelemcnt < 0)
 	{
-		if (iDebug) sprintf(sLogMes, "go to count ReinElms with reset...\n"); writeLog(0, 0);
+		if (iDebug) sprintf(sLogMes, "go to count ReinElms with reset...\n"); writeLog(0, 0, 0, 1);
 
 		getReinElmCount(TRUE, mrP, &elcount); // fpmax
 
@@ -2011,14 +2023,14 @@ void ReinModel::Init(DgnModelRefP mrP, long reinelemcnt)
 	mdlModelRefIterator_create(&iterator, mrP, MRITERATE_PrimaryChildRefs, 0);
 
 	// создание структуры всех референсов (каскадом)
-	if (iDebug) sprintf(sLogMes, "creating inner ReinModels...\n"); writeLog(0, 0);
+	if (iDebug) sprintf(sLogMes, "creating inner ReinModels...\n"); writeLog(0, 0, 0, 1);
 
 	while (NULL != (modelRef = mdlModelRefIterator_getNext(iterator)))
 	{
 		UInt32 elcnt = 0;
 		UInt32 rn = getRefNum(modelRef);
 
-		if (iDebug) sprintf(sLogMes, "ref %u, getReinElmCount with reset...\n", rn); writeLog(0, 0);
+		if (iDebug) sprintf(sLogMes, "ref %u, getReinElmCount with reset...\n", rn); writeLog(0, 0, 0, 1);
 
 		getReinElmCount(TRUE, modelRef, &elcnt);
 
@@ -2048,7 +2060,7 @@ void ReinModel::Init(DgnModelRefP mrP, long reinelemcnt)
 
 	}
 
-	if (iDebug) sprintf(sLogMes, "end creating inner ReinModels\n"); writeLog(0, 0);
+	if (iDebug) sprintf(sLogMes, "end creating inner ReinModels\n"); writeLog(0, 0, 0, 1);
 
 	mdlModelRefIterator_free(&iterator);
 
@@ -2087,7 +2099,7 @@ ReinModel::~ReinModel(void)
 	writeLogIn(__FUNCTION__, 0);
 
 	//for (int i = 0; i < MAX_REF_SLOT; i++)
-	//for (MAP<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+	//for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
 	//{
 	//	sprintf(sLogMes, "delete arMrP[%i]...\n", i); writeLog(0, 0);
 	//	it->second.arMrP.clear();
@@ -2096,7 +2108,7 @@ ReinModel::~ReinModel(void)
 	arMrP.clear();
 
 
-	arCurPos.clear(); //x
+	mrci.arCurPos.clear(); //x
 
 
 //	if (updb)
@@ -2130,7 +2142,7 @@ ReinModel* ReinModel::getRM(DgnModelRefP mrP)
 
 	if (mrP == modelP) return this;
 
-	for (MAP<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
 		//for (int i = 0; i < MAX_REF_SLOT; i++)
 	{
 		if (it->second.modelP == mrP)
@@ -2143,7 +2155,7 @@ ReinModel* ReinModel::getRM(DgnModelRefP mrP)
 
 	if (rmRetP == NULL)
 	{
-		for (MAP<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+		for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
 			//for (int i = 0; i < MAX_REF_SLOT; i++)
 		{
 			rmRetP = it->second.getRM(mrP);
@@ -2868,6 +2880,7 @@ int reinbar::createBar(
 
 
 	writeLogIn(__FUNCTION__, 0);
+
 	if (iDebug) sprintf(sLogMes, "bBarReady = %i\n", bBarReady); writeLog(0, 0);
 
 	//if (mrP && getRefNum(mrP) > 0)
@@ -3494,7 +3507,7 @@ void reinbar::getDrawPoints(
 ///////////////////////////////////////////////////
 void ReinModel::delRefPrefs(int iDpth)
 {
-	for (MAP<UInt32, ReinModel>::iterator it = arMrP.begin(); iDpth != 0 && it != arMrP.end(); ++it)
+	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); iDpth != 0 && it != arMrP.end(); ++it)
 		//for (int i = 0; iDpth != 0 && i < MAX_REF_SLOT; i++)
 	{
 		it->second.delRefPrefs(iDpth - 1);
@@ -3596,7 +3609,7 @@ ReinModel* ReinModel::getRM(UInt32* arn)
 		{
 			UInt32 ind = arn[i];
 
-			MAP<UInt32, ReinModel>::iterator itt = rmRetP->arMrP.find(ind);
+			map<UInt32, ReinModel>::iterator itt = rmRetP->arMrP.find(ind);
 
 			if (itt != rmRetP->arMrP.end()) // found
 			{
@@ -3665,7 +3678,7 @@ ReinModel* ReinModel::getRM(deque <UInt32> &aref)
 
 		if (ind == 0) break; // криминал, там не должно быть нулей, хы-хы-хы
 
-		MAP<UInt32, ReinModel>::iterator itt = rmRetP->arMrP.find(ind);
+		map<UInt32, ReinModel>::iterator itt = rmRetP->arMrP.find(ind);
 
 		if (itt != rmRetP->arMrP.end()) // found
 		{
@@ -3693,7 +3706,7 @@ ReinModel* ReinModel::getRM(UInt32 rn) // поиск по одному номеру - используется 
 
 	if (rn == 0) return this;
 
-	for (MAP<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
 		//for (int i = 0; i < MAX_REF_SLOT; i++)
 	{
 		if (it->first == rn) return &it->second;
@@ -3720,7 +3733,7 @@ ReinModel* ReinModel::getRM(UInt32 rn) // поиск по одному номеру - используется 
 /////////////////////
 long ReinModel::getPosByNum(long pnum)
 {
-	for (MAP<long, ReinPos>::iterator itt = curRM->arCurPos.begin(); itt != curRM->arCurPos.end(); ++itt)
+	for (map<long, ReinPos>::iterator itt = curRM->getPosMap().begin(); itt != curRM->getPosMap().end(); ++itt)
 	{
 		if (itt->second.bar.pnum == pnum)
 			return itt->first;
@@ -3729,12 +3742,23 @@ long ReinModel::getPosByNum(long pnum)
 	return 0;
 }
 
+ReinPos* ReinModel::getReinPosByNum(long pnum)
+{
+	for (map<long, ReinPos>::iterator itt = curRM->getPosMap().begin(); itt != curRM->getPosMap().end(); ++itt)
+	{
+		if (itt->second.bar.pnum == pnum)
+			return &itt->second;
+	}
+
+	return NULL;
+}
+
 
 /////////////////////
 void ReinModel::setCached(bool bSetCached)
 {
 	bCached = bSetCached;
-	for (MAP<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
 	{
 		it->second.setCached(bSetCached);
 	}
@@ -3747,7 +3771,7 @@ ReinElm* ReinModel::findElementByFP(UInt32 fp)
 
 	ReinElm* reP = NULL;
 
-	for (MAP<UInt32, ReinElm>::iterator it = mapElms.begin(); it != mapElms.end(); ++it)
+	for (map<UInt32, ReinElm>::iterator it = mapElms.begin(); it != mapElms.end(); ++it)
 	{
 		if (it->second.bel.ffpos[REIN_ELEM_ISO] == fp)
 		{
@@ -3758,7 +3782,7 @@ ReinElm* ReinModel::findElementByFP(UInt32 fp)
 
 	if (reP) return reP;
 
-	for (MAP<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
 	{
 		reP = it->second.findElementByFP(fp);
 
@@ -3778,7 +3802,7 @@ ReinElm* ReinModel::getReinElm(UInt32 fp)
 	//if (vecElms.size() == 0) return NULL;
 	if (mapElms.size() == 0) return NULL;
 
-	MAP<UInt32, ReinElm>::iterator it = mapElms.find(fp);
+	map<UInt32, ReinElm>::iterator it = mapElms.find(fp);
 	if (it != mapElms.end()) // found
 		return &(it->second);
 
@@ -3815,7 +3839,7 @@ ReinElm* ReinModel::getReinElm(UInt32 fp)
 /// <summary>
 /// reload Bars data
 /// </summary>
-void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int iLoadRefs)
+void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int iLoadRefs, bool bScanPos)
 {
 	ScanCriteria* scP;
 	int             status;
@@ -3839,22 +3863,33 @@ void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int i
 
 	//====================
 
-	//CatInfo ci;
-	getCatInfo(&mrci, mrP, mdlModelRef_isActiveModel(mrP));
+	//getCatInfo(&mrci, mrP, mdlModelRef_isActiveModel(mrP)); // moved to scanFilePositions
 
-	if (iCfgVar_PosListMerge 
-		&& curRM->mrci.catID > 0 && curRM->mrci.catID == mrci.catID 
-		&& rnum > 0)
-	{
-		bRefPlus = true;
-	}
+
+	if (iDebug) sprintf(sLogMes, "catID = %u  getPosMap().size() = %u\n", mrci.catID, (UInt32)getPosMap().size()); writeLog(0, 0, 0, 1);
+
+
+	//if (iCfgVar_PosListMerge 
+	//	&& curRM->mrci.catID > 0 && curRM->mrci.catID == mrci.catID 
+	//	&& rnum > 0)
+	//{
+	//	bRefPlus = true;
+	//}
 
 	//====================
 
 	//UInt32 arf[MAX_REFNUM_PATH];
 	//int rfcnt = getRefPath(arf);
 
-	scanFilePositions(this, mrP);
+	if (bScanPos)
+	{
+		mapCats.clear();
+
+		scanFilePositions(this, mrP, true, true);
+	}
+
+	if (iDebug) sprintf(sLogMes, "getPosMap().size() = %u\n", (UInt32)getPosMap().size()); writeLog(0, 0, 0, 1);
+
 
 	//====================
 
@@ -3949,18 +3984,18 @@ void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int i
 			typeMask[0] = TMSK0_LINE | TMSK0_ARC | TMSK0_LINE_STRING | TMSK0_CMPLX_STRING | TMSK0_ELLIPSE;
 			typeMask[1] = TMSK1_BSPLINE_CURVE;  // для результата развертки
 
-			if (iDebug) sprintf(sLogMes, "begin scan...\n"); writeLog(0, 0);
+			writeLog("model_elements_scan", 1, 0, 0);
 
 			scP = mdlScanCriteria_create();
 			status = mdlScanCriteria_setReturnType(scP, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
-			status = mdlScanCriteria_setElmDscrCallback(scP, (PFScanElemDscrCallback)iterateLoadReinBars, &mrci);
+			status = mdlScanCriteria_setElmDscrCallback(scP, (PFScanElemDscrCallback)iterateLoadReinBars, &getCat());
 			status = mdlScanCriteria_setElementTypeTest(scP, typeMask, sizeof(typeMask));
 			mdlXML_addXMLFragmentAttachmentScanTest(scP, &appID, &appTypeReinElm);
 			status = mdlScanCriteria_setModel(scP, mrP);
 			status = mdlScanCriteria_scan(scP, NULL, NULL, NULL);
 			status = mdlScanCriteria_free(scP);
 
-			if (iDebug) sprintf(sLogMes, "end scan\n"); writeLog(0, 0);
+			writeLog("model_elements_scan", -1, 0, 0);
 
 		}
 
@@ -3971,10 +4006,12 @@ void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int i
 	{
 		long i = 0;
 
-		if (mapElms.size() > 10000 && arCurPos.size() > 300)
+		if (mapElms.size() > 10000 && getPosMap().size() > 300)
 			dlgProgressP = mdlDialog_completionBarOpen(TXT_115);
 
-		for (MAP<UInt32, ReinElm>::iterator it = mapElms.begin(); it != mapElms.end(); ++it)
+		writeLog("mapElms_iteration", 1, 0, 1);
+
+		for (map<UInt32, ReinElm>::iterator it = mapElms.begin(); it != mapElms.end(); ++it)
 		{
 			ReinElm* reP = &(it->second);
 			int dirout = 0;
@@ -3986,7 +4023,7 @@ void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int i
 				ReinModel* rmSrchP = this;
 				if (this->bRefPlus) rmSrchP = curRM;
 
-				for (MAP<long, ReinPos>::iterator itt = rmSrchP->arCurPos.begin(); itt != rmSrchP->arCurPos.end(); ++itt)
+				for (map<long, ReinPos>::iterator itt = rmSrchP->getPosMap().begin(); itt != rmSrchP->getPosMap().end(); ++itt)
 				{
 					ReinPos* rpItP = &itt->second;
 
@@ -3997,7 +4034,7 @@ void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int i
 					}
 				}
 
-				if (iDebug) sprintf(sLogMes, "set position...\n"); writeLog(0, 0);
+				if (iDebug) sprintf(sLogMes, "set position...\n"); writeLog(0, 0, 0, 1);
 				setPosition(rpP, reP, this, dirout);
 			}
 
@@ -4014,25 +4051,36 @@ void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int i
 
 		}
 
+		writeLog("mapElms_iteration", -1, 0, 1);
+
 		if (dlgProgressP) mdlDialog_completionBarClose(dlgProgressP);
 
 	}
 
 	if (bload && iDepth > 0)
 	{
-		for (MAP<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+		if (iDebug) sprintf(sLogMes, "START inner ReinModel iteration...\n"); writeLog(0, 1, 0, 1);
+
+		for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
 		{
 			// выключенные референсы грузятся в ReinModel::Init()
 
-			it->second.reloadCurBars(bScan, bUpdateListBox && (it->first == curPos_ind), iDepth - 1, iLoadRefs);
+			it->second.reloadCurBars(bScan
+				, bUpdateListBox && (it->first == curPos_ind)
+				, iDepth - 1
+				, iLoadRefs
+				, false // do not scan saved positins in file, see above
+			);
 		}
+
+		if (iDebug) sprintf(sLogMes, "END inner ReinModel iteration...\n"); writeLog(0, -1, 0, 1);
 	}
 
 
 
 	setPosArrayInfo(this, bScan);
 
-	//mdlUtil_quickSort(arCurPos[rn], iCurPos[rn], sizeof(ReinPos), sortReinPos);
+	//mdlUtil_quickSort(getPosMap()[rn], iCurPos[rn], sizeof(ReinPos), sortReinPos);
 
 	if (bUpdateListBox) updateListBoxPos(TRUE);
 
@@ -4393,9 +4441,9 @@ int reinelm::getElmFromElement(MSElementCP elP, DgnModelRefP mrP)
 	writeLogIn(__FUNCTION__, 0);
 
 
-	if (iDebug) { sprintf(sLogMes, "start to clear reP\n"); writeLog(0, 0); }
+	//if (iDebug) { sprintf(sLogMes, "start clear reP\n"); writeLog(0, 0); }
 	clear();
-	if (iDebug) { sprintf(sLogMes, "end clear reP\n"); writeLog(0, 0); }
+	//if (iDebug) { sprintf(sLogMes, "end clear reP\n"); writeLog(0, 0); }
 
 	//__try
 	{

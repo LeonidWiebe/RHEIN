@@ -143,5 +143,6 @@
 #define TXT_116					L("Sketch height (%)")
 #define TXT_117					L("Sketch width (%)")
 #define TXT_118					L("Lower margin")
+#define TXT_119					L("Save in progress")
 
 

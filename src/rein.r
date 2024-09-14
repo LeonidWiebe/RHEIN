@@ -2690,7 +2690,7 @@ extendedAttributes
 
 DItem_ToggleIconRsc ICONCMDID_ismodel = // NU, see ICONCMDID_ismodel2
     {
-    CMD_REIN_TOOLTIP, //commandNumber; 
+    CMD_REIN_MODE, //commandNumber; 
 	LCMD, //commandSource; 
 	NOSYNONYM,//synonymsId; 
     NOHELP, //helpInfo; 
@@ -4294,7 +4294,7 @@ StringList STRLIST_MODEL =
 
 DItem_ComboBoxRsc COMBOBOX_MODEL = // used in ICONCMDID_ismodel2
     {
-    CMD_REIN_TOOLTIP, 
+    CMD_REIN_MODE, 
     LCMD, NOSYNONYM, NOHELP, MHELP,
     NOHOOK, // HOOKID_Combo_Model, 
     NOARG,

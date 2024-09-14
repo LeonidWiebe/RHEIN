@@ -143,3 +143,10 @@ Fixes
 14.8.22
 Positions numbers batch set/clear by option in column named "@"
 Fixes
+
+14.8.23
+1) Any reinforcement model can now consist of several files with single set of positions. 
+This is done to allow multiple users to work with the same model.
+2) New command 'REIN POS SAVE' saves corrent position set to xml file (for sample see .\xml\pos.xml)
+Load operation for position set is expected in future...
+3) Fixes

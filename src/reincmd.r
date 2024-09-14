@@ -69,7 +69,7 @@ CommandTable CT_CMDS =
 	, COMMANDID_REIN_NOTE, ItemList_REIN_NOTE
 #endif
 	},
-    {  4, CT_NONE, INHERIT, HID , "TOOLTIP"},
+    {  4, CT_NONE, INHERIT, HID , "MODE"},
     {  5, CT_NONE, INHERIT, NONE, "TOOLBOX"},
     {  6, CT_NONE, INHERIT, NONE, "VERSION"},
     {  7, CT_NONE, INHERIT, NONE , "RELOAD"},
