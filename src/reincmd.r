@@ -126,7 +126,7 @@ CommandTable CT_POS =
 {
     {  1, CT_NONE, INHERIT, NONE, "CLEAR"}, // удаляет данные по позициям из файла
     {  2, CT_NONE, INHERIT, NONE, "SAVE"}, // сохраняет все позиции
-    {  3, CT_NONE, INHERIT, NONE, "DBLOAD"}, // загружает позиции из базы
+    {  3, CT_NONE, INHERIT, NONE, "LOAD"}, // загружает позиции из базы
     {  4, CT_NONE, INHERIT, NONE, "DBSAVE"}, // сохраняет позиции в базе
     {  5, CT_NONE, INHERIT, NONE, "DRAW"}, // 
     {  6, CT_NONE, INHERIT, NONE, "ENUM"}, // пронумеровать

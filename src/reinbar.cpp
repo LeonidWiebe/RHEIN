@@ -1027,7 +1027,19 @@ void reinbar::clear(int memres)
 	term[1] = 0;
 
 	for (int i = 0; i < MAX_BAR_VERTICES; i++)
+	{
 		sgts[i].clear();
+		mdlVec_zero(&apts[i]);
+		mdlVec_zero(&rpts[i]);
+		mdlVec_zero(&cents[i]);
+		cpxb[i].x = 0;
+		cpxb[i].y = 0;
+		cpxb[i].z = 0;
+		cpxe[i].x = 0;
+		cpxe[i].y = 0;
+		cpxe[i].z = 0;
+		rfa[i] = 0;
+	}
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -1083,7 +1095,6 @@ void reinbar::clear(int memres)
 		//rpts.reserve(memres); // реальные точки стержня
 		//cents.reserve(memres); // центры дуговых сегментов (если есть)
 	}
-
 
 }
 
@@ -1147,6 +1158,28 @@ reinaxis::reinaxis(void)
 	clear();
 }
 
+void catinfo::clearPosCalc()
+{
+	for (map<long, ReinPos>::iterator it = arCurPos.begin(); it != arCurPos.end(); ++it)
+	{
+		it->second.clearCalc();
+	}
+}
+
+void reinpos::clearCalc()
+{
+	file_length = 0;
+	file_qty_p = 0;
+	file_qty_rm = 0.;
+	file_ms_min = 0;
+	file_ms_max = 0;
+	file_ms_mid = 0;
+
+	lap_qty = 0; // количество перехлестов
+
+	muft_qty[0] = 0; // муфты или скобы, количество
+	muft_qty[1] = 0; // муфты или скобы, количество
+}
 
 void reinpos::clear()
 {
@@ -1165,17 +1198,9 @@ void reinpos::clear()
 	base_ms_max = 0;
 	base_ms_mid = 0;
 
-	file_length = 0;
-	file_qty_p = 0;
-	file_qty_rm = 0.;
-	file_ms_min = 0;
-	file_ms_max = 0;
-	file_ms_mid = 0;
+	clearCalc();
 
 	bFromRef = false; // for show
-	lap_qty = 0; // количество перехлестов
-	muft_qty[0] = 0; // муфты или скобы, количество
-	muft_qty[1] = 0; // муфты или скобы, количество
 	pdID = 0; // posdefID
 	pcatID = 0;
 
@@ -1188,6 +1213,8 @@ void reinpos::clear()
 
 	for (int i = 0; i < 5; i++) cmpopt[i] = 0;
 	//ZeroMemory(cmpopt, sizeof(cmpopt));
+
+	bPosXml = false;
 }
 
 reinpos::reinpos(void)
@@ -1319,7 +1346,7 @@ void ReinModel::Init()
 	refscale = 1.0;
 	//iPosQty = 0;
 	bCached = false;
-	bRefPlus = false;
+	//bRefPlus = false;
 
 	refPrefsP = NULL;
 	refPrefs.clear();
@@ -3884,6 +3911,7 @@ void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int i
 	if (bScanPos)
 	{
 		mapCats.clear();
+		catPosXml.clearPosCalc();
 
 		scanFilePositions(this, mrP, true, true);
 	}
@@ -4020,10 +4048,10 @@ void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int i
 			{
 				ReinPos* rpP = NULL;
 
-				ReinModel* rmSrchP = this;
-				if (this->bRefPlus) rmSrchP = curRM;
+				//ReinModel* rmSrchP = this;
+				//if (this->bRefPlus) rmSrchP = curRM;
 
-				for (map<long, ReinPos>::iterator itt = rmSrchP->getPosMap().begin(); itt != rmSrchP->getPosMap().end(); ++itt)
+				for (map<long, ReinPos>::iterator itt = getPosMap().begin(); itt != getPosMap().end(); ++itt)
 				{
 					ReinPos* rpItP = &itt->second;
 

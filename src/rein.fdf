@@ -324,10 +324,12 @@
 
 	extern map <UInt32, CatInfo> mapCats;
 
+	extern CatInfo catPosXml;
+
 	extern MSWCH sset[10000];
 	extern deque<wstring> setstr;
 
-	extern BINT bPosSepByRefs;
+	//extern BINT bPosSepByRefs;
 
 	//vector<ReinBar> vCurBars;
 
@@ -1141,8 +1143,6 @@ void barCalcComparePoints(ReinBar* rbP, int bUseRealPts, Transform* tmP);
 
 void loadDBLaps(void);
 
-//void loadDBPositions(void);
-
 int createReinSign(void);
 
 void reinNoteDynamics( 
@@ -1625,7 +1625,7 @@ void closeLogFile(void);
 void openLogFile(int bAppend);
 
 void posSaveDB(	char* unparsedP);
-void posSaveFile(char* unparsedP);
+void posSaveFileXml(char* unparsedP);
 
 
 int getCfgVarEx(WCH* valP, MSWCH* nam);

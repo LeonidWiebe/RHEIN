@@ -81,6 +81,7 @@ DLM_LIBRARY_FILES 	=	$(mdlLibs)BentleyDgn.lib	\
 						$(mdlLibs)mdlbltin.lib 		\
 						$(mdlLibs)kisolid.lib 		\
 						$(mdlLibs)mdlxml.lib 		\
+						$(mdlLibs)mdlxmltools.lib  	\
 						$(mdlLibs)imagelib.lib 		\
 						$(mdlLibs)msbspline.lib 	\
 						$(mdlLibs)rdbmslib.lib  	\

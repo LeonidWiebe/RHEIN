@@ -36,7 +36,7 @@
 #define CMD_REIN_POS                            0x01220000  /* PARAMETERS */ 
 #define CMD_REIN_POS_CLEAR                      0x01220100  /* PARAMETERS */ 
 #define CMD_REIN_POS_SAVE                       0x01220200  /* PARAMETERS */ 
-#define CMD_REIN_POS_DBLOAD                     0x01220300  /* PARAMETERS */ 
+#define CMD_REIN_POS_LOAD                       0x01220300  /* PARAMETERS */ 
 #define CMD_REIN_POS_DBSAVE                     0x01220400  /* PARAMETERS */ 
 #define CMD_REIN_POS_DRAW                       0x01220500  /* PARAMETERS */ 
 #define CMD_REIN_POS_ENUM                       0x01220600  /* PARAMETERS */ 

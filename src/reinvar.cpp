@@ -558,13 +558,9 @@ map <UInt32, CatInfo> mapCats;
 //ArrayObjectHdr* daCurPosBase = NULL;
 //ArrayObjectHdr* daCurPosAll = NULL;
 
+CatInfo catPosXml;
 
-
-
-
-
-
-BINT bPosSepByRefs = FALSE;
+//BINT bPosSepByRefs = FALSE;
 
 //vector<ReinBar> vCurBars;
 

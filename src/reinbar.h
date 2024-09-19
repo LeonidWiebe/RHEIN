@@ -240,7 +240,7 @@ typedef struct reinbar
 	//vector <DVec3d> rpts; // реальные точки стержня
 	//vector <DVec3d> cents; // центры дуговых сегментов (если есть)
 
-	// длина сегмента, включая загибы
+	// calc: длина сегмента, включая загибы
 	// n - номер сегмента
 	// blen[n][0] - минимальная, 
 	// blen[n][1] - СУММА средних, 
@@ -248,10 +248,10 @@ typedef struct reinbar
 	vector <vector<long>> blen; 
 	//long blen[MAX_BAR_LENS][3]; // segment lengths -> blen [segm index] [min | mid | max], qty -> reinbar.numlen
 
-	vector <long> brad;
+	vector <long> brad; // calc: bend radius
 	//long brad[MAX_BAR_LENS];
 
-	vector <double> bang;
+	vector <double> bang; // calc: bend angle - between bar segments
 	//double bang[MAX_BAR_LENS]; // угол между сегментами стержня
 
 	int numlen;
@@ -837,6 +837,7 @@ typedef struct reinpos
 	~reinpos();
 
 	void clear();
+	void clearCalc();
 
 	//reinpos operator=(const reinpos & other);
 
@@ -851,22 +852,23 @@ typedef struct reinpos
 	long posID;
 	long srtmID;
 
-	long base_length;
-	double base_qty;
-	long base_ms_min;
-	long base_ms_max;
-	long base_ms_mid;
+	
+	long base_length; // saved value: file_length, not using
+	double base_qty; // saved value: file_qty_p or file_qty_rm
+	long base_ms_min; // saved value: file_ms_min
+	long base_ms_max; // saved value: file_ms_max
+	long base_ms_mid; // saved value: file_ms_mid
 
-	long file_length;
-	long file_qty_p;
-	double file_qty_rm;
-	long file_ms_min;
-	long file_ms_max;
-	long file_ms_mid;
+	long file_length; // not using
+	long file_qty_p; // calc: quantity
+	double file_qty_rm; // calc: quantity in run meters
+	long file_ms_min; // calc: min length
+	long file_ms_max; // calc: max length
+	long file_ms_mid; // calc: mid length
 
-	bool bFromRef; // барсет загружен из референса или нет
-	int lap_qty; // количество перехлестов
-	int muft_qty[2]; // муфты или скобы, количество
+	bool bFromRef; // barset loaded from ref or not
+	int lap_qty; // calc: lap quantity (количество перехлестов)
+	int muft_qty[2]; // calc: couplings and etc
 	int pdID; // posdefID
 	UInt32 pcatID;
 
@@ -879,6 +881,8 @@ typedef struct reinpos
 	//int drawopt[10];
 	int cmpopt[5]; // compare options
 	Point3d cmppt; // point for sort in positions list
+
+	bool bPosXml;
 
 } ReinPos;
 
@@ -920,6 +924,8 @@ typedef struct catinfo
 {
 	catinfo();
 	void clear();
+	void clearPosCalc();
+	int getPositionsFromDom(XmlDomRef dom);
 	UInt32 projID;
 	UInt32 catID; // ID корневого каталога для основной модели
 	UInt32 catModID; // ID каталога для модели, который определяется по имени модели из отношений view_object_catalog

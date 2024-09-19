@@ -2360,20 +2360,18 @@ extern "C" DLLEXPORT void cmdReinShow(
 
 
 /////////////////////////////////
-extern "C" DLLEXPORT void cmdPosSave( // using?
+extern "C" DLLEXPORT void cmdPosSaveXml( 
 	char* unparsedP
 )
 //cmdNumber   CMD_REIN_POS_SAVE
 {
-	CatInfo ci;
-	int cnt = 0;
+	//CatInfo ci;
+	//int cnt = 0;
 
 
-	posSaveFile(unparsedP);
+	posSaveFileXml(unparsedP);
 
-	return;
-
-	//=============================
+	/*
 
 	int bForce = FALSE;
 	int bUpdInfo = FALSE;
@@ -2413,11 +2411,8 @@ extern "C" DLLEXPORT void cmdPosSave( // using?
 
 	SPRN(s, L(" saved %i positions"), cnt);
 	mdlDialog_dmsgsPrint(s);
+*/
 
-	//iCfgVar_DB = 0;
-
-	//sprintf(s, "Сохранено %i записей для определения позиций", cnt);
-	//mdlDialog_openMessageBox (DIALOGID_MsgBoxOK, s, MSGBOX_ICON_NOSYMBOL);
 
 }
 
@@ -2610,16 +2605,265 @@ extern "C" DLLEXPORT void cmdPosDraw(
 
 }
 
+////////////////
+int getAttrInt(XmlNodeRef pNodeRef, MSWCH* attrname)
+{
+	int n1 = 300;
+	MSWCH atr1[300];
+
+	if (mdlXMLDomElement_getAttributeExt(atr1, &n1, pNodeRef, attrname, XMLDATATYPE_WIDESTRING, TRUE) == SUCCESS)
+		return _wtoi(atr1);
+
+	return 0;
+}
+
+////////////////
+double getAttrDbl(XmlNodeRef pNodeRef, MSWCH* attrname)
+{
+	int n1 = 300;
+	MSWCH atr1[300];
+
+	if (mdlXMLDomElement_getAttributeExt(atr1, &n1, pNodeRef, attrname, XMLDATATYPE_WIDESTRING, TRUE) == SUCCESS)
+		return _wtof(atr1);
+
+	return 0.;
+}
+
+
+///////////////////////
+int catinfo::getPositionsFromDom(XmlDomRef dom)
+{
+	int ret = SUCCESS;
+
+	XmlNodeRef pRootNodeRef;
+
+	ret = mdlXMLDom_getRootNode(&pRootNodeRef, dom); // >>> pRootNodeRef
+
+	if (ret == SUCCESS)
+	{
+		XmlNodeListRef    pNodeListRef;
+		XmlNodeRef pPosNodeRef;
+
+		//if (mdlXMLDomNode_getChildNodes(&pNodeListRef, pRootNodeRef) == SUCCESS) // >>> pNodeListRef
+		if (mdlXMLDomNode_select(&pNodeListRef, pRootNodeRef, L"RHEIN/position") == SUCCESS) // >>> pNodeListRef
+		{
+			long num = mdlXMLDomNodeList_getNumChildren(pNodeListRef);
+
+			for (long i = 0; i < num; i++)
+			{
+				if (mdlXMLDomNodeList_getChild(&pPosNodeRef, pNodeListRef, i) == SUCCESS) // >>> pPosNodeRef
+				{
+					ReinPos rp;
+
+					rp.clear();
+
+					rp.bPosXml = true;
+
+					MSWCH nn[300];
+					int n = 300;
+					int n1 = 300;
+					MSWCH atr1[300];
+
+					//mdlXMLDomNode_getXmlText(nn, &n, pPosNodeRef);
+					mdlXMLDomNode_getName(nn, &n, pPosNodeRef);
+
+					//<position  posID = "0" srtmID = "0" diam = "36" runmet = "0" mainPtsIndex = "1" transp = "21" bendrad = "0" bendrad2 = "180" 
+					//term1 = "0" term2 = "0" pnum = "0" base_qty = "0.000" base_length = "0" file_qty_p = "3" file_qty_rm = "7.147" 
+					//file_ms_min = "7150" file_ms_mid = "7150" file_ms_max = "7150" base_ms_min = "0" base_ms_mid = "0" base_ms_max = "0" 
+					//length = "7146.93929" trmp1 = "0" trmp2 = "0" trmp3 = "0" trmp4 = "0" lap_qty = "0" 
+					//pdID = "1" muft_qty = "0" pcatID = "0" poscalc = "0" noplanar = "0">
+
+					//rp.posID = getAttrInt(pPosNodeRef, L"posID");
+					//rp.srtmID = getAttrInt(pPosNodeRef, L"srtmID");
+					rp.bar.diam = getAttrInt(pPosNodeRef, L"diam");
+					rp.bar.runmet = getAttrInt(pPosNodeRef, L"runmet");
+					rp.bar.mainPtsIndex = getAttrInt(pPosNodeRef, L"mainPtsIndex");
+					rp.bar.transp = getAttrInt(pPosNodeRef, L"transp");
+					rp.bar.bendrad = getAttrInt(pPosNodeRef, L"bendrad");
+					//rp.bar.bendrad2 = getAttrInt(pPosNodeRef, L"bendrad2");
+					rp.bar.term[0] = getAttrInt(pPosNodeRef, L"term1");
+					rp.bar.term[1] = getAttrInt(pPosNodeRef, L"term2");
+
+					rp.bar.pnum = getAttrInt(pPosNodeRef, L"pnum");
+
+					rp.base_qty = getAttrDbl(pPosNodeRef, L"base_qty");
+					rp.base_length = getAttrInt(pPosNodeRef, L"base_length");
+					//rp.file_qty_p = getAttrInt(pPosNodeRef, L"file_qty_p");
+					//rp.file_qty_rm = getAttrDbl(pPosNodeRef, L"file_qty_rm");
+
+					//rp.file_ms_min = getAttrInt(pPosNodeRef, L"file_ms_min");
+					//rp.file_ms_mid = getAttrInt(pPosNodeRef, L"file_ms_mid");
+					//rp.file_ms_max = getAttrInt(pPosNodeRef, L"file_ms_max");
+					rp.base_ms_min = getAttrInt(pPosNodeRef, L"base_ms_min");
+					rp.base_ms_mid = getAttrInt(pPosNodeRef, L"base_ms_mid");
+					rp.base_ms_max = getAttrInt(pPosNodeRef, L"base_ms_max");
+
+					rp.bar.length = getAttrDbl(pPosNodeRef, L"length");
+
+					int trmp[6] = { 0 };
+					trmp[0] = getAttrInt(pPosNodeRef, L"trmp1");
+					trmp[1] = getAttrInt(pPosNodeRef, L"trmp2");
+					trmp[2] = getAttrInt(pPosNodeRef, L"trmp3");
+					trmp[3] = getAttrInt(pPosNodeRef, L"trmp4");
+					setBarTermPar4to6(trmp, &rp.bar);
+
+					//rp.lap_qty = getAttrInt(pPosNodeRef, L"lap_qty");
+					//rp.muft_qty = getAttrInt(pPosNodeRef, L"muft_qty");
+					rp.pdID = getAttrInt(pPosNodeRef, L"pdID");
+					//rp.pcatID = getAttrInt(pPosNodeRef, L"pcatID");
+
+					rp.bar.poscalc = getAttrInt(pPosNodeRef, L"poscalc");
+					rp.bar.noplanar = getAttrInt(pPosNodeRef, L"noplanar");
+
+
+					XmlNodeListRef    pPosNodeListRef;
+					XmlNodeListRef    pPointNodeListRef;
+					XmlNodeRef pPointNodeRef;
+					XmlNodeRef pCoordNodeRef;
+
+					if (mdlXMLDomNode_getChildNodes(&pPosNodeListRef, pPosNodeRef) == SUCCESS) // >>> pPosNodeListRef
+					{
+						long num2 = mdlXMLDomNodeList_getNumChildren(pPosNodeListRef);
+
+						for (long ii = 0; ii < num2; ii++)
+						{
+							if (mdlXMLDomNodeList_getChild(&pPointNodeRef, pPosNodeListRef, ii) == SUCCESS) // >>> pPointNodeRef
+							{
+								rp.bar.rfa[ii] = getAttrInt(pPointNodeRef, L"i_rfa");
+
+								// coords
+
+								if (mdlXMLDomNode_getChildNodes(&pPointNodeListRef, pPointNodeRef) == SUCCESS) // >>> pPointNodeListRef
+								{
+									long num3 = mdlXMLDomNodeList_getNumChildren(pPointNodeListRef);
+
+									for (long iii = 0; iii < num3; iii++)
+									{
+										if (mdlXMLDomNodeList_getChild(&pCoordNodeRef, pPointNodeListRef, iii) == SUCCESS) // >>> pCoordNodeRef
+										{
+
+											//<coords function = "sketch" x = "4398.34" y = "2121.90" z = "0.00" / >
+											//<coords function = "compare1" x = "-151" y = "4398" z = "0" / >
+											//<coords function = "compare2" x = "3256" y = "-2961" z = "0" / >
+
+											n1 = 300;
+
+											if (mdlXMLDomElement_getAttributeExt(atr1, &n1, pCoordNodeRef, L"function", XMLDATATYPE_WIDESTRING, TRUE) == SUCCESS)
+											{
+												if (wcscmp(atr1, L"sketch") == 0)
+												{
+													rp.bar.apts[ii].x = getAttrDbl(pCoordNodeRef, L"x");
+													rp.bar.apts[ii].y = getAttrDbl(pCoordNodeRef, L"y");
+													rp.bar.apts[ii].z = getAttrDbl(pCoordNodeRef, L"z");
+												}
+
+												if (wcscmp(atr1, L"compare1") == 0)
+												{
+													rp.bar.cpxb[ii].x = getAttrInt(pCoordNodeRef, L"x");
+													rp.bar.cpxb[ii].y = getAttrInt(pCoordNodeRef, L"y");
+													rp.bar.cpxb[ii].z = getAttrInt(pCoordNodeRef, L"z");
+												}
+
+												if (wcscmp(atr1, L"compare2") == 0)
+												{
+													rp.bar.cpxe[ii].x = getAttrInt(pCoordNodeRef, L"x");
+													rp.bar.cpxe[ii].y = getAttrInt(pCoordNodeRef, L"y");
+													rp.bar.cpxe[ii].z = getAttrInt(pCoordNodeRef, L"z");
+												}
+											}
+
+											mdlXMLDomNode_free(pCoordNodeRef); // <<< pCoordNodeRef
+										}
+									}
+
+									mdlXMLDomNodeList_free(pPointNodeListRef); // <<< pPointNodeListRef
+								}
+
+								rp.bar.cnumpts++;
+								rp.bar.numpts++;
+
+								mdlXMLDomNode_free(pPointNodeRef); // <<< pPointNodeRef
+							}
+
+						}
+
+						mdlXMLDomNodeList_free(pPosNodeListRef); // <<< pPosNodeListRef
+					}
+
+
+					// add ReinPos to cat...
+
+					if (rp.bar.pnum > 0 && rp.bar.cnumpts > 0)	arCurPos[rp.bar.pnum] = rp;
+
+					mdlXMLDomNode_free(pPosNodeRef); // <<< pPosNodeRef
+				}
+			}
+
+			mdlXMLDomNodeList_free(pNodeListRef); // <<< pNodeListRef
+		}
+
+		mdlXMLDomNode_free(pRootNodeRef); // <<< pRootNodeRef
+
+	}
+
+
+	return ret;
+}
+
 /////////////////////////////////
-extern "C" DLLEXPORT void cmdPosLoadDB(
+extern "C" DLLEXPORT void cmdPosLoadXml(
 	char* unparsedP
 )
-//cmdNumber   CMD_REIN_POS_DBLOAD
+//cmdNumber   CMD_REIN_POS_LOAD
 {
 
-	//loadDBPositions();
+	string sline;
+	int res;
 
-	//iCfgVar_DB = 1;
+
+	ofstream f;
+	char fname[300];
+
+
+	if (unparsedP && strlen(unparsedP) > 0)
+	{
+		strcpy(fname, unparsedP);
+	}
+	else
+	{
+		int res = mdlDialog_fileOpen(fname, 0, 0, "", "*.xml", 0, "file to open");
+
+		if (res != SUCCESS) return;
+	}
+
+
+	MSWCH wfname[300];
+	XmlDomRef dom = NULL;
+
+
+	res = mdlXMLDom_create(&dom);
+
+	SCPM2W(wfname, fname, 300);
+
+	if (res == SUCCESS) 
+		res = mdlXMLDom_load(dom, FILESPEC_LOCAL, wfname, 0, 0);
+
+
+	if (res == SUCCESS)
+	{
+		if (catPosXml.arCurPos.empty())
+			catPosXml = curRM->getCat();
+
+		catPosXml.getPositionsFromDom(dom);
+	}
+	else
+	{
+		mdlOutput_messageCenterW(MESSAGE_ERROR, L"Can not read xml", L"Can not read xml", MESSAGE_ALERT_BALLOON);
+	}
+
+
+
+	mdlXMLDom_free(dom);
 
 }
 
@@ -6244,7 +6488,6 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 			//mdlVBA_runMacro("arm", "main", "mdlGetCatID");
 
 			//loadDBLaps();
-			//loadDBPositions();
 
 			//cmdDrawNodes(NULL);
 
@@ -7250,8 +7493,8 @@ extern "C" DLLEXPORT  int MdlMain
 		{ (CmdHandler)cmdBarOverride,	CMD_REIN_BAROVER			},
 		{ (CmdHandler)cmdReinList,		CMD_REIN_POS				},
 		{ (CmdHandler)cmdPosClear,		CMD_REIN_POS_CLEAR			},
-		{ (CmdHandler)cmdPosSave,		CMD_REIN_POS_SAVE			},
-		{ (CmdHandler)cmdPosLoadDB,		CMD_REIN_POS_DBLOAD			},
+		{ (CmdHandler)cmdPosSaveXml,	CMD_REIN_POS_SAVE			},
+		{ (CmdHandler)cmdPosLoadXml,	CMD_REIN_POS_LOAD			},
 		{ (CmdHandler)cmdPosSaveDB,		CMD_REIN_POS_DBSAVE			},
 		{ (CmdHandler)cmdPosDraw,		CMD_REIN_POS_DRAW			},
 		{ (CmdHandler)cmdPosEnum,		CMD_REIN_POS_ENUM			},

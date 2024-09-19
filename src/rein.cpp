@@ -575,7 +575,7 @@ void openLogFile(int bAppend)
 	{
 		fileLog.open(sFileLog, ofstream::out);
 
-		char* hdr = "<?xml version=\"1.0\" encoding=\"utf - 8\"?>\n";
+		char* hdr = "<?xml version=\"1.0\" encoding=\"Windows-1251\"?>\n";
 
 		if (fileLog.is_open()) fileLog.write(hdr, strlen(hdr));
 	}
@@ -5183,196 +5183,6 @@ DRAWMODE  drawMode  )
 
 }
 
-/////////////////////////////////
-// func: save positions to xml file
-void posSaveFile(
-	char* unparsedP
-)
-{
-	string sline;
-	int res;
-	long partID = 0;
-	long posID = 0;
-	long propID = 0;
-
-
-	ofstream f;
-	char fname[300];
-
-	char* hdr = "<?xml version=\"1.0\" encoding=\"utf - 8\"?>\n";
-
-	if (unparsedP && strlen(unparsedP) > 0)
-	{
-		strcpy(fname, unparsedP);
-	}
-	else
-	{
-		int res = mdlDialog_fileCreate(fname, 0, 0, "", "*.xml", 0, "file to save");
-
-		if (res != SUCCESS) return;
-	}
-
-	f.open(fname, ofstream::out);
-
-	if (f.is_open())
-		f.write(hdr, strlen(hdr));
-	else
-		return;
-
-
-	sline = "<RHEIN>\n";
-	f.write(sline.c_str(), sline.length());
-
-
-	ReinLap* rlP = getReinLap(6);
-
-
-	ZeroTrackBar(&tbi);
-	tbi.update = UPDATE_Percent1 | UPDATE_Msg1;
-
-
-	SCPY(tbi.msgText1, TXT_119);
-
-	dlgProgressP = mdlDialog_completionBarOpen(TXT_119);
-	//mdlDialog_trackBarStartProcessing(NULL, NULL, NULL, NULL, L("Отменено"), 0, &tbi, L(""));
-
-	UInt32 i = 0;
-
-	for (map<long, ReinPos>::iterator it = curRM->getPosMap().begin(); it != curRM->getPosMap().end(); ++it, i++)
-	{
-
-		WCH v[20];
-
-		ReinPos* rpP = &it->second;
-
-		long posnum = rpP->bar.pnum;
-
-
-		setPosString(rpP, 1, 1);
-
-		SPRN(s, L("\t<position %s>\n"), sCurPos);
-
-		sline = s;
-		f.write(sline.c_str(), sline.length());
-
-
-		// точки
-		{
-
-			for (int a = 0; a < rpP->bar.cnumpts; a++)
-			{
-
-				int isMn = 0;
-				int isCn = 0;
-
-				if (a == rpP->bar.mainPtsIndex) isMn = 1;
-				if (rpP->bar.runmet > 1) isCn = isMn;
-
-				//SCPY(strSQL, L("INSERT INTO [r_part_reinpoints] (partID, xd,yd,zd, x,y,z, xa,ya,za, isMain, isOk, isCont, onArc) "));
-
-				int i_rfa = 0;
-				if (rpP->bar.rfa[a] & RFA_ARCP || rpP->bar.rfa[a] & RFA_CIRP) i_rfa = RFA_ARCP;
-
-
-				SPRN(s, L("\t\t<point isMn=\"%i\" isCn=\"%i\" i_rfa=\"%i\">\n"), isMn, isCn, i_rfa);
-				sline = s;
-				f.write(sline.c_str(), sline.length());
-
-				SPRN(s, L("\t\t\t<coords function=\"sketch\" x=\"%.2f\" y=\"%.2f\" z=\"%.2f\"/>\n"),
-					rpP->bar.apts[a].x, rpP->bar.apts[a].y, rpP->bar.apts[a].z);
-				sline = s;
-				f.write(sline.c_str(), sline.length());
-
-				SPRN(s, L("\t\t\t<coords function=\"compare1\" x=\"%i\" y=\"%i\" z=\"%i\"/>\n"),
-					rpP->bar.cpxb[a].x, rpP->bar.cpxb[a].y, rpP->bar.cpxb[a].z);
-				sline = s;
-				f.write(sline.c_str(), sline.length());
-
-				SPRN(s, L("\t\t\t<coords function=\"compare2\" x=\"%i\" y=\"%i\" z=\"%i\"/>\n"),
-					rpP->bar.cpxe[a].x, rpP->bar.cpxe[a].y, rpP->bar.cpxe[a].z);
-				sline = s;
-				f.write(sline.c_str(), sline.length());
-
-				SPRN(s, L("\t\t</point>\n"));
-				sline = s;
-				f.write(sline.c_str(), sline.length());
-
-			}
-
-		}
-
-		SPRN(s, L("\t</position>\n"));
-
-		sline = s;
-		f.write(sline.c_str(), sline.length());
-
-
-		/*
-
-		if (rpP->bar.runmet == 1)
-			rpP->base_qty = rpP->file_qty_rm;
-		else
-			rpP->base_qty = rpP->file_qty_p;
-
-		int bSk = 1;
-
-		if ((rpP->bar.runmet == 1 || rpP->bar.cnumpts <= 2) &&
-			(rpP->bar.term[0] == REIN_TERM_NONE || rpP->bar.term[0] == REIN_TERM_SKOB) &&
-			(rpP->bar.term[1] == REIN_TERM_NONE || rpP->bar.term[1] == REIN_TERM_SKOB)) bSk = 0;
-
-
-		SPRN(s, L("length, lenmin, lenmax VALUES (%i,%i,%i,%i)"),
-			posID, rpP->file_ms_mid, rpP->file_ms_min, rpP->file_ms_max);
-
-		sline = s;
-		f.write(sline.c_str(), sline.length());
-
-		// окончания
-		{
-
-			int trmp[4] = { 0 };
-			//ZeroMemory(trmp, sizeof(trmp));
-			setBarTermPar6to4(trmp, &rpP->bar);
-
-			//SPRN(strSQL, L("INSERT INTO [r_part_reinsketch] (partID, "));
-			//SCAT(strSQL, L("sketchStartType, sketchStartAngle, sketchStartLength, "));
-			//SCAT(strSQL, L("sketchEndType, sketchEndAngle, sketchEndLength) "));
-
-			SPRN(s, L("term VALUES (%i,%i,%i,%i,%i,%i,%i)"),
-				partID,
-				rpP->bar.term[0], trmp[0], trmp[2],
-				rpP->bar.term[1], trmp[1], trmp[3]
-			);
-
-			sline = s;
-			f.write(sline.c_str(), sline.length());
-
-		}
-
-
-		*/
-
-		tbi.percentComplete1 = (long)(((double)i / (double)curRM->getPosMap().size()) * 100.);
-
-		if (dlgProgressP) mdlDialog_completionBarUpdate(dlgProgressP, 0, (int)tbi.percentComplete1);
-		WaitMessage();
-
-	}
-
-
-	if (dlgProgressP) mdlDialog_completionBarClose(dlgProgressP);
-
-
-	sline = "</RHEIN>\n";
-	f.write(sline.c_str(), sline.length());
-
-
-	f.close();
-
-
-}
-
-
 
 /////////////////////////////////
 // func: save db
@@ -5850,6 +5660,8 @@ char	*unparsedP
 	if (dlgProgressP) mdlDialog_completionBarClose(dlgProgressP);
 
 }
+
+
 
 
 /////////////////////////////////
@@ -21831,10 +21643,10 @@ int barsEqual(ReinBar* rbOneP, // from file
 	//	return FALSE;
 	//}
 
-	if (bPosSepByRefs)
-	{
-		if (rbOneP->numRef != rbTwoP->numRef) bRet = FALSE;
-	}
+	//if (bPosSepByRefs)
+	//{
+	//	if (rbOneP->numRef != rbTwoP->numRef) bRet = FALSE;
+	//}
 
 	//if (rbOneP->runmet != 1) // not run met
 	{
@@ -22138,7 +21950,25 @@ int barsEqual(ReinBar* rbOneP, // from file
 
 	}
 
-	if (iDebug) sprintf(sLogMes, "bTermEq = %i  bGeomEq = %i\n", bTermEq, bGeomEq); writeLog(0, 0, 0, 1);
+
+
+
+	if (iDebug)
+	{
+		if (!bGeomEq)
+		{
+
+			for (int i = 0; i < rbOneP->cnumpts; i++)
+			{
+				sprintf(sLogMes, "%i x b%i e%i - b%i\n", i, rbOneP->cpxb[i].x, rbOneP->cpxe[i].x, rbTwoP->cpxb[i].x); writeLog(0, 0, 0, 1);
+				sprintf(sLogMes, "%i y b%i e%i - b%i\n", i, rbOneP->cpxb[i].y, rbOneP->cpxe[i].y, rbTwoP->cpxb[i].y); writeLog(0, 0, 0, 1);
+				sprintf(sLogMes, "%i z b%i e%i - b%i\n", i, rbOneP->cpxb[i].z, rbOneP->cpxe[i].z, rbTwoP->cpxb[i].z); writeLog(0, 0, 0, 1);
+			}
+
+		}
+
+		sprintf(sLogMes, "bTermEq = %i  bGeomEq = %i\n", bTermEq, bGeomEq); writeLog(0, 0, 0, 1);
+	}
 
 	writeLogOut(__FUNCTION__, 0);
 
@@ -24901,6 +24731,14 @@ void posListAddRow(ListModel* pListModel, ReinPos* rpP, bool bRealPos, long ind,
 		pCel = mdlListRow_getCellAtIndex (pRow, REIN_LISTB_NONE);
 		mdlListCell_setDisplayText(pCel, v);
 	}
+
+	if (rpP->bPosXml)
+	{
+		ListCell    *pCel;
+		//SPRN(v, L("%i"), rpP->bar.poscalc);
+		pCel = mdlListRow_getCellAtIndex (pRow, REIN_LISTB_NONE);
+		mdlListCell_setDisplayText(pCel, L("xml"));
+	}
 	
 
 	
@@ -27609,11 +27447,11 @@ void insertCurBarsMember2(ReinElm* reToAddP, MSElementDescr* edP, UInt32 iBarFP,
 
 	if (iDebug) sprintf(sLogMes, "search for position... rmP--getPosMap().size() = %u\n", (UInt32)rmP->getPosMap().size()); writeLog(0, 0, 0, 1);
 
-	ReinModel* rmSrchP = rmP;
-	if (rmP->bRefPlus) rmSrchP = curRM;
+	//ReinModel* rmSrchP = rmP;
+	//if (rmP->bRefPlus) rmSrchP = curRM;
 
 
-	for (map<long, ReinPos>::iterator it = rmSrchP->getPosMap().begin(); it != rmSrchP->getPosMap().end(); ++it)
+	for (map<long, ReinPos>::iterator it = rmP->getPosMap().begin(); it != rmP->getPosMap().end(); ++it)
 	{
 		ReinPos* rpItP = &it->second;
 
@@ -28029,6 +27867,12 @@ int savePosition(ReinPos* rpP, int bOverwrite, int bUpdateBaseInfo)
 	//	deleteFilePosition(rpP->bar.pnum);
 	//}
 
+	if (rpP->bPosXml)
+	{
+		writeLogOut(__FUNCTION__, "position has xml format");
+		return ERROR;
+	}
+
 	if (bPosExist) // уже есть такая позиция
 	{
 		if (bOverwrite)
@@ -28167,24 +28011,7 @@ ScanCriteria    *pScanCriteria
 				rp.bar.numpts = readBarPointsFromElement(&rp.bar, &edP->el);
 				rp.bar.cnumpts = rp.bar.numpts;
 
-				rp.file_length = 0;
-				rp.file_ms_max = 0;
-				rp.file_ms_mid = 0;
-				rp.file_ms_min = 0;
-				rp.file_qty_p = 0;
-				rp.file_qty_rm = 0;
-				rp.lap_qty = 0;
-				rp.muft_qty[0] = 0;
-				rp.muft_qty[1] = 0;
-				//rp.refcnt = 0;
-
-				//rp.pcatID = ciP->catModID;
-
-				//if (rp.bar.pnum == 30)
-				//{
-				//	int a = 0;
-				//}
-
+				rp.clearCalc();
 
 				if (rp.bar.pnum > 0)
 				{
@@ -28329,6 +28156,7 @@ void scanFilePositions(ReinModel* rmP, DgnModelRefP mrP, bool bClearCats, bool b
 	if (rmP->mrci.catID > 0)
 	{
 		map <UInt32, CatInfo>::iterator it = mapCats.find(rmP->mrci.catID);
+
 		if (it == mapCats.end()) // not found, add first one
 		{
 			// copy new to common
@@ -28774,24 +28602,24 @@ void setPosString(ReinPos* rpP, int bPoints, int bXml)
 
 	if (bXml)
 	{
-		SCPY(sCurPosFmt, L(" posID=\"%i\""));				// 00
-		SCAT(sCurPosFmt, L(" srtmID=\"%i\""));				// 01
+		//SCPY(sCurPosFmt, L(" posID=\"%i\""));				// 00
+		//SCAT(sCurPosFmt, L(" srtmID=\"%i\""));				// 01
 		SCAT(sCurPosFmt, L(" diam=\"%i\""));				// 02
 		SCAT(sCurPosFmt, L(" runmet=\"%i\""));				// 03
 		SCAT(sCurPosFmt, L(" mainPtsIndex=\"%i\""));		// 04
 		SCAT(sCurPosFmt, L(" transp=\"%i\""));				// 05
 		SCAT(sCurPosFmt, L(" bendrad=\"%i\""));				// 06
-		SCAT(sCurPosFmt, L(" bendrad2=\"%i\""));			// 07
+		//SCAT(sCurPosFmt, L(" bendrad2=\"%i\""));			// 07
 		SCAT(sCurPosFmt, L(" term1=\"%i\""));				// 08
 		SCAT(sCurPosFmt, L(" term2=\"%i\""));				// 09
 		SCAT(sCurPosFmt, L(" pnum=\"%i\""));				// 10
 		SCAT(sCurPosFmt, L(" base_qty=\"%.3f\""));			// 11
 		SCAT(sCurPosFmt, L(" base_length=\"%i\""));			// 12
-		SCAT(sCurPosFmt, L(" file_qty_p=\"%i\""));			// 13
-		SCAT(sCurPosFmt, L(" file_qty_rm=\"%.3f\""));		// 14
-		SCAT(sCurPosFmt, L(" file_ms_min=\"%i\""));			// 15
-		SCAT(sCurPosFmt, L(" file_ms_mid=\"%i\""));			// 16
-		SCAT(sCurPosFmt, L(" file_ms_max=\"%i\""));			// 17
+		//SCAT(sCurPosFmt, L(" file_qty_p=\"%i\""));			// 13
+		//SCAT(sCurPosFmt, L(" file_qty_rm=\"%.3f\""));		// 14
+		//SCAT(sCurPosFmt, L(" file_ms_min=\"%i\""));			// 15
+		//SCAT(sCurPosFmt, L(" file_ms_mid=\"%i\""));			// 16
+		//SCAT(sCurPosFmt, L(" file_ms_max=\"%i\""));			// 17
 		SCAT(sCurPosFmt, L(" base_ms_min=\"%i\""));			// 18
 		SCAT(sCurPosFmt, L(" base_ms_mid=\"%i\""));			// 19
 		SCAT(sCurPosFmt, L(" base_ms_max=\"%i\""));			// 20
@@ -28800,10 +28628,10 @@ void setPosString(ReinPos* rpP, int bPoints, int bXml)
 		SCAT(sCurPosFmt, L(" trmp2=\"%i\""));				// 23
 		SCAT(sCurPosFmt, L(" trmp3=\"%i\""));				// 24
 		SCAT(sCurPosFmt, L(" trmp4=\"%i\""));				// 25
-		SCAT(sCurPosFmt, L(" lap_qty=\"%i\""));				// 26
+		//SCAT(sCurPosFmt, L(" lap_qty=\"%i\""));				// 26
 		SCAT(sCurPosFmt, L(" pdID=\"%i\""));				// 27
-		SCAT(sCurPosFmt, L(" muft_qty=\"%i\""));			// 28
-		SCAT(sCurPosFmt, L(" pcatID=\"%i\""));				// 29
+		//SCAT(sCurPosFmt, L(" muft_qty=\"%i\""));			// 28
+		//SCAT(sCurPosFmt, L(" pcatID=\"%i\""));				// 29
 		SCAT(sCurPosFmt, L(" poscalc=\"%i\""));				// 30
 		SCAT(sCurPosFmt, L(" noplanar=\"%i\""));			// 31
 
@@ -33960,8 +33788,8 @@ void setPosition(ReinPos* rpP, ReinElm* relmP, ReinModel* rmP, int dirout)
 	//	SPRN(s, L(""));
 	//}
 
-	bool bSwap = rmP->bRefPlus;
-	if (rmP->bRefPlus) rmP = curRM; // swap models
+	//bool bSwap = rmP->bRefPlus;
+	//if (rmP->bRefPlus) rmP = curRM; // swap models
 
 	if (rlP)
 	{
@@ -34116,7 +33944,9 @@ void setPosition(ReinPos* rpP, ReinElm* relmP, ReinModel* rmP, int dirout)
 	rpP->cmppt.y = (Int32)roundExt( mdlCnv_uorsToMasterUnits(relmP->bel.rpts[i].y), ROUND_STD);
 	rpP->cmppt.z = (Int32)roundExt( mdlCnv_uorsToMasterUnits(relmP->bel.rpts[i].z), ROUND_STD);
 
-	if ( mdlModelRef_isActiveModel(relmP->bel.modrefP) || bSwap)
+	if ( mdlModelRef_isActiveModel(relmP->bel.modrefP) 
+		//|| bSwap
+		)
 	{
 		rpP->file_qty_rm += len_with_lap / 1000.;
 
@@ -34209,7 +34039,12 @@ map<long, ReinPos>& ReinModel::getPosMap(void)
 
 	//writeLogIn(__FUNCTION__, 0);
 
-	if (mrci.catID > 0)
+	if (!catPosXml.arCurPos.empty())
+	{
+		return catPosXml.arCurPos;
+	}
+
+	if (iCfgVar_PosListMerge && mrci.catID > 0)
 	{
 		map <UInt32, CatInfo>::iterator it = mapCats.find(mrci.catID);
 
@@ -34237,7 +34072,12 @@ CatInfo& ReinModel::getCat(void)
 
 	//writeLogIn(__FUNCTION__, 0);
 
-	if (mrci.catID > 0)
+	if (!catPosXml.arCurPos.empty())
+	{
+		return catPosXml;
+	}
+
+	if (iCfgVar_PosListMerge && mrci.catID > 0)
 	{
 		map <UInt32, CatInfo>::iterator it = mapCats.find(mrci.catID);
 
@@ -34325,13 +34165,13 @@ void ReinModel::updateModelElmNumbers(bool bSkipIfLot, map<long, ReinPos>* arCur
 	}
 
 
-	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
-	{
-		if (it->second.bRefPlus)
-		{
-			it->second.updateModelElmNumbers(bSkipIfLot, arCurPosP);
-		}
-	}
+	//for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+	//{
+	//	if (it->second.bRefPlus)
+	//	{
+	//		it->second.updateModelElmNumbers(bSkipIfLot, arCurPosP);
+	//	}
+	//}
 
 
 
@@ -34932,9 +34772,9 @@ extern "C" DLLEXPORT void cmdReinMerge(
 			elemIterCount3 = 0;
 			elemCount3 = cnt;
 
-			dlgProgressP = mdlDialog_completionBarOpen(L("Копирование"));
+			dlgProgressP = mdlDialog_completionBarOpen(TXT_120);
 
-			rn = -1;
+			rn = -1; // bars
 			pSC = mdlScanCriteria_create();
 			status = mdlScanCriteria_setReturnType(pSC, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
 			status = mdlScanCriteria_setElmDscrCallback(pSC, (PFScanElemDscrCallback)scanMerge, &rn);
@@ -34943,7 +34783,7 @@ extern "C" DLLEXPORT void cmdReinMerge(
 			status = mdlScanCriteria_scan(pSC, NULL, NULL, NULL);
 			status = mdlScanCriteria_free(pSC);
 
-			rn = -2;
+			rn = -2; // spaces
 			pSC = mdlScanCriteria_create();
 			status = mdlScanCriteria_setReturnType(pSC, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
 			status = mdlScanCriteria_setElmDscrCallback(pSC, (PFScanElemDscrCallback)scanMerge, &rn);
@@ -35908,3 +35748,197 @@ int readRndFromElement(ELID* idP, UInt32* refnumP, MSElementCP elP)
 	return SUCCESS;
 
 }
+
+
+/////////////////////////////////
+// func: save positions to xml file
+void posSaveFileXml(
+	char* unparsedP
+)
+{
+	string sline;
+	int res;
+	long partID = 0;
+	long posID = 0;
+	long propID = 0;
+
+
+	ofstream f;
+	char fname[300];
+
+	char* hdr = "<?xml version=\"1.0\" encoding=\"Windows-1251\"?>\n";
+
+	if (unparsedP && strlen(unparsedP) > 0)
+	{
+		strcpy(fname, unparsedP);
+	}
+	else
+	{
+		int res = mdlDialog_fileCreate(fname, 0, 0, "", "*.xml", 0, "file to save");
+
+		if (res != SUCCESS) return;
+	}
+
+	f.open(fname, ofstream::out);
+
+	if (f.is_open())
+		f.write(hdr, strlen(hdr));
+	else
+		return;
+
+
+	sline = "<RHEIN>\n";
+	f.write(sline.c_str(), sline.length());
+
+
+	ReinLap* rlP = getReinLap(6);
+
+
+	ZeroTrackBar(&tbi);
+	tbi.update = UPDATE_Percent1 | UPDATE_Msg1;
+
+
+	SCPY(tbi.msgText1, TXT_119);
+
+	dlgProgressP = mdlDialog_completionBarOpen(TXT_119);
+	//mdlDialog_trackBarStartProcessing(NULL, NULL, NULL, NULL, L("Отменено"), 0, &tbi, L(""));
+
+	UInt32 i = 0;
+
+	for (map<long, ReinPos>::iterator it = curRM->getPosMap().begin(); it != curRM->getPosMap().end(); ++it, i++)
+	{
+
+		WCH v[20];
+
+		ReinPos* rpP = &it->second;
+
+		long posnum = rpP->bar.pnum;
+
+		if (posnum <= 0) continue;
+
+		// save...
+
+		setPosString(rpP, 1, 1);
+
+		SPRN(s, L("\t<position %s>\n"), sCurPos);
+
+		sline = s;
+		f.write(sline.c_str(), sline.length());
+
+
+		// точки
+		{
+
+			for (int a = 0; a < rpP->bar.cnumpts; a++)
+			{
+
+				int isMn = 0;
+				int isCn = 0;
+
+				if (a == rpP->bar.mainPtsIndex) isMn = 1;
+				if (rpP->bar.runmet > 1) isCn = isMn;
+
+				//SCPY(strSQL, L("INSERT INTO [r_part_reinpoints] (partID, xd,yd,zd, x,y,z, xa,ya,za, isMain, isOk, isCont, onArc) "));
+
+				//int i_rfa = 0;
+				//if (rpP->bar.rfa[a] & RFA_ARCP || rpP->bar.rfa[a] & RFA_CIRP) i_rfa = RFA_ARCP;
+
+
+				SPRN(s, L("\t\t<point isMn=\"%i\" isCn=\"%i\" i_rfa=\"%i\">\n"), isMn, isCn, rpP->bar.rfa[a]);
+				sline = s;
+				f.write(sline.c_str(), sline.length());
+
+				SPRN(s, L("\t\t\t<coords function=\"sketch\" x=\"%.2f\" y=\"%.2f\" z=\"%.2f\"/>\n"),
+					rpP->bar.apts[a].x, rpP->bar.apts[a].y, rpP->bar.apts[a].z);
+				sline = s;
+				f.write(sline.c_str(), sline.length());
+
+				SPRN(s, L("\t\t\t<coords function=\"compare1\" x=\"%i\" y=\"%i\" z=\"%i\"/>\n"),
+					rpP->bar.cpxb[a].x, rpP->bar.cpxb[a].y, rpP->bar.cpxb[a].z);
+				sline = s;
+				f.write(sline.c_str(), sline.length());
+
+				SPRN(s, L("\t\t\t<coords function=\"compare2\" x=\"%i\" y=\"%i\" z=\"%i\"/>\n"),
+					rpP->bar.cpxe[a].x, rpP->bar.cpxe[a].y, rpP->bar.cpxe[a].z);
+				sline = s;
+				f.write(sline.c_str(), sline.length());
+
+				SPRN(s, L("\t\t</point>\n"));
+				sline = s;
+				f.write(sline.c_str(), sline.length());
+
+			}
+
+		}
+
+		SPRN(s, L("\t</position>\n"));
+
+		sline = s;
+		f.write(sline.c_str(), sline.length());
+
+
+		/*
+
+		if (rpP->bar.runmet == 1)
+			rpP->base_qty = rpP->file_qty_rm;
+		else
+			rpP->base_qty = rpP->file_qty_p;
+
+		int bSk = 1;
+
+		if ((rpP->bar.runmet == 1 || rpP->bar.cnumpts <= 2) &&
+			(rpP->bar.term[0] == REIN_TERM_NONE || rpP->bar.term[0] == REIN_TERM_SKOB) &&
+			(rpP->bar.term[1] == REIN_TERM_NONE || rpP->bar.term[1] == REIN_TERM_SKOB)) bSk = 0;
+
+
+		SPRN(s, L("length, lenmin, lenmax VALUES (%i,%i,%i,%i)"),
+			posID, rpP->file_ms_mid, rpP->file_ms_min, rpP->file_ms_max);
+
+		sline = s;
+		f.write(sline.c_str(), sline.length());
+
+		// окончания
+		{
+
+			int trmp[4] = { 0 };
+			//ZeroMemory(trmp, sizeof(trmp));
+			setBarTermPar6to4(trmp, &rpP->bar);
+
+			//SPRN(strSQL, L("INSERT INTO [r_part_reinsketch] (partID, "));
+			//SCAT(strSQL, L("sketchStartType, sketchStartAngle, sketchStartLength, "));
+			//SCAT(strSQL, L("sketchEndType, sketchEndAngle, sketchEndLength) "));
+
+			SPRN(s, L("term VALUES (%i,%i,%i,%i,%i,%i,%i)"),
+				partID,
+				rpP->bar.term[0], trmp[0], trmp[2],
+				rpP->bar.term[1], trmp[1], trmp[3]
+			);
+
+			sline = s;
+			f.write(sline.c_str(), sline.length());
+
+		}
+
+
+		*/
+
+		tbi.percentComplete1 = (long)(((double)i / (double)curRM->getPosMap().size()) * 100.);
+
+		if (dlgProgressP) mdlDialog_completionBarUpdate(dlgProgressP, 0, (int)tbi.percentComplete1);
+		WaitMessage();
+
+	}
+
+
+	if (dlgProgressP) mdlDialog_completionBarClose(dlgProgressP);
+
+
+	sline = "</RHEIN>\n";
+	f.write(sline.c_str(), sline.length());
+
+
+	f.close();
+
+
+}
+

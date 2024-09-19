@@ -147,6 +147,8 @@ Fixes
 14.8.23
 1) Any reinforcement model can now consist of several files with single set of positions. 
 This is done to allow multiple users to work with the same model.
-2) New command 'REIN POS SAVE' saves corrent position set to xml file (for sample see .\xml\pos.xml)
-Load operation for position set is expected in future...
+It is assumed that the open file is linked to database.
+2) New command 'REIN POS SAVE' saves current positions to xml file (for sample see .\xml\pos.xml)
+New command 'REIN POS LOAD' loads positions from xml file.
+These operations are experimental.
 3) Fixes
