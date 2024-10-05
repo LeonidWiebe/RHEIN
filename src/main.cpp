@@ -2357,6 +2357,95 @@ extern "C" DLLEXPORT void cmdReinShow(
 
 }
 
+/////////////////////////////////
+// нажатие кнопки дискеты сразу на всех позициях
+extern "C" DLLEXPORT void cmdPosSync( //
+	char* unparsedP
+)
+//cmdNumber   CMD_REIN_POS_SYNC
+{
+
+	MSDLGP dbP = mdlDialog_find(DLG_POSLIST, NULL);
+
+	if (dbP == NULL) return;
+
+	DialogItem* pListBoxItem = NULL;
+	ListModel* pListModel = NULL;
+	int row, col;
+
+	bool bByCheck = false;
+
+
+
+	if (NULL == (pListBoxItem = mdlDialog_itemGetByTypeAndId(dbP, RTYPE_ListBox, 1, 0)))
+		return;
+
+	if (NULL == (pListModel = mdlDialog_listBoxGetListModelP(pListBoxItem->rawItemP)))
+		return;
+
+	if (curPos_rn > 0) // reference
+		return;
+
+
+	//ReinModel* rmP = curRM;
+
+
+	long cnt = 1;
+	enumCount = 0;
+
+
+	if (mdlListModel_getRowCount(pListModel) > 50)
+		dlgProgressP = mdlDialog_completionBarOpen(TXT_119);
+	else
+		dlgProgressP = NULL;
+
+
+	for (int i = 0; i < mdlListModel_getRowCount(pListModel); i++)
+	{
+
+		ListRow* pListRow = mdlListModel_getRowAtIndex(pListModel, i);
+		if (mdlListRow_getStatus(pListRow) == LISTCELLATTR_DISABLED)  continue;
+
+		ListCell* pListCell = mdlListModel_getCellAtIndexes(pListModel, i, REIN_LISTB_SAVE);
+		long needsave = myListCell_getInfoFieldInt32(pListCell, 0, &gst);
+
+		if (gst != SUCCESS) continue;
+
+		ListCell* pListCell2 = mdlListModel_getCellAtIndexes(pListModel, i, REIN_LISTB_POSN);
+		long pn = myListCell_getInfoFieldInt32(pListCell2, 0, &gst);
+
+		if (gst != SUCCESS) continue;
+
+
+
+		if (needsave == 1) // need save
+		{
+			//long index = rmP->getPosByNum(pn);
+
+			CatInfo& poscat = curRM->getCat();
+
+			map<long, ReinPos>::iterator it = poscat.arCurPos.find(pn);
+
+			if (it != poscat.arCurPos.end()) // found
+			{
+				if (savePosition(&it->second, TRUE, TRUE) == SUCCESS)
+				{
+					mdlListCell_setInfoFieldInt32(pListCell, 0, 0); // no save
+					mdlListCell_setIconRsc(pListCell, NULL);
+				}
+			}
+		}
+
+		if (dlgProgressP) mdlDialog_completionBarUpdate(dlgProgressP, 0, (int)(((double)i / (double)mdlListModel_getRowCount(pListModel)) * 100.));
+	}
+
+	if (dlgProgressP) mdlDialog_completionBarClose(dlgProgressP);
+
+	mdlDialog_listBoxDrawContents(pListBoxItem->rawItemP, -1, REIN_LISTB_SAVE);
+
+	//updateModelElmNumbers(rmP, true); // зачем обновлять номера?
+
+}
 
 
 /////////////////////////////////
@@ -7352,6 +7441,34 @@ extern "C" DLLEXPORT  int MdlMain
 	{
 		bNoLoad = true;
 	}
+
+
+	if (mdlSystem_getCfgVar(0, L("REIN_START_AND_UNLOAD"), 0) == SUCCESS)
+	{
+		//printf("REIN_START_AND_UNLOAD\n");
+
+		//for (int i = 0; i < argc; i++)
+		//	printf("arg %i - %s\n", i, argv[i]);
+
+		int r = mdlSystem_deleteCfgVar(L("REIN_START_AND_UNLOAD"));
+
+		mdlOutput_messageCenter(MESSAGE_WARNING, L("REIN mdl app unloaded"), 
+			L("REIN mdl app unloaded by config variable REIN_START_AND_UNLOAD, this variable is also undefined"), MESSAGE_ALERT_NONE);
+
+		//printf("undef var status %i\n", r);
+
+		mdlInput_sendCommand(CMD_MDL_UNLOAD, mdlSystem_getCurrTaskID(), INPUTQ_EOQ, 0, 0);
+
+#if defined (MSVERSION) && (MSVERSION == 0x8b0) // end of main
+		return SUCCESS;
+#else
+		return;
+#endif
+	}
+
+
+
+
 	//map<UInt32, UInt32> mapElms;
 	//mapElms.insert(pair<UInt32, UInt32>(456, 789));
 
@@ -7505,6 +7622,7 @@ extern "C" DLLEXPORT  int MdlMain
 		{ (CmdHandler)cmdReinDups,		CMD_REIN_DUPS				},
 		{ (CmdHandler)cmdHideposDel,	CMD_REIN_HPDEL				}, // bar sets info
 		{ (CmdHandler)cmdConcrete,		CMD_REIN_CONCRETE			},
+		{ (CmdHandler)cmdPosSync,		CMD_REIN_POS_SYNC			},
 		0,
 	};
 

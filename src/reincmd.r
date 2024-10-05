@@ -131,6 +131,7 @@ CommandTable CT_POS =
     {  5, CT_NONE, INHERIT, NONE, "DRAW"}, // 
     {  6, CT_NONE, INHERIT, NONE, "ENUM"}, // пронумеровать
     {  7, CT_NONE, INHERIT, NONE, "CATCH"}, // пронумеровать
+    {  8, CT_NONE, INHERIT, NONE, "SYNC"}, // сохранить позиции в файле (дискета)
 };
 
 

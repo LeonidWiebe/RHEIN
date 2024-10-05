@@ -142,6 +142,7 @@ Fixes
 
 14.8.22
 Positions numbers batch set/clear by option in column named "@"
+New command REIN POS SYNC - batch 'save position' command for all positions in list
 Fixes
 
 14.8.23

@@ -41,6 +41,7 @@
 #define CMD_REIN_POS_DRAW                       0x01220500  /* PARAMETERS */ 
 #define CMD_REIN_POS_ENUM                       0x01220600  /* PARAMETERS */ 
 #define CMD_REIN_POS_CATCH                      0x01220700  /* PARAMETERS */ 
+#define CMD_REIN_POS_SYNC                       0x01220800  /* PARAMETERS */ 
 #define CMD_REIN_SAVEPLOT                       0x01230000  /* PARAMETERS */ 
 #define CMD_REIN_SAVEPLOT_CLEAR                 0x01230100  /* PARAMETERS */ 
 #define CMD_REIN_SAVEPLOT_REFS                  0x01230200  /* PARAMETERS */ 
