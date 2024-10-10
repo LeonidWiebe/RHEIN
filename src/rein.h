@@ -233,7 +233,7 @@
 
 #define LOGIN writeLogIn(__FUNCTION__, 0);
 #define LOGOUT writeLogOut(__FUNCTION__, 0);
-#define RETURN_LOGOUT writeLogOut(__FUNCTION__, 0); return;
+#define RETURN_LOGOUT {writeLogOut(__FUNCTION__, 0); return;}
 
 
 
