@@ -2609,7 +2609,7 @@ void reinbar::checkBarPoints(int bBends)
 
 		int res = ERROR;
 		
-		if (modrefP) res = mdlCnv_masterToUOR(&dst, dst, modrefP);
+		if (modrefP) res = mdlCnv_UORToMaster(&dst, dst, modrefP);
 
 		if (res == SUCCESS && dst < (double)iCfgVar_MinSegment)
 		{
