@@ -7343,16 +7343,17 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 	)
 	{
 
-		//writeLogIn(__FUNCTION__, 0);
+		writeLogIn(__FUNCTION__, 0);
 
-		//callbackDgnFileChanged(afterUndoRedo, beforeUndoRedo, 0, 0);
+		// не отключать, иначе глюки
+		callbackDgnFileChanged(afterUndoRedo, beforeUndoRedo, 0, 0);
 
-		//writeLogOut(__FUNCTION__, 0);
 
 		if (beforeUndoRedo) checkBarsSetElem(beforeUndoRedo, true); // для appTypeBarSet
 
 		if (afterUndoRedo) checkBarsSetElem(afterUndoRedo, false); // для appTypeBarSet
 
+		writeLogOut(__FUNCTION__, 0);
 	}
 
 
