@@ -125,6 +125,7 @@ CmdItemListRsc CMD_REIN_BARSET =
     {{
 {{05.00*XC,0.50*YC,0,0}, OptionButton, 95, ON, 0, "", ""},
 {{05.00*XC,2.00*YC,0,0}, ToggleButton, 252, ON, 0, "", ""},
+{{05.00*XC,3.50*YC,0,0}, ToggleButton, 253, ON, 0, "", ""},
 	}};
 
 
@@ -1648,6 +1649,14 @@ DItem_ToggleButtonRsc 252 =
     NOHOOK, NOARG, NOMASK, NOINVERT,
     TXT_93,
     "barsetdim"
+    };
+
+DItem_ToggleButtonRsc 253 =
+    {
+    NOCMD, LCMD, NOSYNONYM, NOHELP, MHELP,
+    NOHOOK, NOARG, NOMASK, NOINVERT,
+    TXT_93_1,
+    "barsetall"
     };
 
 

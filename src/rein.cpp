@@ -1380,7 +1380,7 @@ void barSetFenceProcess(int step)
 			NULL,
 			(StateFunc_DataPoint)reinLocatePoint, 
 			(StateFunc_Reset)mdlState_startDefaultCommand, 
-			1, 0, FENCE_CLIP_ORIG);
+			1, 0, FENCE_NO_CLIP);
 
 		mdlFence_process(0); // only hilite, set bUpdate flags, runs fenceContent()
 
@@ -1693,40 +1693,53 @@ void reinLocateShowElem(DPoint3dCP point, int view)
 	int ret;
 
 
+	vElemLoc.clear();
 
-	//DisplayPathP dpP = mdlLocate_getCurrPath();
-	//for (int i = 0; i < mdlDisplayPath_getCount(dpP); ++i)
-	//{
-	//	ElementRef  eref = mdlDisplayPath_getElem(dpP, i);
-	//}
 
 	ReinCache prm;
 
-	//filePosRein = mdlElement_getFilePos(FILEPOS_CURRENT, &curElemModelRef);
-	// неа
+	filePosRein = mdlElement_getFilePos(FILEPOS_CURRENT, &curElemModelRef);
 
-	if (!vElemLoc.empty())
+
+	if (rDopInfo.dopopt[13])
 	{
-		printf("eeee tak delo ne poidet");
-		return;
-	}
+		// mdlLocate_findElement не дружит с текущей командой, hilite не работает, идет сброс
+		// надо разбираться с DisplayPathP
+		// mdlLocate_getCurrPath() после каждого reset возвращает разные fp
 
-
-	filePosRein = mdlLocate_findElement(point, view, FALSE, ComponentMode_None, TRUE);
-	curElemModelRef = mdlLocate_getCurrModelRef();
-
-	prm.pnum = filePosRein;
-	prm.mrP = curElemModelRef;
-
-
-	while (prm.pnum)
-	{
-		vElemLoc.push_back(prm);
-
-		prm.pnum = mdlLocate_findElement(point, view, TRUE, ComponentMode_None, TRUE);
+		prm.pnum = mdlLocate_findElement(point, view, FALSE, ComponentMode_None, FALSE);
 		prm.mrP = mdlLocate_getCurrModelRef();
+		prm.elref = getElemRefByFPos(prm.mrP, prm.pnum, TRUE);
 
+		while (prm.pnum)
+		{
+			vElemLoc.push_back(prm);
+
+			prm.pnum = mdlLocate_findElement(point, view, TRUE, ComponentMode_None, FALSE);
+			prm.mrP = mdlLocate_getCurrModelRef();
+			prm.elref = getElemRefByFPos(prm.mrP, prm.pnum, TRUE);
+
+		}
 	}
+
+
+
+
+	//for (int i = 0; dpP && i < mdlDisplayPath_getCount(dpP); ++i)
+	//{
+	//	ElementRef  eref = mdlDisplayPath_getElem(dpP, i);
+	//	prm.pnum = elementRef_getFilePos(eref);
+	//	ReinModel* rmP = curRM->getRM(curElemModelRef);
+	//	if (rmP)
+	//	{
+	//		ReinElm* relmP = rmP->getReinElm(prm.pnum);
+	//		if (relmP)
+	//		{
+	//		}
+	//	}
+	//}
+
+
 
 	// не то
 	//prm.fp = mdlElement_getFilePos(FILEPOS_CURRENT, &prm.mrP);
@@ -1746,8 +1759,8 @@ void reinLocateShowElem(DPoint3dCP point, int view)
 	filePosReinSpace = 0;
 	filePosReinSurf = 0;
 
-	if (vElemLoc.empty()) return;
-	if (filePosRein == 0) return; // old
+	//if (vElemLoc.empty()) return;
+	if (filePosRein == 0) return;
 	//if (filePosRSElementOffset == 0) 	return;
 
 
@@ -2484,19 +2497,23 @@ int	reinLocatePoint(
 		}
 		else if (iAC == CMD_REIN_BARSET)
 		{
-			if (!vElemLoc.empty())
+			if (rDopInfo.dopopt[13])
 			{
-				int bPlaceDim = rDopInfo.dopopt[6];
-
-				for (vector<ReinCache>::iterator it = vElemLoc.begin(); it != vElemLoc.end(); ++it)
+				if (!vElemLoc.empty())
 				{
-					reinSetBarInSpace(ptP, it->pnum, it->mrP, rInfo.option[16], bPlaceDim);
-					bPlaceDim = FALSE; // хватит
+					int bPlaceDim = rDopInfo.dopopt[6];
+					for (vector<ReinCache>::iterator it = vElemLoc.begin(); it != vElemLoc.end(); ++it)
+					{
+						reinSetBarInSpace(ptP, it->pnum, it->mrP, rInfo.option[16], bPlaceDim);
+						bPlaceDim = FALSE; // хватит
+					}
 				}
-
+			}
+			else
+			{
+				reinSetBarInSpace(ptP, filePosRein, curElemModelRef, rInfo.option[16], rDopInfo.dopopt[6]);
 			}
 
-			//reinSetBarInSpace(ptP, filePosRein, curElemModelRef, rInfo.option[16], rDopInfo.dopopt[6]);
 		}
 		else if (iAC == CMD_REIN_CHLAP)
 		{
@@ -8312,14 +8329,14 @@ void drawReinElm(
 						output.DrawArc3d(ell, true, true, 0);
 #else
 
-
 						//if (drawPurpose == 5)
-						//{
-						//OvrMatSymbP ovrMatSymb = context->GetOverrideMatSymb();
-						//ovrMatSymb->SetIndexedLineColor(viewPortP->GetHiliteColor(),0);
-						//output->ActivateOverrideMatSymb(ovrMatSymb);
-						//context->CookElemDisplayParams(*elemIterP);
+						//{ // не фурычет
+						////OvrMatSymbP ovrMatSymb = context->GetOverrideMatSymb();
+						////ovrMatSymb->SetIndexedLineColor(viewPortP->GetHiliteColor(),0);
+						////output->ActivateOverrideMatSymb(ovrMatSymb);
+						////context->CookElemDisplayParams(*elemIterP);
 						//}
+
 
 						// SECTION
 						output->DrawArc3d(&pOrg, 0, &ppp[0], &ppp[1], dSecRad, dSecRad, NULL, NULL, true, NULL);
@@ -31610,8 +31627,8 @@ UInt32 checkDrawElem(MSElementDescrCP edp,
 				//ReinPos* rpItP = &daCurBarSet[i];
 				//if (rpItP <= 0) continue;
 
-				if (relmP->bel.inum == 17 && relmP->bel.elemid== 6402223 && aref.front() ==12)
-					int a = 0;
+				//if (relmP->bel.inum == 17 && relmP->bel.elemid== 6402223 && aref.front() ==12)
+				//	int a = 0;
 
 				if (rpItP->second.bar.inum == relmP->bel.inum && 
 					rpItP->second.bar.elemid == relmP->bel.elemid &&

@@ -116,6 +116,7 @@
 #define TXT_91						"Display settings"
 #define TXT_92						L("active model")
 #define TXT_93						"place dimension"
+#define TXT_93_1					"all under cursor"
 #define TXT_94						"Begin shift"
 #define TXT_95						"End shift"
 #define TXT_96_1					" (pieces)"

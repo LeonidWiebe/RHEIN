@@ -172,3 +172,6 @@ and according to this comes new regeneration command - REIN RELOAD SPACES - to r
 5) Important fixes for linear contours
 6) new config var REIN_BARSET_REF_NESTING (default -1) # drawing section: bar hide/unhide load data from refs nesting level - 0 no load, -1 unlim nesting, >0 nesting level
 7) Other fixes
+
+14.8.27
+Locating bars method improved

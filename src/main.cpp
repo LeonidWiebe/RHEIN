@@ -3433,8 +3433,8 @@ typedef enum DrawPurpose
 	//if (id == 4586430)
 	//	int aa = 0;
 
-	//if (fp == 4001062)
-	//	__asm nop;
+	if (fp == 4004166)
+		__asm nop;
 
 
 	ReinModel* rmP = curRM->getRM(mrP);
@@ -8239,6 +8239,7 @@ extern "C" DLLEXPORT  int MdlMain
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "barendsrefs", &rDopInfo.dopopt[4]);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "barendshil", &rDopInfo.dopopt[5]);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "barsetdim", &rDopInfo.dopopt[6]);
+	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "barsetall", &rDopInfo.dopopt[13]);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "drawvedrealbar", &rDopInfo.dopopt[10]);
 
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "saveinfo", &rDopInfo.dopopt[14]);
