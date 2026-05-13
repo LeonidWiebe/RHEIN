@@ -10422,7 +10422,7 @@ int readReinElmIso(ReinElm* reP, MSElementDescr* edP, int bLoadAxis, int bUpdVec
 						UInt32 wgt = 10;
 						mdlElmdscr_duplicate(&edpAxErr, edpAx);
 						func_amp(mdlElmdscr_setSymbology, edpAxErr), &clr, 0, &wgt, 0);
-						xmlAddCacheInfo(reP, &edpAxErr, fName);
+						xmlAddCacheInfo(reP, &edpAxErr, fName, false, rmmP);
 						TransDescrP tedP = mdlTransient_addElemDescr(NULL, edpAxErr, TRUE, 0x00ff, DRAW_MODE_Normal, 1, 0, 0);
 					}
 				}
@@ -10483,7 +10483,7 @@ int readReinElmIso(ReinElm* reP, MSElementDescr* edP, int bLoadAxis, int bUpdVec
 								MSWCH str[100];
 								_swprintf(str, L"#####%u", reP->bel.ffpos[REIN_ELEM_ISO]);
 
-								xmlAddCacheInfo(reP, &edpAxClip, str);
+								xmlAddCacheInfo(reP, &edpAxClip, str, false, rmP);
 
 								// добавление точки чтобы можно было привязываться к сечению на разрезе
 								rmP->tedSecP = mdlTransient_addElemDescr(rmP->tedSecP, edpAxClip, TRUE, 0x00ff, DRAW_MODE_Normal, 1, 0, 0); // ПРИВЯЗКА К СЕЧЕНИЮ
@@ -24845,7 +24845,7 @@ void posListAddRow(ListModel* pListModel, ReinPos* rpP, bool bRealPos, long ind,
 		pCell = mdlListRow_getCellAtIndex (pRow, REIN_LISTB_POSN);
 		if (bRealPos)
 		{
-			mdlListCell_setDoubleValue (pCell, (double)rpP->bar.pnum);
+			mdlListCell_setDoubleValue (pCell, (double)(rpP->bar.pnum));
 			if (rpP->bar.pnum) mdlListCell_setDisplayText(pCell, v);
 			if (curPos_rn == 0) mdlListCell_setEditor (pCell, RTYPE_Text, TEXTID_Space, mdlSystem_getCurrMdlDesc(), FALSE, TRUE);
 			res = mdlListCell_setInfoFieldInt32(pCell, 0, ind);
@@ -27842,8 +27842,10 @@ void insertCurBarsMember2(ReinElm* reToAddP, MSElementDescr* edP, UInt32 iBarFP,
 	//ReinModel* rmSrchP = rmP;
 	//if (rmP->bRefPlus) rmSrchP = curRM;
 
+	CatInfo& poscat = rmP->getCat(reP);
 
-	for (map<long, ReinPos>::iterator it = rmP->getPosMap().begin(); it != rmP->getPosMap().end(); ++it)
+
+	for (map<long, ReinPos>::iterator it = poscat.arCurPos.begin(); it != poscat.arCurPos.end(); ++it)
 	{
 		ReinPos* rpItP = &it->second;
 
@@ -28573,17 +28575,21 @@ void scanFilePositions(ReinModel* rmP, DgnModelRefP mrP, bool bClearCats, bool b
 
 	if (rmP->mrci.catID > 0)
 	{
-		map <UInt32, CatInfo>::iterator it = mapCats.find(rmP->mrci.catID);
+		UInt32 ctID = 0;
+
+		if (rmP->arMrP.empty()) // if no parent model exists - set separate 
+			ctID = rmP->mrci.catModID;
+		else
+			ctID = rmP->mrci.catID;
+
+		map <UInt32, CatInfo>::iterator it = mapCats.find(ctID);
 
 		if (it == mapCats.end()) // not found, add first one
 		{
 			// copy new to common
 			//if (!rmP->mrci.arCurPos.empty()) // models without saved positions are also needed to fill them by elements
 
-			if (rmP->arMrP.empty()) // if no parent model exists - set separate 
-				mapCats[rmP->mrci.catModID] = rmP->mrci;
-			else
-				mapCats[rmP->mrci.catID] = rmP->mrci;
+			mapCats[ctID] = rmP->mrci;
 
 			if (iDebug) sprintf(sLogMes, "cat %u redefined to common\n", rmP->mrci.catID); writeLog(0, 0, 0, 1);
 		}
@@ -34393,7 +34399,7 @@ void setPosition(ReinPos* rpP, ReinElm* relmP, ReinModel* rmP, int dirout)
 	rpP->cmppt.y = (Int32)roundExt( mdlCnv_uorsToMasterUnits(relmP->bel.rpts[i].y), ROUND_STD);
 	rpP->cmppt.z = (Int32)roundExt( mdlCnv_uorsToMasterUnits(relmP->bel.rpts[i].z), ROUND_STD);
 
-	if ( mdlModelRef_isActiveModel(relmP->bel.modrefP) 
+	if (mdlModelRef_isActiveModel(relmP->bel.modrefP)
 		//|| bSwap
 		)
 	{
@@ -34403,6 +34409,8 @@ void setPosition(ReinPos* rpP, ReinElm* relmP, ReinModel* rmP, int dirout)
 		rpP->muft_qty[0] += mqty[0];
 		rpP->muft_qty[1] += mqty[1];
 	}
+	else
+		rpP->file_qty_rm += relmP->bel.length;
 
 	{
 		if (relmP->bel.noplanar == 1) rpP->bar.noplanar = 1;
@@ -34483,12 +34491,12 @@ int sortReinPos(ReinPos* rp1, ReinPos* rp2) // Not Using
 
 ////////////////////////////////////////////
 // func: get possitions map
-map<long, ReinPos>& ReinModel::getPosMap(void)
+map<long, ReinPos>& ReinModel::getPosMap(ReinElm* reP)
 {
 
 	//writeLogIn(__FUNCTION__, 0);
 
-	CatInfo poscat = getCat();
+	CatInfo& poscat = getCat(reP);
 
 	//if (!catPosXml.arCurPos.empty())
 	//{
@@ -34510,7 +34518,7 @@ map<long, ReinPos>& ReinModel::getPosMap(void)
 
 ////////////////////////////////////////////
 // func: get possitions map
-CatInfo& ReinModel::getCat(void)
+CatInfo& ReinModel::getCat(ReinElm* reP)
 {
 
 	//writeLogIn(__FUNCTION__, 0);
@@ -34520,17 +34528,46 @@ CatInfo& ReinModel::getCat(void)
 		return catPosXml;
 	}
 
+
 	if (iCfgVar_PosListMerge && mrci.catID > 0)
 	{
 
-		map <UInt32, CatInfo>::iterator it = mapCats.find(mrci.catID);
-
-		if (it != mapCats.end()) // found
+		if (reP && reP->relmLevName.length() > 0)
 		{
-			//writeLogOut(__FUNCTION__, 0);
+			for (map <UInt32, CatInfo>::iterator itt = mapCats.begin(); itt != mapCats.end(); ++itt)
+			{
+				if (!itt->second.dqlvnm.empty() && itt->second.catID == mrci.catID)
+				{
+					for (deque <wstring>::iterator itstr = itt->second.dqlvnm.begin(); itstr != itt->second.dqlvnm.end(); ++itstr)
+					{
+						if (*itstr == reP->relmLevName)
+						{
+							MSWCH sspc[1000];
 
-			return it->second;
+							SCPM2W(sspc, itt->second.catname, 1000);
+
+							reP->relmSpecName = sspc;
+
+							return itt->second;
+							break;
+						}
+					}
+				}
+			}
 		}
+		else
+		{
+			map <UInt32, CatInfo>::iterator it = mapCats.find(mrci.catID);
+
+			if (it != mapCats.end()) // found
+			{
+				//writeLogOut(__FUNCTION__, 0);
+
+				return it->second;
+			}
+
+		}
+
 	}
 
 	//writeLogOut(__FUNCTION__, 0);
@@ -34547,10 +34584,13 @@ void ReinModel::updateModelElmNumbers(bool bSkipIfLot, map<long, ReinPos>* arCur
 	writeLogIn(__FUNCTION__, 0);
 
 	bool bBarLoc = false;
+	bool bRedir = false;
 
 
 	long i = 0;
-	if (dlgProgressP == NULL && mapElms.size() > 10000 && getPosMap().size() > 300)
+	if (dlgProgressP == NULL && mapElms.size() > 10000 
+		//&& getPosMap().size() > 300
+		)
 	{
 		if (bSkipIfLot) return;
 			
@@ -34563,9 +34603,10 @@ void ReinModel::updateModelElmNumbers(bool bSkipIfLot, map<long, ReinPos>* arCur
 	{
 		bBarLoc = false;
 	}
-	else
+	else // arCurPosP == NULL
 	{
-		arCurPosP = &getPosMap();
+		//arCurPosP = &getPosMap();
+		bRedir = true;
 	}
 
 
@@ -34573,6 +34614,12 @@ void ReinModel::updateModelElmNumbers(bool bSkipIfLot, map<long, ReinPos>* arCur
 	{
 		ReinElm* reP = &(it->second);
 		int dirout = 0;
+
+		if (bRedir)
+		{
+			CatInfo& poscat = getCat(reP);
+			arCurPosP = &(poscat.arCurPos);
+		}
 
 		for (map<long, ReinPos>::iterator itt = arCurPosP->begin(); itt != arCurPosP->end(); ++itt)
 		{
@@ -34706,7 +34753,7 @@ long addConttNum(ReinBar* rbP)
 
 
 /////////////////////////////////////////////////////////////////
-int xmlAddCacheInfo(ReinElm* relmP, MSElementDescr** edpP, MSWCH* stadd, bool bClear)
+int xmlAddCacheInfo(ReinElm* relmP, MSElementDescr** edpP, MSWCH* stadd, bool bClear, ReinModel* rmP)
 {
 
 	MSWCH wstr[2000];
@@ -34714,16 +34761,19 @@ int xmlAddCacheInfo(ReinElm* relmP, MSElementDescr** edpP, MSWCH* stadd, bool bC
 	XMLFragmentListP    pCurrent = NULL;
 	int status;
 	MSElementDescr* edp;
-	ELID attid = 0;
+	//ELID attid = 0;
 
 	if (relmP == NULL) return 0;
 	if (edpP == NULL) return 0;
 
-	if (relmP->bel.modrefP)
-		attid = mdlModelRef_getAttachmentID(relmP->bel.modrefP);
+	//if (relmP->bel.modrefP)
+	//	attid = mdlModelRef_getAttachmentID(relmP->bel.modrefP);
 
 	edp = *edpP;
 
+	UInt32 rmid = 0;
+
+	if (rmP) rmid = rmP->rmid;
 
 	//_swprintf(wstr, L"REINCACHE;%i;%i",
 	//	relmP->bel.diam,
@@ -34733,12 +34783,12 @@ int xmlAddCacheInfo(ReinElm* relmP, MSElementDescr** edpP, MSWCH* stadd, bool bC
 	if (stadd != NULL)
 		wsadd = stadd;
 
-	_swprintf(wstr, L"REINCACHE;%i;%s;%d;%I64u;%I64u;%s",
+	_swprintf(wstr, L"REINCACHE;%i;%s;%d;%I64u;%u;%s",
 		relmP->bel.diam,		
 		curPos_refpath.c_str(),
 		relmP->bel.pnum,
 		relmP->bel.elemid,
-		attid,
+		rmid,
 		wsadd
 		);
 
@@ -34852,18 +34902,24 @@ int readReinCacheFromString(ReinCache* rcP, wstring str)
 
 	IF_IT_nxt IF_IT_end return SUCCESS;
 	{
-		ELID atid;
+		UInt32 rmid = wcstoul(it->c_str(), 0, 0);
 
-#if defined (MSVERSION) && (MSVERSION == 0xa00) // ref file
-		DgnAttachmentP rfP;
-#else
-		ReferenceFile* rfP;
-#endif
+		ReinModel* rmP = curRM->getRMbyID(rmid);
 
-		if (swscanf(it->c_str(), L"%I64u", &atid) != 1) atid = 0;
+		if (rmP) rcP->mrP = rmP->modelP;
 
-		if (mdlRefFile_getFromAttachmentID(&rfP, &rcP->mrP, ACTIVEMODEL, atid) != SUCCESS)
-			rcP->mrP = NULL;
+//		ELID atid;
+//
+//#if defined (MSVERSION) && (MSVERSION == 0xa00) // ref file
+//		DgnAttachmentP rfP;
+//#else
+//		ReferenceFile* rfP;
+//#endif
+//
+//		if (swscanf(it->c_str(), L"%I64u", &atid) != 1) atid = 0;
+//
+//		if (mdlRefFile_getFromAttachmentID(&rfP, &rcP->mrP, ACTIVEMODEL, atid) != SUCCESS)
+//			rcP->mrP = NULL;
 	}
 
 	IF_IT_nxt IF_IT_end return SUCCESS;

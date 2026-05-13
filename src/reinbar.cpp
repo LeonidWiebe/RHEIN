@@ -1416,6 +1416,7 @@ void ReinModel::Init()
 	//ZeroMemory(&refPrefs, sizeof(refPrefs));
 
 	rnum = 0;
+	rmid = iReinModelIDiter++;
 
 	mrci.clear();
 
@@ -3787,6 +3788,27 @@ ReinModel* ReinModel::getRM(deque <UInt32> &aref)
 
 }
 
+//////////////////////////////////////////
+ReinModel* ReinModel::getRMbyID(UInt32 rmidin)
+{
+
+	if (rmid == rmidin)
+	{
+		return this;
+	}
+
+	ReinModel* rmP = NULL;
+
+	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+	{
+		rmP = it->second.getRMbyID(rmidin);
+
+		if (rmP) break;
+	}
+
+	return rmP;
+
+}
 
 //////////////////////////////////////////
 ReinModel* ReinModel::getRM(UInt32 rn) // поиск по одному номеру - используется в окошке позиций

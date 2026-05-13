@@ -154,3 +154,7 @@ New command 'REIN POS LOAD' loads positions from xml file.
 These operations are experimental.
 3) Special symbology for reference file
 4) Fixes
+
+14.8.24
+new keyin: REIN POS DBSAVE LEVELS - save level names for current model
+New combinations of positions detecting

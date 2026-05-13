@@ -1005,6 +1005,7 @@ typedef struct reinelm
 	int bTransientInProgress;
 
 	wstring relmLevName; // level name, use only for position search
+	wstring relmSpecName;
 
 #ifdef _REIN_H_
 	DLLEXPORT
@@ -1054,6 +1055,7 @@ typedef struct ReinModel
 	ReinModel* getRM(UInt32 rn);
 	ReinModel* getRM(deque <UInt32> &aref);
 	ReinModel* getRM(wstring ws);
+	ReinModel* getRMbyID(UInt32 rmid);
 	//ReinModel* getRM(UInt32* aref);
 	void reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int iLoadRefs, bool bScanPos = true);
 	//UInt32 getIndMax();
@@ -1085,8 +1087,8 @@ typedef struct ReinModel
 
 	//ReinPos* arPos = NULL;
 
-	map<long, ReinPos>& getPosMap(void);
-	CatInfo& getCat(void);
+	map<long, ReinPos>& getPosMap(ReinElm* reP = NULL);
+	CatInfo& getCat(ReinElm* reP = NULL);
 
 	//vector<ReinPos> arCurPos; //x
 	//ReinPos arCurPos[1000];
@@ -1097,6 +1099,7 @@ typedef struct ReinModel
 	ReinInfoRef refPrefs;
 
 	UInt32 rnum;
+	UInt32 rmid; // ReinModel id, identificator for current loaded session
 	//int prnum; // parent ref num
 
 	//UInt32 indmax;

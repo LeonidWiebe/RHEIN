@@ -21,6 +21,8 @@
 
 	extern int iModePosCatch; // 
 
+	extern UInt32 iReinModelIDiter;
+
 	extern int bUseDB;
 
 	extern UInt32 curggn;
@@ -701,7 +703,7 @@ UInt32 checkDrawElem(MSElementDescrCP edp,
 
 int savePlotFile(ReinModel* rmP);
 
-int xmlAddCacheInfo(ReinElm* relmP, MSElementDescr** edpP, MSWCH* stadd = NULL, bool bClear = false);
+int xmlAddCacheInfo(ReinElm* relmP, MSElementDescr** edpP, MSWCH* stadd = NULL, bool bClear = false, ReinModel* rmP = NULL);
 
 int readReinCacheFromElement(
 	ReinCache* rcP,
@@ -785,6 +787,8 @@ int xmlAddNoteInfo(ReinNote* rnP, WCH* strNoteFmt, MSElementDescr** edpP, int ie
 void reinCalcAnker(void);
 
 int reinGetLevelMask(MSElementDescrCP edP, UInt32 fp, DgnModelRefP mrP);
+
+wstring getReinModelLevelsString(DgnModelRefP mrP);
 
 //int callbackViewPlot( int plotEvent, MSWindow* wP);
 

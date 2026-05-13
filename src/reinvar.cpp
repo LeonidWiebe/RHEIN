@@ -274,6 +274,8 @@ ReinNote curNote;
 
 int iModePosCatch = 0;
 
+UInt32 iReinModelIDiter = 1;
+
 int iModelType = MODTYPE_NONE; // was bIsModel
 //char sModelType[10];
 //long iOfftCatID = 0;

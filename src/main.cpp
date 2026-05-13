@@ -1699,8 +1699,17 @@ extern "C" DLLEXPORT void cmdHidepos(
 		}
 	}
 
-	mdlDialog_dmsgsPrint(L("======= ALLES ======"));
+	char slev[5000];
+	wstring wstrlev = getReinModelLevelsString(ACTIVEMODEL);
 
+	SCPW2M(slev, wstrlev.c_str(), 5000);
+
+	mdlDialog_dmsgsPrint(L("======= SAVED LEVEL NAMES OF ACTIVE MODEL ======"));
+
+	mdlDialog_dmsgsPrint(slev);
+
+
+	mdlDialog_dmsgsPrint(L("======= ALLES ======"));
 
 }
 
@@ -4631,36 +4640,45 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 		XMLFragmentListP  oXMLFragmentList = NULL;
 
-		//vector <UInt32> aref;
-		//UInt32 aref[MAX_REFNUM_PATH]; // обратный путь, для рефа 5->3->7 массив: [0] = 7, [1] = 3, [2] = 5
-		deque<UInt32> aref;
-		size_t refcnt = rmP->getRefPath(&aref);
 
-
-		//for (vector<UInt32>::iterator it = aref.begin(); it != aref.end(); ++it)
-		//for (UInt32 i = 0; i < aref.size(); i++)
-		//{
-		//	swprintf(fName, 300, L"[%u]", *it);
-		//	if (wcslen(fpath) > 0) wcscat(fpath, L"->");
-		//	wcscat(fpath, fName);
-		//}
-		for (deque<UInt32>::reverse_iterator it = aref.rbegin(); it != aref.rend(); ++it)
-		//for (int i = refcnt - 1; i >= 0; i--)
+		if (relm.relmSpecName.length() > 0)
 		{
-			_swprintf(fName, L"[%u]", *it);
-			if (wcslen(fpath) > 0) wcscat(fpath, L"->");
-			wcscat(fpath, fName);
+			_swprintf(fName, L"%s", relm.relmSpecName.c_str());
 		}
+		else
+		{
+			//vector <UInt32> aref;
+			//UInt32 aref[MAX_REFNUM_PATH]; // обратный путь, для рефа 5->3->7 массив: [0] = 7, [1] = 3, [2] = 5
+			deque<UInt32> aref;
+			size_t refcnt = rmP->getRefPath(&aref);
+
+
+			//for (vector<UInt32>::iterator it = aref.begin(); it != aref.end(); ++it)
+			//for (UInt32 i = 0; i < aref.size(); i++)
+			//{
+			//	swprintf(fName, 300, L"[%u]", *it);
+			//	if (wcslen(fpath) > 0) wcscat(fpath, L"->");
+			//	wcscat(fpath, fName);
+			//}
+			for (deque<UInt32>::reverse_iterator it = aref.rbegin(); it != aref.rend(); ++it)
+			//for (int i = refcnt - 1; i >= 0; i--)
+			{
+				_swprintf(fName, L"[%u]", *it);
+				if (wcslen(fpath) > 0) wcscat(fpath, L"->");
+				wcscat(fpath, fName);
+			}
 
 #if defined (MSVERSION) && (MSVERSION == 0xa00)
-		mdlModelRef_getFileName(rmP->modelP, fName, 300);
-		mdlFile_parseName(fName, 0, 0, mName, 0);
+			mdlModelRef_getFileName(rmP->modelP, fName, 300);
+			mdlFile_parseName(fName, 0, 0, mName, 0);
 #else
-		mdlModelRef_getFileNameW(rmP->modelP, fName, 300);
-		mdlFile_parseNameW(fName, 0, 0, mName, 0);
+			mdlModelRef_getFileNameW(rmP->modelP, fName, 300);
+			mdlFile_parseNameW(fName, 0, 0, mName, 0);
 #endif
-		_swprintf(fName, L"%s %s", fpath, mName);
-		mdlModelRef_getModelName(rmP->modelP, mName);
+			_swprintf(fName, L"%s %s", fpath, mName);
+			mdlModelRef_getModelName(rmP->modelP, mName);
+		}
+
 
 
 		if (elmRef)
@@ -4820,18 +4838,25 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 					//rn = getRefNum(edP->h.dgnModelRef);
 
-					for (map<long, ReinPos>::iterator it = rmP->getPosMap().begin(); it != rmP->getPosMap().end(); ++it)
+					if (relm.relmSpecName.length() > 0)
 					{
-
-						ReinPos* rpItP = &it->second;
-
-						if (rpItP->bar.pnum == 0) continue;
-
-						if (barsEqual(&relm.bel, &rpItP->bar)
-							//&& ci.catModID == rpItP->pcatID
-							)
+						arPos[iPosCount++] = relm.bel.pnum;
+					}
+					else
+					{
+						for (map<long, ReinPos>::iterator it = rmP->getPosMap().begin(); it != rmP->getPosMap().end(); ++it)
 						{
-							arPos[iPosCount++] = rpItP->bar.pnum;
+
+							ReinPos* rpItP = &it->second;
+
+							if (rpItP->bar.pnum == 0) continue;
+
+							if (barsEqual(&relm.bel, &rpItP->bar)
+								//&& ci.catModID == rpItP->pcatID
+								)
+							{
+								arPos[iPosCount++] = rpItP->bar.pnum;
+							}
 						}
 					}
 
