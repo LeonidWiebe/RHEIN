@@ -1143,6 +1143,29 @@ reincache::reincache(void)
 }
 
 
+reinbarset::reinbarset(void)
+{
+	clear();
+}
+
+void reinbarset::clear(void)
+{
+	bsdrawmode = 0;
+	//bsset = 0;
+	bsnum = 0;
+	bseid = 0;
+	//wstrsave = L"";
+
+	bMustUpdate = false;
+	bFromRef = false;
+
+	mrP = NULL;
+	bselref = NULL; // for hilite
+
+	aref.clear();
+}
+
+
 
 //int reinelm::readFromString(wstring str, DgnModelRefP mrP)
 //{
@@ -1176,43 +1199,41 @@ void catinfo::clearPosCalc()
 /// <param name="wstr">ключ</param>
 /// <param name="bForSave">1 для сохранения в файл, 0 - для ключа mapBarSet</param>
 /// <returns></returns>
-bool reinpos::getIdentChars(MSWCH* wstr, int bForSave)
+bool reinbarset::getIdentChars(MSWCH* _wstr, int bForSave)
 {
 
 	UInt32 rn = 0;
 
-	if (!arefnum.empty())
+	if (!aref.empty())
 	{
-		rn = arefnum.back(); // обратный массив
+		rn = aref.back(); // обратный массив
 	}
 
 	if (bForSave)
 	{
-		_swprintf(wstr, L"%i|%i|%u|%I64u",
-			drawmode,
-			bar.inum,
-			rn, // ref path see below
-			bar.elemid
+		_swprintf(_wstr, L"%i|%i|%u|%I64u",
+			bsdrawmode,
+			bsnum,
+			rn, // ref path not using, see below
+			bseid
 		);
 	}
 	else
 	{
-		_swprintf(wstr, L"%i|%I64u",
-			bar.inum,
-			bar.elemid
+		_swprintf(_wstr, L"%i|%I64u",
+			bsnum,
+			bseid
 		);
 	}
 
 
-
-
 	// add ref path to wstr
-	for (deque<UInt32>::iterator it = arefnum.begin(); it != arefnum.end(); ++it)
+	for (deque<UInt32>::iterator it = aref.begin(); it != aref.end(); ++it)
 	{
 		{
 			MSWCH locstr[500];
 			_swprintf(locstr, L"|%u", *it);
-			wcscat(wstr, locstr);
+			wcscat(_wstr, locstr);
 		}
 	}
 
@@ -1224,14 +1245,14 @@ bool reinpos::getIdentChars(MSWCH* wstr, int bForSave)
 /// получение ключа для mapBarSet
 /// </summary>
 /// <returns></returns>
-wstring reinpos::getMapIdentString()
+wstring reinbarset::getMapIdentString()
 {
 
-	MSWCH wstr[1000];
+	MSWCH _wstr[1000];
 
-	getIdentChars(wstr, FALSE);
+	getIdentChars(_wstr, FALSE);
 
-	wstring retstr(wstr);
+	wstring retstr(_wstr);
 
 	return retstr;
 
@@ -1271,7 +1292,7 @@ void reinpos::clear()
 
 	clearCalc();
 
-	bFromRef = false; // for show
+	//bFromRef = false; // for show
 	pdID = 0; // posdefID
 	pcatID = 0; //
 

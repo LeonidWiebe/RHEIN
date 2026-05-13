@@ -108,12 +108,12 @@ DItem_ScaleRsc 2 =
 	SCALE_HASARROWS | SCALE_SHOWVALUE, "%.0lf", TXT_117, "skperwdt", "10%", "90%"
 }; 
 
-DItem_ScaleRsc 3 = 
+DItem_ScaleRsc SCALE_NoteMargin = 
 { 
 	NOCMD, LCMD, NOSYNONYM, NOHELP, MHELP, 
 	NOHOOK, NOARG, 
 	0.0, 1.0, 0.05, 0.1, 0, 
-	SCALE_HASARROWS | SCALE_SHOWVALUE, "%.2f", TXT_118, "notetxtmrgn", "", ""
+	SCALE_HASARROWS | SCALE_SHOWVALUE, TXT_128, TXT_118, "notetxtmrgn", "", ""
 }; 
 
 
@@ -334,7 +334,7 @@ CmdItemListRsc CMD_REIN_MODIFY =
     40, "", "", "", "", NOMASK,
     0, 5, 1, 0, 0, 
     COMBOATTR_AUTOADDNEWSTRINGS/* | COMBOATTR_SORT | COMBOATTR_LABELABOVE*/, 
-    "up",
+    TXT_129,
     "sNoteUpFmt",
 	{
 	{20*XC, 40, ALIGN_LEFT, ""},
@@ -356,7 +356,7 @@ CmdItemListRsc CMD_REIN_MODIFY =
     40, "", "", "", "", NOMASK,
     0, 5, 1, 0, 0, 
     COMBOATTR_AUTOADDNEWSTRINGS/* | COMBOATTR_SORT | COMBOATTR_LABELABOVE*/, 
-    "down",
+    TXT_130,
     "sNoteDnFmt",
 	{
 	{20*XC, 40, ALIGN_LEFT, ""},
@@ -375,8 +375,8 @@ DItem_TextRsc TEXTID_NoteUp =
     {
     NOCMD, LCMD, NOSYNONYM, NOHELP, MHELP, 
     NOHOOK, NOARG, 
-    40, "%s", "%s", "", "", NOMASK, 0, 
-    "up",
+    44, "%s", "%s", "", "", NOMASK, 0, 
+    TXT_129,
     "sNoteUp"
     };
 
@@ -384,20 +384,32 @@ DItem_TextRsc TEXTID_NoteDn =
     {
     NOCMD, LCMD, NOSYNONYM, NOHELP, MHELP, 
     NOHOOK, NOARG, 
-    40, "%s", "%s", "", "", NOMASK, 0, 
-    "down",
+    44, "%s", "%s", "", "", NOMASK, 0, 
+    TXT_130,
     "sNoteDn"
     };
 
 DItem_OptionButtonRsc  OPTIONBUTTONID_NoteStyle =
     {
     NOSYNONYM, NOHELP, MHELP, NOHOOK, NOARG,
-    "",
+    TXT_126,
     "iNoteStyle",
 	{
-	{NOTYPE, NOICON, NOCMD, LCMD, 0, NOMASK, ON, "full"},
-	{NOTYPE, NOICON, NOCMD, LCMD, 1, NOMASK, ON, "simple"},
-	{NOTYPE, NOICON, NOCMD, LCMD, 2, NOMASK, ON, "empty"},
+	{NOTYPE, NOICON, NOCMD, LCMD, 0, NOMASK, ON, TXT_126_1},
+	{NOTYPE, NOICON, NOCMD, LCMD, 1, NOMASK, ON, TXT_126_2},
+	{NOTYPE, NOICON, NOCMD, LCMD, 2, NOMASK, ON, TXT_126_3},
+	}
+    };
+
+DItem_OptionButtonRsc  OPTIONBUTTONID_NoteJust =
+    {
+    NOSYNONYM, NOHELP, MHELP, NOHOOK, NOARG,
+    TXT_127,
+    "iNoteJust",
+	{
+	{NOTYPE, NOICON, NOCMD, LCMD, 0, NOMASK, ON, TXT_127_1},
+	{NOTYPE, NOICON, NOCMD, LCMD, 1, NOMASK, ON, TXT_127_2},
+	{NOTYPE, NOICON, NOCMD, LCMD, 2, NOMASK, ON, TXT_127_3},
 	}
     };
 
@@ -408,7 +420,7 @@ DItem_OptionButtonRsc  OPTIONBUTTONID_NoteStyle =
     40, "", "", "", "", NOMASK,
     0, 5, 1, 0, 0, 
     COMBOATTR_READONLY /* | COMBOATTR_SORT | COMBOATTR_LABELABOVE*/, 
-    "level",
+    TXT_125,
     "sNoteLevel",
 	{
 	{20*XC, 40, ALIGN_LEFT, ""},
@@ -419,7 +431,7 @@ DItem_ToggleButtonRsc TOGGLE_NoteDim =
     {
     NOCMD, LCMD, NOSYNONYM, NOHELP, MHELP,
     NOHOOK, NOARG, NOMASK, NOINVERT,
-    "arrow range",
+    TXT_121,
     "iNoteDim"
     };
 
@@ -427,8 +439,24 @@ DItem_ToggleButtonRsc TOGGLE_NoteBarSet =
     {
     NOCMD, LCMD, NOSYNONYM, NOHELP, MHELP,
     NOHOOK, NOARG, NOMASK, NOINVERT,
-    "outer bars",
+    TXT_122,
     "iNoteBarSet"
+    };
+
+DItem_ToggleButtonRsc TOGGLE_NoteSecBar =
+    {
+    NOCMD, LCMD, NOSYNONYM, NOHELP, MHELP,
+    NOHOOK, NOARG, NOMASK, NOINVERT,
+    TXT_123,
+    "iNoteSecBar"
+    };
+
+DItem_ToggleButtonRsc TOGGLE_NoteConfirm =
+    {
+    NOCMD, LCMD, NOSYNONYM, NOHELP, MHELP,
+    NOHOOK, NOARG, NOMASK, NOINVERT,
+    TXT_124,
+    "iNoteConfirm"
     };
 
 
@@ -438,20 +466,26 @@ CmdItemListRsc ItemList_REIN_NOTE =
 CmdItemListRsc CMD_REIN_NOTE =
 #endif
     {{
-{{5.00*XC,0.5*YC,0,0}, ComboBox, COMBOBOX_NoteUpFmt, ON, 0, "", ""},
-{{5.00*XC,2.0*YC,0,0}, ComboBox, COMBOBOX_NoteDnFmt, ON, 0, "", ""},
-{{46.50*XC,0.5*YC,0,0}, ToggleButton, TOGGLE_NoteUpFmt, ON, 0, "", ""},
-{{46.50*XC,2.0*YC,0,0}, ToggleButton, TOGGLE_NoteDnFmt, ON, 0, "", ""},
+{{7.00*XC,0.5*YC,0,0}, ComboBox, COMBOBOX_NoteUpFmt, ON, 0, "", ""},
+{{7.00*XC,2.0*YC,0,0}, ComboBox, COMBOBOX_NoteDnFmt, ON, 0, "", ""},
+{{48.50*XC,0.5*YC,0,0}, ToggleButton, TOGGLE_NoteUpFmt, ON, 0, "", ""},
+{{48.50*XC,2.0*YC,0,0}, ToggleButton, TOGGLE_NoteDnFmt, ON, 0, "", ""},
 
-{{5.00*XC,3.5*YC,0,0}, OptionButton, OPTIONBUTTONID_NoteStyle, ON, 0, "", ""},
-{{5.00*XC,5.0*YC,0,0}, ToggleButton, TOGGLE_NoteDim, ON, 0, "", ""},
-{{5.00*XC,6.2*YC,0,0}, ToggleButton, TOGGLE_NoteBarSet, ON, 0, "", ""},
+{{2.00*XC,5.0*YC,0,0}, ToggleButton, TOGGLE_NoteDim, ON, 0, "", ""},
+{{2.00*XC,6.5*YC,0,0}, ToggleButton, TOGGLE_NoteBarSet, ON, 0, "", ""},
 
-{{20.0 * XC,3.5*YC,28.0*XC,0}, ComboBox, COMBOBOX_NoteLevels, ON, 0, "", ""},
-{{33.0*XC,6.2*YC,15*XC,0}, Scale, 3, ON, 0, "", ""},
+{{7.0 * XC,3.5*YC,40.0*XC,0}, ComboBox, COMBOBOX_NoteLevels, ON, 0, "", ""},
 
-{{5.00*XC,8.0*YC,0,0}, Text, TEXTID_NoteUp, OFF, 0, "", ""},
-{{5.00*XC,9.5*YC,0,0}, Text, TEXTID_NoteDn, OFF, 0, "", ""},
+{{37.0*XC,6.2*YC,15*XC,0}, Scale, SCALE_NoteMargin, ON, 0, "", ""},
+
+{{44.00*XC,8.0*YC,0,0}, OptionButton, OPTIONBUTTONID_NoteStyle, ON, 0, "", ""},
+{{45.00*XC,9.5*YC,0,0}, OptionButton, OPTIONBUTTONID_NoteJust, ON, 0, "", ""},
+
+{{2.00*XC,8.0*YC,0,0}, ToggleButton, TOGGLE_NoteSecBar, ON, 0, "", ""},
+{{2.00*XC,9.5*YC,0,0}, ToggleButton, TOGGLE_NoteConfirm, ON, 0, "", ""},
+
+{{7.00*XC,11.0*YC,0,0}, Text, TEXTID_NoteUp, OFF, 0, "", ""},
+{{7.00*XC,12.5*YC,0,0}, Text, TEXTID_NoteDn, OFF, 0, "", ""},
 
     }};
 

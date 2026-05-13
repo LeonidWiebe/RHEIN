@@ -144,9 +144,24 @@
 #define TXT_115					L("Сравнение позиций")
 #define TXT_116					"Высота эскиза (%)"
 #define TXT_117					"Ширина эскиза (%)"
-#define TXT_118					"Отступ текста"
+#define TXT_118					"" // "Отступ текста"
 #define TXT_119					L("Сохранение")
 #define TXT_120					L("Копирование")
 
-
+#define TXT_121					L("ставить элемент границ раскладки")
+#define TXT_122					L("сделать крайние стержни видимыми")
+#define TXT_123					L("укажу крайние стержни раскладки")
+#define TXT_124					L("укажу начальную точку выноски")
+#define TXT_125					L("слой")
+#define TXT_126					L("стиль")
+#define TXT_126_1					L("полный")
+#define TXT_126_2					L("простой")
+#define TXT_126_3					L("пустой")
+#define TXT_127					L("магнит")
+#define TXT_127_1					L("центр")
+#define TXT_127_2					L("слева")
+#define TXT_127_3					L("справа")
+#define TXT_128					L("отступ %.2f")
+#define TXT_129					L("сверху")
+#define TXT_130					L("снизу")
 

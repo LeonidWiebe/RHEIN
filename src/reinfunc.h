@@ -93,6 +93,8 @@
 	extern int hTimer;
 	extern UInt32 iDblClickFP;
 
+	extern int hTimer2;
+	extern Bentley::Ustn::Element::ElementAgenda agBarSet;
 
 	extern ELID elidDisplayCopy;
 	extern ELID elidReinBar;
@@ -654,7 +656,7 @@ void setLap(
 	int ilap // 0 - begin, 1 - end
 );
 
-void checkBarsSetElem(MSElementDescr*       edP);
+void checkBarsSetElem(MSElementDescr*       edP, bool bDelete);
 
 int scanPlotProcessElmd(UInt32 fpos, DgnModelRefP mrP, ReinElm* relmP, int view, int iBar);
 
@@ -719,7 +721,7 @@ int readReinCacheFromElement(
 	MSElement* el
 );
 
-void saveBarSetInfo(ReinPos* rpP, int bMapInsert);
+//void saveBarSetInfo(ReinPos* rpP, int bMapInsert);
 
 void hookNoteCombo(
 	DialogItemMessage* dimP
@@ -1182,7 +1184,12 @@ void barCalcComparePoints(ReinBar* rbP, int bUseRealPts, Transform* tmP);
 
 void loadDBLaps(void);
 
-int createReinSign(void);
+int createReinSign(DVec3d* ptP, int bAddToFile);
+
+void reinNoteDimDynamics(
+DVec3d*  ptP,  
+int  view
+);
 
 void reinNoteDynamics( 
 DVec3d*  ptP,  
@@ -1239,7 +1246,7 @@ MSElementDescr  *elemDscrP  //  => element descr
 );
 
 
-int getBarSetInfo(MSElementDescr* edP, ReinPrm* prmP);
+//int getBarSetInfo(MSElementDescr* edP, ReinPrm* prmP);
 int getModelInfo(MSElementDescr* edP, ReinPrm* prmP);
 
 void vecAllocInt(vector<vector<int>>* vecP, int iSize);
@@ -1568,7 +1575,7 @@ void saveHidePosInfo(void);
 //void updateHidePosArray(int bReload, int refnum);
 void saveHidePosInfo(void);
 void deleteHidePosInfo(int bAllPosForRef);
-void deleteBarSetInfo(ReinPos* rpP, int bAllPosForRef, int bRemoveFromMap);
+void deleteBarSetInfo(ReinBarSet* bsP, int bAllPosForRef, int bRemoveFromMap);
 
 int iterateForHidingPos(
 MSElementDescr  *edP,

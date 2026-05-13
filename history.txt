@@ -175,3 +175,7 @@ and according to this comes new regeneration command - REIN RELOAD SPACES - to r
 
 14.8.27
 Locating bars method improved
+
+14.8.28
+Note command interface and algorithm improved
+Fixed UNDO/REDO operations for "Display bar settings" command

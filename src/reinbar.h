@@ -820,6 +820,36 @@ typedef pair<UInt32, UInt32> UInt32pair;
 typedef pair<ELID, int> RelmPair;
 
 
+typedef struct reinbarset
+{
+	reinbarset(void);
+
+	void clear(void);
+
+	bool loadBarSetInfo(MSElementDescr* edP);
+	bool getIdentChars(MSWCH* wstr, int bForSave);
+	wstring getMapIdentString();
+
+	void saveBarSetInfo();
+
+	int bsdrawmode;
+	//long	bsset;
+	long	bsnum;
+	ELID	bseid;
+	deque<UInt32> aref;
+
+	//wstring wstrsave;
+
+	DgnModelRefP mrP;
+	ELREF bselref; // for hilite
+
+	bool bMustUpdate; // для масовых операций, например fence
+
+	bool bFromRef; // элемент barset пришел из референса или нет
+
+} ReinBarSet;
+
+
 
 /// <summary>
 /// ось стержня
@@ -844,8 +874,8 @@ typedef struct reinpos
 	void clear();
 	void clearCalc();
 
-	bool getIdentChars(MSWCH* wstr, int bForSave);
-	wstring getMapIdentString();
+	//bool getIdentChars(MSWCH* wstr, int bForSave);
+	//wstring getMapIdentString();
 
 	//reinpos operator=(const reinpos & other);
 
@@ -873,7 +903,6 @@ typedef struct reinpos
 	long file_ms_max; // calc: max length
 	long file_ms_mid; // calc: mid length
 
-	bool bFromRef; // элемент barset пришел из референса или нет
 	int lap_qty; // calc: lap quantity (количество перехлестов)
 	int muft_qty[2]; // calc: couplings and etc
 	int pdID; // posdefID
@@ -913,7 +942,7 @@ typedef struct reinnote
 
 	// curNote.arNotePts, curNoteSet...
 
-	DVec3d arNotePts[4];
+	DVec3d arNotePts[4]; // 0 - first bar, 1 - second bar, 2 - first note point
 
 	UInt32 iNoteGGN;
 	LEVID iNoteLevID;
@@ -1125,7 +1154,7 @@ typedef struct ReinModel
 	map<ELID, UInt32> mapBars;
 	//map<ELID, ReinPos> mapBarSet;
 
-	map <wstring, ReinPos> mapBarSet;
+	map <wstring, ReinBarSet> mapBarSet;
 
 	//vector<ReinElm> vecElms;
 	//vector<ELID> vExIds;
@@ -1172,6 +1201,7 @@ typedef struct reinprm
 
 	ReinElm* reP;
 	ReinPos* rpP;
+	ReinBarSet* bsP;
 
 	map <long, reinprm> mapprm;
 	set <ELID> sids;

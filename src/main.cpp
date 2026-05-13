@@ -1716,7 +1716,7 @@ extern "C" DLLEXPORT void cmdHidepos(
 	}
 
 
-	if (curRM->mapBarSet.size() == 0) mdlDialog_dmsgsPrint(L("no barset positions"));
+	if (curRM->mapBarSet.empty()) mdlDialog_dmsgsPrint(L("no barset positions"));
 	else
 	{
 
@@ -1725,14 +1725,14 @@ extern "C" DLLEXPORT void cmdHidepos(
 
 		barSetFenceProcess(-1); // clear hilited
 
-		for (map <wstring, ReinPos>::iterator rpItP = curRM->mapBarSet.begin(); rpItP != curRM->mapBarSet.end(); ++rpItP)
+		for (map <wstring, ReinBarSet>::iterator rpItP = curRM->mapBarSet.begin(); rpItP != curRM->mapBarSet.end(); ++rpItP)
 		{
 			//ReinPos* rpP = *rpItP;
 			//ReinPos* rpItP = &(daCurBarSet[i]);
 			{
 				STRING sttr = L("");
 				//SCPY(ss, L(""));
-				for (deque<UInt32>::reverse_iterator it = rpItP->second.arefnum.rbegin(); it != rpItP->second.arefnum.rend(); ++it)
+				for (deque<UInt32>::reverse_iterator it = rpItP->second.aref.rbegin(); it != rpItP->second.aref.rend(); ++it)
 				//for (int i = MAX_REFNUM_PATH - 1; i >= 0; i--)
 				{
 					//if (rpItP->second.arefnum[i] > 0)
@@ -1744,8 +1744,8 @@ extern "C" DLLEXPORT void cmdHidepos(
 					}
 				}
 
-				SPRN(s, L("drawmode = %i, inum = %i, ref = %s, elemid = %I64u, bFromRef = %d"),
-					rpItP->second.drawmode, rpItP->second.bar.inum, sttr.c_str(), rpItP->second.bar.elemid, rpItP->second.bFromRef);
+				SPRN(s, L("drawmode = %i, inum = %i, ref = %s, elemid = %I64u"),
+					rpItP->second.bsdrawmode, rpItP->second.bsnum, sttr.c_str(), rpItP->second.bseid);
 				mdlDialog_dmsgsPrint(s);
 			}
 		}
@@ -6070,8 +6070,17 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 
 
-	///////////////////////////////////
-	// func in callbackElmDscrToFile
+	/// <summary>
+	/// событие изменения элемента
+	/// - для коррекции
+	/// </summary>
+	/// <param name="action">- append,delete,replace</param>
+	/// <param name="modelRef"></param>
+	/// <param name="filePos"></param>
+	/// <param name="newEdP"></param>
+	/// <param name="oldEdP"></param>
+	/// <param name="replacementEdPP"></param>
+	/// <returns>success, replace, abort</returns>
 	ElmDscrToFile_Status  callbackElmDscrToFile // acht regen
 	(
 		ElmDscrToFile_Actions       action,
@@ -6107,10 +6116,10 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 		writeLogIn(__FUNCTION__, 0); 
 		if (iDebug) sprintf(sLogMes, "bCopyFromRef = %i\n", bCopyFromRef); writeLog(0, 0);
 
-		//if (oldEdP && newEdP == NULL)
-		//{
-		//	printf("");
-		//}
+		if (oldEdP && newEdP == NULL)
+		{
+			checkBarsSetElem(oldEdP, true); // для appTypeBarSet
+		}
 
 
 		//if (newEdP == NULL && oldEdP && readReinElmIso(&re, oldEdP, FALSE, FALSE, modelRef) == SUCCESS )
@@ -6182,6 +6191,9 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 					return ELMDTF_STATUS_SUCCESS;
 				}
 			}
+
+			checkBarsSetElem(newEdP, false); // для appTypeBarSet
+
 		}
 
 
@@ -7108,7 +7120,14 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 
 
-	////////////////////////////////////
+	/// <summary>
+	/// функция для проведение действий после сохранения элемента
+	/// - удаление и создание производных элементов
+	/// </summary>
+	/// <param name="newDescr"></param>
+	/// <param name="oldDescr"></param>
+	/// <param name="info"></param>
+	/// <param name="cantBeUndoneFlag"></param>
 	void  callbackDgnFileChanged(
 		MSElementDescrP newDescr,
 		MSElementDescrP oldDescr,
@@ -7235,7 +7254,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 			writeLog("process", -1, "deleting elements");
 
-			checkBarsSetElem(oldDescr);
+			//checkBarsSetElem(oldDescr, true); // для appTypeBarSet
 
 		}
 
@@ -7250,6 +7269,8 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 			iterateReloadBarsData(newDescr, args, 0);
 
 			writeLog("process", -1, "adding elements");
+
+			//checkBarsSetElem(newDescr, false); // для appTypeBarSet
 
 			ReinBar rb;
 			ReinSpace rs;
@@ -7322,11 +7343,16 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 	)
 	{
 
-		writeLogIn(__FUNCTION__, 0);
+		//writeLogIn(__FUNCTION__, 0);
 
-		callbackDgnFileChanged(afterUndoRedo, beforeUndoRedo, 0, 0);
+		//callbackDgnFileChanged(afterUndoRedo, beforeUndoRedo, 0, 0);
 
-		writeLogOut(__FUNCTION__, 0);
+		//writeLogOut(__FUNCTION__, 0);
+
+		if (beforeUndoRedo) checkBarsSetElem(beforeUndoRedo, true); // для appTypeBarSet
+
+		if (afterUndoRedo) checkBarsSetElem(afterUndoRedo, false); // для appTypeBarSet
+
 	}
 
 
@@ -7728,8 +7754,13 @@ extern "C" DLLEXPORT  int MdlMain
 		bNoLoad = true;
 	}
 
+	//ReinBarSet bs;
+	//map <wstring, ReinBarSet> map1;
 
+	//bs.aref.push_back(1);
+	//bs.aref.push_back(2);
 
+	//map1[L"aaa"] = bs;
 
 
 	if (getCfgVar(0, L("REIN_START_AND_UNLOAD")) == SUCCESS)
@@ -8384,10 +8415,13 @@ extern "C" DLLEXPORT  int MdlMain
 #endif
 
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "iNoteStyle", &curNoteSet.iNoteStyle);
+	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "iNoteJust", &curNoteSet.noteopt[5]);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "iNoteDim", &curNoteSet.iNoteDim);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "iNoteBarSet", &curNoteSet.noteopt[0]);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "iNoteUpFmt", &curNoteSet.noteopt[1]);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "iNoteDnFmt", &curNoteSet.noteopt[2]);
+	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "iNoteSecBar", &curNoteSet.noteopt[3]);
+	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "iNoteConfirm", &curNoteSet.noteopt[4]);
 
 
 	//   mdlDialog_publishBasicVariable (setP, mdlCExpression_getType(TYPECODE_LONG), "curPos_numb", &curPos.bar.pnum);

@@ -528,6 +528,7 @@ SEC = As summary
 
 #define OPTIONBUTTONID_BarOver				97
 #define OPTIONBUTTONID_NoteStyle			401
+#define OPTIONBUTTONID_NoteJust				402
 #define OPTIONBUTTONID_LineStyles			1001
 #define OPTIONBUTTONID_PresOpt				96
 #define OPTIONBUTTONID_BarView				98
@@ -536,6 +537,11 @@ SEC = As summary
 #define TOGGLE_NoteBarSet					402
 #define TOGGLE_NoteUpFmt						403
 #define TOGGLE_NoteDnFmt						404
+#define TOGGLE_NoteSecBar						405
+#define TOGGLE_NoteConfirm						406
+
+#define SCALE_NoteMargin						3
+
 #define TOGGLE_RepairBend						500
 
 //#define CMN_Diameter						2

@@ -308,6 +308,9 @@ int optmir[3] = { 1,1,0 };
 int hTimer = 0;
 UInt32 iDblClickFP = 0;
 
+int hTimer2 = 0;
+Bentley::Ustn::Element::ElementAgenda agBarSet;
+
 //MSElementUnion arViewShapes[8];
 
 ELID elidDisplayCopy = 0;
