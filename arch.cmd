@@ -1,4 +1,5 @@
 cd /d d:\projects\rein\
+c:\progra~1\winrar\rar a -agyyyy-mm-dd_hh-mm .\rein_ .\ext\rcat\*.*
 c:\progra~1\winrar\rar a -agyyyy-mm-dd_hh-mm .\rein_ .\cfg\*.*
 c:\progra~1\winrar\rar a -agyyyy-mm-dd_hh-mm .\rein_ .\cfg\misc\*.*
 c:\progra~1\winrar\rar a -agyyyy-mm-dd_hh-mm .\rein_ .\src\*.*

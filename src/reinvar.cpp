@@ -507,6 +507,7 @@ UShort appTypeReinBar = 27375;
 UShort appTypeOrgPoints = 27373;
 UShort appTypeEndPoints = 27374;
 UShort appTypeReinElm = 27376;
+UShort appTypeReinLevels = 27378; // список используемых стержнями слоев
 UShort appTypeBarPoints = 27379;
 UShort appTypeBarVerts = 27382;
 UShort appTypeIsModel = 27380;

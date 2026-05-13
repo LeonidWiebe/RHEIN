@@ -417,13 +417,13 @@ extern "C" DLLEXPORT void cmdBarSet(
 
 
 	iAC = CMD_REIN_BARSET;
-
+	iACStep = 0;
 
 	curNote.clear();
 
 	if (mdlFence_isDefined())
 	{
-		barSetFenceProcess(0);
+		barSetFenceProcess(iACStep); // clear hilited, start fence cmd, update mapBarSet (flag bUpdate), hilite
 
 	}
 	else
@@ -1558,7 +1558,7 @@ extern "C" DLLEXPORT void cmdHideposDel(
 
 	elemIterCount2 = 0;
 
-	deleteBarSetInfo(TRUE);
+	deleteBarSetInfo(NULL, TRUE, FALSE);
 
 	mdlDialog_dmsgsClear();
 	SPRN(s, L("deleted %u bar set elems"), elemIterCount2);
@@ -1623,7 +1623,7 @@ extern "C" DLLEXPORT void cmdHidepos(
 
 		//if (rn < 0 || rn == rpItP->arefnum[0])
 		{
-			SPRN(s, L("pos=%i ref=%s cat=%i    %i %i %i %i %i"), rpItP->bar.pnum, sttr.c_str(), rpItP->pcatID,
+			SPRN(s, L("pos=%i ref=%s pcatID=%u    %i %i %i %i %i"), rpItP->bar.pnum, sttr.c_str(), rpItP->pcatID,
 				rpItP->drawopt[DROPT_A],
 				rpItP->drawopt[DROPT_V],
 				rpItP->drawopt[DROPT_X],
@@ -1641,7 +1641,7 @@ extern "C" DLLEXPORT void cmdHidepos(
 		SPRN(s, L("======= BARS SETTINGS INFORMATION ====== (%u elements)"), (UInt32)mapBarSet.size());
 		mdlDialog_dmsgsPrint(s);
 
-		barSetFenceProcess(-1);
+		barSetFenceProcess(-1); // clear hilited
 
 		for (map <wstring, ReinPos>::iterator rpItP = mapBarSet.begin(); rpItP != mapBarSet.end(); ++rpItP)
 		{
@@ -1663,7 +1663,7 @@ extern "C" DLLEXPORT void cmdHidepos(
 				}
 
 				SPRN(s, L("drawmode = %i, inum = %i, ref = %s, elemid = %I64u, bFromRef = %d"),
-					rpItP->second.drawmode, rpItP->second.bar.inum, ss, rpItP->second.bar.elemid, rpItP->second.bFromRef);
+					rpItP->second.drawmode, rpItP->second.bar.inum, sttr.c_str(), rpItP->second.bar.elemid, rpItP->second.bFromRef);
 				mdlDialog_dmsgsPrint(s);
 			}
 		}
@@ -2996,6 +2996,10 @@ extern "C" DLLEXPORT void cmdPosSaveDB(
 
 
 
+	}
+	if (unparsedP && strcmp(unparsedP, "levels") == 0)
+	{
+		saveModelLevels(ACTIVEMODEL);
 	}
 	else // dbsave
 	{

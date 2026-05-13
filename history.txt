@@ -152,4 +152,5 @@ It is assumed that the open file is linked to database.
 2) New command 'REIN POS SAVE' saves current positions to xml file (for sample see .\xml\pos.xml)
 New command 'REIN POS LOAD' loads positions from xml file.
 These operations are experimental.
-3) Fixes
+3) Special symbology for reference file
+4) Fixes

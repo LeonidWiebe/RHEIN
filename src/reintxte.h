@@ -57,7 +57,7 @@
 #define TXT_53						"Bends in"
 #define TXT_54						"Notches"
 #define TXT_55						"Labels with position number"
-#define TXT_56						"Only bars of ground contour"
+#define TXT_56						"Symbology override"
 #define TXT_57						"End points"
 #define TXT_58						"Start points"
 #define TXT_59						"Settings for:"
@@ -122,7 +122,7 @@
 #define TXT_96_3					" (variable horizont)"
 #define TXT_96_4					" (variable vertical)"
 #define TXT_97						"position not defined"
-#define TXT_98						"Other bars line style"
+#define TXT_98						"Bars line style"
 #define TXT_99						L("Loading reinforcement (depth %i, q-ty %u)")
 #define TXT_100						L("Q-ty saved in table")
 #define TXT_101						L("in model")

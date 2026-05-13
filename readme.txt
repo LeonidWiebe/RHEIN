@@ -1,4 +1,5 @@
 RHEIN
+version 14.8.23
 Application for Bentley MicroStation/OpenBuildings Designer
 Main purpose: design of concrete reinforcement using 3D model
 ATTENTION: Versions for MicroStation CONNECT are in BETA testing!

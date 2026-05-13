@@ -1137,9 +1137,10 @@ char	*unparsedP
 }
 
 
-
+/*
 
 /////////////////////////////////
+// NOT USING
 int scanBarSetFenceHilite(
 MSElementDescr  *edInP,
 int* step,
@@ -1216,7 +1217,9 @@ ScanCriteria    *pScanCriteria
 					if (rpItP->second.bFromRef == false && // not from ref
 						*step > 0)
 					{
-						deleteBarSetInfo(FALSE);
+						deleteBarSetInfo(&rpItP->second, FALSE, FALSE);
+
+						mapBarSet.erase(rpItP);
 					}
 
 					if (*step < 0)
@@ -1226,7 +1229,7 @@ ScanCriteria    *pScanCriteria
 				}
 			}
 
-			if (*step > 0 && curPos.drawmode > 0) saveBarSetInfo();
+			if (*step > 0 && curPos.drawmode > 0) saveBarSetInfo(&curPos);
 
 		}
 
@@ -1242,6 +1245,110 @@ ScanCriteria    *pScanCriteria
 	writeLogOut(__FUNCTION__, 0);
 
 	return SUCCESS;
+}*/
+
+////////////////////////////
+int fenceContent(int* stepP)
+{
+	DgnModelRefP mrP;
+
+	UInt32 filePos = mdlElement_getFilePos(FILEPOS_CURRENT, &mrP);
+
+	ReinModel* rmP = curRM->getRM(mrP);
+
+	if (rmP == NULL) return SUCCESS;
+
+	deque<UInt32> aref;
+	size_t refcnt = rmP->getRefPath(&aref);
+
+
+	ReinElm relm;
+
+	MSElementDescr* edInP = NULL;
+
+	if (filePos && aref.size() > 0) // only ref
+	{
+		mdlElmdscr_readToMaster(&edInP, filePos, mrP, 0, 0);
+	}
+
+
+	if (edInP == NULL) return SUCCESS;
+
+
+
+	if (readReinElmIso(&relm, edInP, FALSE, FALSE) == SUCCESS)
+	{
+		writeLogIn(__FUNCTION__, 0);
+
+		//printf("  %u\n", filePos);
+
+		ReinPos p;
+
+		p.bar.modrefP = mrP;
+		p.bar.elref = edInP->h.elementRef;
+
+		p.bar.elemid = relm.bel.elemid;
+		p.bar.inum = relm.bel.inum;
+
+		p.arefnum = aref;
+
+		if (iACStep == 0)
+		{
+			wstring str = p.getIdentString();
+
+			map <wstring, ReinPos>::iterator it = mapBarSet.find(str); // 
+
+			if (it != mapBarSet.end()) // found
+			{
+				it->second.bar.modrefP = mrP;
+				it->second.bar.elref = edInP->h.elementRef;
+
+				it->second.bUpdate = true;
+			}
+			else
+			{
+				p.bUpdate = true;
+
+				mapBarSet[str] = p;
+			}
+
+
+		}
+		//else if (iACStep == 1)
+		//{
+		//	for (map <wstring, ReinPos>::iterator rpItP = mapBarSet.begin(); rpItP != mapBarSet.end(); ++rpItP)
+		//	{
+		//		if (rpItP->second.bar.inum == relm.bel.inum &&
+		//			rpItP->second.bar.elemid == relm.bel.elemid &&
+		//			refPathsEQ(rpItP->second.arefnum, aref))
+		//		{
+		//			if (rpItP->second.bFromRef == false)
+		//			{
+		//				//rpItP->second.bUpdate = true;
+
+		//				//deleteBarSetInfo(&rpItP->second, FALSE, FALSE);
+
+		//				//if (rInfo.option[16])
+		//				//{
+		//				//	rpItP->second.drawmode = rInfo.option[16];
+		//				//	saveBarSetInfo(&rpItP->second, FALSE);
+		//				//}
+		//				//else
+		//				//	mapBarSet.erase(rpItP);
+		//			}
+		//		}
+		//	}
+		//}
+
+
+
+
+		writeLogOut(__FUNCTION__, 0);
+	}
+
+	mdlElmdscr_freeAll(&edInP);
+
+	return 0;
 }
 
 ////////////////////////////////////
@@ -1252,12 +1359,59 @@ void barSetFenceProcess(int step)
 
 	if (step <= 0) mdlLocate_clearHilited(TRUE);
 	
-	if (step == 0) mdlState_startPrimitive (
-		(StateFunc_DataPoint)reinLocatePoint, 
-		(StateFunc_Reset)mdlState_startDefaultCommand, 
-		1, 0);
+	//if (step == 0) mdlState_startPrimitive (
+	//	(StateFunc_DataPoint)reinLocatePoint, 
+	//	(StateFunc_Reset)mdlState_startDefaultCommand, 
+	//	1, 0);
 
+	
+	//==================================
+	// РАБОТАЕТ ТОЛБКО OVERLAP (VOID не тестировал)
+	//==================================
+	if (step == 0)
+	{
+		mdlState_startFenceCommand(
+			(MdlFunctionP)fenceContent, // works as reinLocatePoint
+			NULL,
+			(StateFunc_DataPoint)reinLocatePoint, 
+			(StateFunc_Reset)mdlState_startDefaultCommand, 
+			1, 0, FENCE_CLIP_ORIG);
 
+		mdlFence_process(0); // only hilite, set bUpdate flags, runs fenceContent()
+
+		for (map<wstring, ReinPos>::iterator rpItP = mapBarSet.begin(); rpItP != mapBarSet.end(); ++rpItP)
+		{
+			if (rpItP->second.bUpdate && rpItP->second.bar.elref && rpItP->second.bar.modrefP)
+				mdlLocate_hiliteElement(rpItP->second.bar.elref, rpItP->second.bar.modrefP);
+		}
+
+	}
+	else if (step == 1)
+	{
+		//mdlFence_process(0); // runs fenceContent()
+
+		for (map <wstring, ReinPos>::iterator rpItP = mapBarSet.begin(); rpItP != mapBarSet.end(); ++rpItP)
+		{
+			if (rpItP->second.bUpdate)
+			{
+				deleteBarSetInfo(&rpItP->second, FALSE, FALSE);
+
+				if (rInfo.option[16])
+				{
+					rpItP->second.drawmode = rInfo.option[16];
+
+					saveBarSetInfo(&rpItP->second, FALSE);
+
+					rpItP->second.bUpdate = false;
+				}
+				else
+					mapBarSet.erase(rpItP);
+
+			}
+		}
+	}
+
+	/*
 	ScanCriteria    *scP = NULL;
 	UShort          typeMask[6];
 	int status;
@@ -1304,7 +1458,7 @@ void barSetFenceProcess(int step)
 		mdlModelRefIterator_free (&iterator);
 
 	}
-
+*/
 	if (step > 0) 
 	{
 		// reloadHidingPositions(); // pushed after element save
@@ -2160,8 +2314,13 @@ int	reinLocatePoint(
 
 	if (iAC == CMD_REIN_BARSET && mdlFence_isDefined())
 	{
-		barSetFenceProcess(1);
+
+		iACStep = 1;
+
+		barSetFenceProcess(iACStep); // save, update mapBarSet, start def cmd
+
 		mdlLocate_clearHilited(TRUE);
+
 		return SUCCESS;
 	}
 
@@ -2750,6 +2909,10 @@ void reloadCurBarsAll(int iLoadRefs) // загрузка элементов референсов для информ
 	//sprintf(sss, "загружено %i элементов с clip boundary", iCurBarsCount);
 
 	//mdlOutput_messageCenter(OutputMessagePriority::Warning, sss, sss, FALSE);
+
+
+
+	mdlInput_sendKeyin("MDL KEYIN RCAT RCAT UPDATE", 0, 0, 0);
 
 
 	writeLogOut(__FUNCTION__, 0);
@@ -16869,7 +17032,7 @@ int reinCalcSurfExtrusion(
 
 
 ///////////////////////
-bool isLevelDisplayed(MSElementDescr* edP, DgnModelRefP mrP)
+bool isLevelDisplayed(MSElementDescr* edP, DgnModelRefP mrP, ReinElm* reP)
 {
 	LEVID lid = 0;
 	BINT bdsp = FALSE;
@@ -16883,6 +17046,14 @@ bool isLevelDisplayed(MSElementDescr* edP, DgnModelRefP mrP)
 		mdlElmdscr_getProperties(&lid, 0, 0, 0, 0, 0, 0, 0, eddP);
 		res = mdlLevel_getDisplay(&bdsp, mrP, lid);
 		eddP = eddP->h.firstElem;
+
+		if (reP && iCfgVar_PosListMerge)
+		{
+			MSWCH levName[512];
+			int st = mdlLevel_getName(levName, 512, mrP, lid);
+			if (st == SUCCESS)
+				reP->relmLevName = levName;
+		}
 	}
 
 	if (res != SUCCESS)
@@ -18988,7 +19159,7 @@ ScanCriteria    *pScanCriteria
 			if (iDebug) sprintf(sLogMes, "elemIterCount = %u\n", elemIterCount); writeLog(0, 0);
 
 			//if (urelm.type == REIN_ELEM_ISO)
-			if (isLevelDisplayed(edP, mdlScanCriteria_getModel(pScanCriteria)))
+			if (isLevelDisplayed(edP, mdlScanCriteria_getModel(pScanCriteria), &urelm))
 				insertCurBarsMember2(&urelm, edP, 0, ciP, elemIterCount - 1); // func insert CurBars Member2 call
 		}
 
@@ -19212,7 +19383,7 @@ ScanCriteria    *pScanCriteria
 //////////////////////////////////////////////////////
 int scanDeleteBarSet(
 MSElementDescr  *edP,
-int            *bAll,
+ReinPrm            *prmP,
 ScanCriteria    *pScanCriteria
 )
 {
@@ -19314,7 +19485,7 @@ ScanCriteria    *pScanCriteria
 
 */
 
-	if (*bAll)
+	if (prmP->ival[0])
 	{
 		res = mdlElmdscr_undoableDelete(edP, elementRef_getFilePos (edP->h.elementRef), FALSE);
 		if (res == SUCCESS) elemIterCount2++;
@@ -19330,29 +19501,33 @@ ScanCriteria    *pScanCriteria
 	//}
 	else
 	{
-		if (refPathsEQ(curPos.arefnum, prm.uints) &&
-			curPos.bar.inum == inum && 
-			curPos.bar.elemid == eid)
+		if (prmP->rpP &&
+			refPathsEQ(prmP->rpP->arefnum, prm.uints) &&
+			prmP->rpP->bar.inum == inum &&
+			prmP->rpP->bar.elemid == eid)
 		{
 			res = mdlElmdscr_undoableDelete(edP, elementRef_getFilePos (edP->h.elementRef), FALSE);
 			if (res == SUCCESS)
 			{
 				elemIterCount2++;
 
-				map <wstring, ReinPos>::iterator it = mapBarSet.find(prm.wstr);
-				if (it != mapBarSet.end()) // found
+				if (prmP->ival[1]) // delete from map
 				{
-					mapBarSet.erase(it);
-					/*
-					// todo relmP->drwopt[0]
-					for (map<UInt32, ReinElm>::iterator it = rmP->mapElms.begin(); it != rmP->mapElms.end(); ++it)
+					map <wstring, ReinPos>::iterator it = mapBarSet.find(prm.wstr);
+					if (it != mapBarSet.end()) // found
 					{
-						if (inum == it->second.bel.inum && eid == it->second.bel.elemid)
+						mapBarSet.erase(it);
+						/*
+						// todo relmP->drwopt[0]
+						for (map<UInt32, ReinElm>::iterator it = rmP->mapElms.begin(); it != rmP->mapElms.end(); ++it)
 						{
-							it->second.drwopt[0] = set + BARSET_GAP;
+							if (inum == it->second.bel.inum && eid == it->second.bel.elemid)
+							{
+								it->second.drwopt[0] = set + BARSET_GAP;
+							}
 						}
+						*/
 					}
-					*/
 				}
 			}
 		}
@@ -19538,6 +19713,201 @@ ScanCriteria    *pScanCriteria
 	writeLogOut(__FUNCTION__, 0);
 
     return SUCCESS;
+}
+
+
+
+
+//////////////////////////////////////////////////////
+int scanCheckReinLevelElement(
+	MSElementDescr* edP,
+	int* bDelete,
+	ScanCriteria* pScanCriteria
+)
+{
+	int res;
+
+	if (*bDelete == TRUE)
+	{
+		res = mdlElmdscr_undoableDelete(edP, elementRef_getFilePos(edP->h.elementRef), FALSE);
+	}
+	else
+	{
+	}
+
+	return SUCCESS;
+}
+
+
+/////////////////////////////////////////////////////
+void getLevelsString(ReinModel& rm, wstring* wstrP, set<wstring>* setlevP)
+{
+
+	set<wstring> setlev;
+
+
+	for (map<UInt32, ReinElm>::iterator it = rm.mapElms.begin(); it != rm.mapElms.end(); ++it)
+	{
+
+		wstring wsLevName = it->second.getReinElmLevName(false);
+
+		if (wsLevName.length() > 0)
+		{
+			if (setlevP == NULL) 
+				setlev.insert(wsLevName);
+			else
+				setlevP->insert(wsLevName);
+		}
+
+	}
+
+	for (map<UInt32, ReinModel>::iterator itt = rm.arMrP.begin(); itt != rm.arMrP.end(); ++itt)
+	{
+
+		if (setlevP == NULL)
+			getLevelsString(itt->second, wstrP, &setlev);
+		else
+			getLevelsString(itt->second, wstrP, setlevP);
+
+	}
+
+	if (setlevP == NULL)
+	{
+		for (set<wstring>::iterator it = setlev.begin(); it != setlev.end(); ++it)
+		{
+
+			if ((*wstrP).length() > 0) (*wstrP).append(L"|");
+
+			(*wstrP).append(*it);
+
+		}
+	}
+
+
+}
+
+
+//////////////////////////////////////////////////////
+int scanGetModelLevels(
+	MSElementDescr* edP,
+	wstring* wstrP,
+	ScanCriteria* pScanCriteria
+)
+{
+
+	XMLFragmentListP  oXMLFragmentList = NULL;
+
+	oXMLFragmentList = mdlXMLFragmentList_constructFromXMLFragmentElement(edP);
+
+	if (oXMLFragmentList)
+	{
+		XMLFragmentP        pXMLFragment;
+		MSWCH* wtxt;
+		pXMLFragment = mdlXMLFragmentList_getXMLFragment(oXMLFragmentList);
+
+		if (pXMLFragment && mdlXMLFragment_getText(&wtxt, pXMLFragment) == SUCCESS)
+		{
+			wstring wstr(wtxt);
+
+			mdlXMLFragmentList_free(&oXMLFragmentList);
+
+			*wstrP = wstr;
+
+		}
+		else
+			return ERROR;
+	}
+	else
+		return ERROR;
+
+
+	return SUCCESS;
+}
+
+
+//////////////////////////
+wstring getReinModelLevelsString(DgnModelRefP mrP)
+{
+
+	wstring ret = L"";
+
+	ScanCriteria* pScanCriteria;
+	int status;
+
+	pScanCriteria = mdlScanCriteria_create();
+	status = mdlScanCriteria_setReturnType(pScanCriteria, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
+	status = mdlScanCriteria_setElmDscrCallback(pScanCriteria, (PFScanElemDscrCallback)scanGetModelLevels, &ret);
+	status = mdlScanCriteria_setModel(pScanCriteria, mrP);
+	mdlXML_addXMLFragmentElementScanTest(pScanCriteria, &appID, &appTypeReinLevels);
+	status = mdlScanCriteria_scan(pScanCriteria, NULL, NULL, NULL);
+	status = mdlScanCriteria_free(pScanCriteria);
+
+	return ret;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////
+void saveModelLevels(DgnModelRefP mrP)
+{
+
+	ScanCriteria* pScanCriteria;
+	MSElementDescr* pXmlFragmentElement = NULL;
+	XMLFragmentListP pCurrent = NULL;
+
+	int status;
+
+	int bDelete = TRUE;
+	ReinPrm prm;
+
+
+	wstring wstr = L"";
+
+	// add level names including references
+	// iterate ReinElms
+	getLevelsString(curRMod, &wstr, NULL);
+
+
+	// delete all prev. xml elements
+	pScanCriteria = mdlScanCriteria_create();
+	status = mdlScanCriteria_setReturnType(pScanCriteria, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
+	status = mdlScanCriteria_setElmDscrCallback(pScanCriteria, (PFScanElemDscrCallback)scanCheckReinLevelElement, &bDelete);
+	status = mdlScanCriteria_setModel(pScanCriteria, mrP);
+	mdlXML_addXMLFragmentElementScanTest(pScanCriteria, &appID, &appTypeReinLevels);
+	status = mdlScanCriteria_scan(pScanCriteria, NULL, NULL, NULL);
+	status = mdlScanCriteria_free(pScanCriteria);
+
+
+
+	if (wstr.length() > 0)
+	{
+		MSWCH* wstrarr = new MSWCH[wstr.length() + 100];
+
+		// attention
+		memset(wstrarr, 0, sizeof(MSWCH) * (wstr.length() + 100));
+
+		wcscpy(wstrarr, wstr.c_str());
+
+		pCurrent = mdlXMLFragmentList_construct(wstrarr, NULL, appID, appTypeReinLevels);
+
+		// create new one
+		status = mdlXMLFragmentList_createXMLElementDescriptor(&pXmlFragmentElement, &pCurrent, FALSE);
+
+		if (NULL != pXmlFragmentElement)
+		{
+			UInt32 fp;
+
+			if (iDebug) sprintf(sLogMes, "     add xml fragment to file...\n"); writeLog(0, 0);
+
+			fp = mdlElmdscr_addByModelRef(pXmlFragmentElement, mrP);
+			mdlElmdscr_freeAll(&pXmlFragmentElement);
+
+			mdlXMLFragmentList_free(&pCurrent);
+		}
+
+		delete[] wstrarr;
+	}
+
+
 }
 
 
@@ -22735,7 +23105,7 @@ int elmFunc    ( // NU (bars in cells)
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle, bool bCheckUnder)
+void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle, bool bCheckDB, bool bSetParent)
 {
 	ScanCriteria    *pScanCriteria;
 	int status;
@@ -22785,7 +23155,12 @@ void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle, bool bCheckUnder
 	}
 
 	// подмодели (каркасы)
-	if (bCheckUnder && mdlModelRef_isDefault(ACTIVEMODEL) == FALSE)
+	if (ciP->catID > 0 && bCheckDB &&
+		(
+			mdlModelRef_isDefault(ACTIVEMODEL) == FALSE // for cages
+			|| (iCfgVar_PosListMerge && bSetParent)
+		)
+		)
 	{
 		WCH  sql[1000];
 
@@ -22793,8 +23168,16 @@ void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle, bool bCheckUnder
 		MS_sqlda    sqlda;
 
 
-
-		SPRN(sql, L("select catID from view_object_catalog where catName = '%s' and objID = 7 and objectID = %u and deleted = 0"), ctxt, ciP->catID);
+		if (iCfgVar_PosListMerge && bSetParent)
+		{
+			// get parent catalog
+			SPRN(sql, L("select objectID from view_object_catalog where objID = 7 and catID = %u and deleted = 0"), ciP->catID);
+		}
+		else
+		{
+			// get catalog of cage by name and id
+			SPRN(sql, L("select catID from view_object_catalog where catName = '%s' and objID = 7 and objectID = %u and deleted = 0"), ctxt, ciP->catID);
+		}
 
 		connectDB();
 
@@ -22805,7 +23188,14 @@ void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle, bool bCheckUnder
 		{
 			while (mdlDB_fetchRowByID  (&sqlda, ci) != QUERY_FINISHED)
 			{
-				ciP->catModID = STOUL(sqlda.value[0], 0, 0);
+
+				if (iCfgVar_PosListMerge)
+				{
+					ciP->catModID = ciP->catID; // catModID use for save positions
+					ciP->catID = STOUL(sqlda.value[0], 0, 0); // use parent for manipulating
+				}
+				else
+					ciP->catModID = STOUL(sqlda.value[0], 0, 0);
 			}
 
 			mdlDB_closeCursorByID (ci);
@@ -22860,6 +23250,7 @@ void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle, bool bCheckUnder
 	}
 
 
+
 	if (iDebug) sprintf(sLogMes, "projID = %u, catID = %u\n", ciP->projID, ciP->catID); writeLog(0, 0, 0, 1);
 
 
@@ -22870,12 +23261,12 @@ void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle, bool bCheckUnder
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle)
-{
-	getCatInfo(ciP, mrP, bSetTitle
-		, false // каркасы временно отключены
-	);
-}
+//void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle)
+//{
+//	getCatInfo(ciP, mrP, bSetTitle
+//		, false // каркасы временно отключены
+//	);
+//}
 
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -22970,7 +23361,7 @@ void deleteHidePosInfo(ReinPos* rpP)
 }
 
 ///////////////////////
-void deleteBarSetInfo(int bAllPosForRef)
+void deleteBarSetInfo(ReinPos* rpP, int bAllPosForRef, int bRemoveFromMap)
 {
 
 	writeLogIn(__FUNCTION__, 0);
@@ -22980,11 +23371,16 @@ void deleteBarSetInfo(int bAllPosForRef)
 	int status;
 	XMLFragmentListP pCurrent = NULL; 
 
+	ReinPrm prm;
+	
+	prm.rpP = rpP;
+	prm.ival[0] = bAllPosForRef;
+	prm.ival[1] = bRemoveFromMap;
 
 	// delete all prev. xml elements
 	pScanCriteria= mdlScanCriteria_create ();
 	status = mdlScanCriteria_setReturnType (pScanCriteria,MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
-	status = mdlScanCriteria_setElmDscrCallback (pScanCriteria, (PFScanElemDscrCallback)scanDeleteBarSet, &bAllPosForRef);
+	status = mdlScanCriteria_setElmDscrCallback (pScanCriteria, (PFScanElemDscrCallback)scanDeleteBarSet, &prm);
 	status = mdlScanCriteria_setModel (pScanCriteria, MASTERFILE);
 	mdlXML_addXMLFragmentElementScanTest (pScanCriteria, &appID, &appTypeBarSet);
 	status = mdlScanCriteria_scan (pScanCriteria,NULL,NULL,NULL);
@@ -23065,7 +23461,7 @@ void saveHidePosInfo(ReinPos* rpP)
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-void saveBarSetInfo()
+void saveBarSetInfo(ReinPos* rpP, int bMapInsert)
 {
 	MSElementDescr* pXmlFragmentElement = NULL; 
 	int status;
@@ -23078,47 +23474,32 @@ void saveBarSetInfo()
 
 	UInt32 rn = 0;
 
-	if (!curPos.arefnum.empty())
-		rn = curPos.arefnum.back(); // обратный массив
+	//if (!curPos.arefnum.empty())
+	//	rn = curPos.arefnum.back(); // обратный массив
 
-	_swprintf(wstr, L"%i|%i|%u|%I64u", 
-				curPos.drawmode, 
-				curPos.bar.inum,
-				//(UInt32)curPos.arefnum.size(), // not curPos_rn, rnn...
-				rn, // not curPos_rn, rnn...
-				curPos.bar.elemid
-				// ref nums see below
-				);
+	//_swprintf(wstr, L"%i|%i|%u|%I64u", 
+	//			curPos.drawmode, 
+	//			curPos.bar.inum,
+	//			//(UInt32)curPos.arefnum.size(), // not curPos_rn, rnn...
+	//			rn, // ref path see below
+	//			curPos.bar.elemid
+	//			);
 
-
-	// VERSION 2
-	//for (vector<UInt32>::reverse_iterator it = curPos.arefnum.rbegin();	it != curPos.arefnum.rend(); ++it)
+	//// add ref path to wstr
+	//for (deque<UInt32>::iterator it = curPos.arefnum.begin(); it != curPos.arefnum.end(); ++it)
 	//{
-	//	if (*it > 0)
 	//	{
-	//		_swprintf(wss, L"|%u", *it);
-	//		wcscat(wstr, wss);
+	//		MSWCH locstr[50];
+	//		_swprintf(locstr, L"|%u", *it);
+	//		wcscat(wstr, locstr);
 	//	}
-	//	else
-	//		break;
 	//}
-
-	for (deque<UInt32>::iterator it = curPos.arefnum.begin(); it != curPos.arefnum.end(); ++it)
-	//for (int i = 0; i < MAX_REFNUM_PATH; i++)
-	{
-		//if (curPos.arefnum[i] > 0)
-		{
-			MSWCH locstr[50];
-			_swprintf(locstr, L"|%u", *it);
-			wcscat(wstr, locstr);
-		}
-		//else
-		//	break;
-	}
 
 	//SCPM2W(wstr, str, 1500);
 
-	pCurrent = mdlXMLFragmentList_construct (wstr, NULL, appID, appTypeBarSet); 
+	rpP->getIdentChars(wstr, TRUE);
+
+	pCurrent = mdlXMLFragmentList_construct (wstr, NULL, appID, appTypeBarSet);
 
 	// create new one
 	status = mdlXMLFragmentList_createXMLElementDescriptor  (&pXmlFragmentElement, &pCurrent, TRUE); 
@@ -23135,10 +23516,12 @@ void saveBarSetInfo()
 		fp = mdlElmdscr_add (pXmlFragmentElement); 
 		mdlElmdscr_freeAll (&pXmlFragmentElement); 
 
-		if (fp > 0)
+		if (fp > 0 && bMapInsert)
 		{
+			rpP->getIdentChars(wstr, FALSE);
+
 			wstring str = wstr;
-			mapBarSet[str] = curPos;
+			mapBarSet[str] = *rpP;
 			/*
 			// todo relmP->drwopt[0]
 			for (map<UInt32, ReinElm>::iterator it = rmP->mapElms.begin(); it != rmP->mapElms.end(); ++it)
@@ -24296,7 +24679,9 @@ ListModel* createListBoxRefs(
 			ReinModel* rmP = curRM->getRM(modelRef);
 			if (rmP == NULL) continue; //error?
 
-			if (rmP->elcount == 0) continue;
+			if (rmP->elcount == 0 
+				//&& rmP->mrci.catID == 0 // show design that has no elements and catID>0 
+				) continue;
 
 			DgnAttachmentP rfP = mdlRefFile_getInfo(modelRef);
 			if (rfP == NULL) continue;
@@ -25312,7 +25697,14 @@ DialogItemMessage   *dimP
 								//if (arCurMrP[curPos_rn] && arCurMrP[curPos_rn][curPos_rnn])
 								{
 									ReinModel* rmP = curRM->getRM(curPos_refpath);
-									if (rmP) rmP->reloadCurBars(false, false, iRefLvl, iRefLvl);
+									if (rmP) rmP->reloadCurBars(
+										false, // no elements scan
+										false, // no update listbox (см ниже)
+										iRefLvl, // nest depth
+										iRefLvl, // load refs if > 0
+										(rmP->mrci.catID == 0) // scan for saved positions if no link to catID
+									);
+
 									updateListBoxPos(FALSE);
 								}
 
@@ -27367,8 +27759,8 @@ void insertCurBarsMember2(ReinElm* reToAddP, MSElementDescr* edP, UInt32 iBarFP,
 	//if (fp == 4002838)
 	//	__asm nop;
 
-	if (fp == 4000039)
-		__asm nop;
+	//if (fp == 4000039)
+	//	__asm nop;
 
 
 	//if (!bNoLoad)
@@ -27758,9 +28150,9 @@ void reinSetBarInSpace(DVec3d *ptP, UInt32 fp, DgnModelRefP mrP, int idrawmode, 
 		//curPos.refind = getModelRefNum(relm.bel.mrP);
 		curPos.bar.elemid = relm.bel.elemid;
 
-		deleteBarSetInfo(FALSE);
+		deleteBarSetInfo(&curPos, FALSE, TRUE); // также удалить из массива
 
-		if (curPos.drawmode > 0) saveBarSetInfo();
+		if (curPos.drawmode > 0) saveBarSetInfo(&curPos, TRUE);
 
 		//reloadHidingPositions(); // pushed after element save
 
@@ -28120,7 +28512,33 @@ void scanFilePositions(ReinModel* rmP, DgnModelRefP mrP, bool bClearCats, bool b
 	
 	//rmP->mrci.clear();// above
 
-	if (bCatInfo) 	getCatInfo(&rmP->mrci, mrP, mdlModelRef_isActiveModel(mrP));
+	if (bCatInfo)
+	{
+		getCatInfo(&rmP->mrci, mrP, 
+					mdlModelRef_isActiveModel(mrP),				// set title if active model
+					true, // (mdlModelRef_isActiveModel(mrP) == TRUE),		// check db always (if active model)
+					(							// set PARENT catalog catID from DB
+						rmP->elcount == 0		// only if current model is empty
+						//&& !rmP->arMrP.empty()	// and parent model exists (not here see below)
+						)					  
+					);
+
+
+		if (iCfgVar_PosListMerge) // new var?
+		{
+			wstring wstrlev = L"";
+			wchar_t wsep[5] = L"|\0\0";
+
+			wstrlev = getReinModelLevelsString(mrP);
+
+			rmP->mrci.dqlvnm.clear();
+
+			readFromString(0, &(rmP->mrci.dqlvnm), wstrlev, wsep);
+
+		}
+
+
+	}
 
 
 	if (bClearCats && rmP->mrci.catID > 0)
@@ -28160,7 +28578,12 @@ void scanFilePositions(ReinModel* rmP, DgnModelRefP mrP, bool bClearCats, bool b
 		if (it == mapCats.end()) // not found, add first one
 		{
 			// copy new to common
-			mapCats[rmP->mrci.catID] = rmP->mrci;
+			//if (!rmP->mrci.arCurPos.empty()) // models without saved positions are also needed to fill them by elements
+
+			if (rmP->arMrP.empty()) // if no parent model exists - set separate 
+				mapCats[rmP->mrci.catModID] = rmP->mrci;
+			else
+				mapCats[rmP->mrci.catID] = rmP->mrci;
 
 			if (iDebug) sprintf(sLogMes, "cat %u redefined to common\n", rmP->mrci.catID); writeLog(0, 0, 0, 1);
 		}
@@ -28631,13 +29054,13 @@ void setPosString(ReinPos* rpP, int bPoints, int bXml)
 		//SCAT(sCurPosFmt, L(" lap_qty=\"%i\""));				// 26
 		SCAT(sCurPosFmt, L(" pdID=\"%i\""));				// 27
 		//SCAT(sCurPosFmt, L(" muft_qty=\"%i\""));			// 28
-		//SCAT(sCurPosFmt, L(" pcatID=\"%i\""));				// 29
+		SCAT(sCurPosFmt, L(" pcatID=\"%u\""));				// 29
 		SCAT(sCurPosFmt, L(" poscalc=\"%i\""));				// 30
 		SCAT(sCurPosFmt, L(" noplanar=\"%i\""));			// 31
 
 	}
 	else
-		SCPY(sCurPosFmt, L("%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%.3f;%i;%i;%.3f;%i;%i;%i;%i;%i;%i;%.5f;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i")); // 0 - 31
+		SCPY(sCurPosFmt, L("%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%.3f;%i;%i;%.3f;%i;%i;%i;%i;%i;%i;%.5f;%i;%i;%i;%i;%i;%i;%i;%u;%i;%i")); // 0 - 31
 
 
 	//printf("  %i  %i\n", i, rpP->posID);
@@ -28669,10 +29092,10 @@ void setPosString(ReinPos* rpP, int bPoints, int bXml)
 					trmp[1],						// 23 param 0/2 end
 					trmp[2],						// 24 param 1 beg
 					trmp[3],						// 25 param 1 end
-					0, //rpP->lap_qty,					// 26
+					0, //rpP->lap_qty,				// 26
 					rpP->pdID,						// 27
-					0, //rpP->muft_qty,					// 28
-					0, //rpP->pcatID,					// 29
+					0, //rpP->muft_qty,				// 28
+					rpP->pcatID,					// 29
 					rpP->bar.poscalc,				// 30
 					rpP->bar.noplanar				// 31
 					);
@@ -31793,13 +32216,39 @@ int scanPlotProcessElmd(UInt32 fpos, DgnModelRefP mrP, ReinElm* relmP, int view,
 	{
 		if (lvlSaveID > 0) func_amp(mdlElmdscr_setProperties,edCellP), &lvlSaveID, 0, 0, 0, 0, 0, 0, 0);
 
-		if (rirP->riropt[19]) // color by diam
+		Int32 st = 0;
+		UInt32 clr = 0;
+		UInt32* clrP = NULL;
+		Int32* stP = NULL;
+		int iBlock = FALSE;
+
+		if (rirP->riropt[3]) // special style
 		{
-			UInt32 clr = relmP->bel.diam;
-			func_amp(mdlElmdscr_setSymbology,edCellP), &clr, 0, 0, 0);
+			if (!relmP->bel.grnd)
+			{
+				if (rirP->riropt[6] == -1)
+					iBlock = TRUE; // no display
+				else
+				{
+					st = rirP->riropt[6];
+					stP = &st;
+				}
+			}
 		}
 
-		mdlElmdscr_setTransparency(&edCellP, 0.0);
+		if (rirP->riropt[19]) // color by diam
+		{
+			UInt32 clr = (UInt32)relmP->bel.diam;
+			clrP = &clr;
+		}
+
+		if (clrP || stP)
+			func_amp(mdlElmdscr_setSymbology, edCellP), clrP, stP, 0, 0);
+
+		mdlElmdscr_setTransparency(&edCellP, 0.0); // no transparency on cached
+
+		if (iBlock)
+			mdlElmdscr_setVisible(edCellP, iBlock);
 
 		xmlAddCacheInfo(relmP, &edCellP);
 
@@ -34039,30 +34488,24 @@ map<long, ReinPos>& ReinModel::getPosMap(void)
 
 	//writeLogIn(__FUNCTION__, 0);
 
-	if (!catPosXml.arCurPos.empty())
-	{
-		return catPosXml.arCurPos;
-	}
+	CatInfo poscat = getCat();
 
-	if (iCfgVar_PosListMerge && mrci.catID > 0)
-	{
-		map <UInt32, CatInfo>::iterator it = mapCats.find(mrci.catID);
+	//if (!catPosXml.arCurPos.empty())
+	//{
+	//	return catPosXml.arCurPos;
+	//}
 
-		if (it != mapCats.end()) // found
-		{
-			//if (iDebug) sprintf(sLogMes, "getPosMap found %u\n", mrci.catID); writeLog(0, 0);
+	//if (iCfgVar_PosListMerge && mrci.catID > 0)
+	//{
+	//	map <UInt32, CatInfo>::iterator it = mapCats.find(mrci.catID);
+	//	if (it != mapCats.end()) // found
+	//	{
+	//		return it->second.arCurPos;
+	//	}
+	//}
 
-			//writeLogOut(__FUNCTION__, 0);
 
-			return it->second.arCurPos;
-		}
-	}
-
-	//if (iDebug) sprintf(sLogMes, "getPosMap not found\n"); writeLog(0, 0);
-
-	//writeLogOut(__FUNCTION__, 0);
-
-	return mrci.arCurPos;
+	return poscat.arCurPos;
 }
 
 ////////////////////////////////////////////
@@ -34079,6 +34522,7 @@ CatInfo& ReinModel::getCat(void)
 
 	if (iCfgVar_PosListMerge && mrci.catID > 0)
 	{
+
 		map <UInt32, CatInfo>::iterator it = mapCats.find(mrci.catID);
 
 		if (it != mapCats.end()) // found

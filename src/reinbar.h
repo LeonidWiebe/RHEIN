@@ -222,6 +222,8 @@ typedef struct reinbar
 	int cnumpts; // количество точек - неизменно - для сравнения и отрисовки (apts, cpxb)
 	int numsgts; // количество сегментов - зависит от наличия гнутых сегментов
 
+	ELREF elref; // for bar sets
+
 	//vector <ReinPoint> &vpt = gvpt; // задел на бдущее
 
 	DVec3d apts[MAX_BAR_VERTICES]; // точки для отрисовки 2D с учетом mainline (точка арки пока не на элементе)
@@ -804,6 +806,7 @@ typedef struct reinclash
 		int irefnum; // legacy
 		wstring refpath;
 		ELID elid;
+		ELREF elref;
 		DgnModelRefP mrP;
 		UInt32 pnum;
 		MSWCH desc[500];
@@ -839,6 +842,9 @@ typedef struct reinpos
 	void clear();
 	void clearCalc();
 
+	bool getIdentChars(MSWCH* wstr, int bForSave);
+	wstring getIdentString();
+
 	//reinpos operator=(const reinpos & other);
 
 	ReinBar bar;
@@ -851,7 +857,6 @@ typedef struct reinpos
 	int drawmode; // опция отображения
 	long posID;
 	long srtmID;
-
 	
 	long base_length; // saved value: file_length, not using
 	double base_qty; // saved value: file_qty_p or file_qty_rm
@@ -866,11 +871,11 @@ typedef struct reinpos
 	long file_ms_max; // calc: max length
 	long file_ms_mid; // calc: mid length
 
-	bool bFromRef; // barset loaded from ref or not
+	bool bFromRef; // элемент barset пришел из референса или нет
 	int lap_qty; // calc: lap quantity (количество перехлестов)
 	int muft_qty[2]; // calc: couplings and etc
 	int pdID; // posdefID
-	UInt32 pcatID;
+	UInt32 pcatID; // каталог
 
 	long pnum_cnd; // кандидат на присовение номера позиции
 	long mapind; // source map index for sorted map
@@ -883,6 +888,7 @@ typedef struct reinpos
 	Point3d cmppt; // point for sort in positions list
 
 	bool bPosXml;
+	bool bUpdate;
 
 } ReinPos;
 
@@ -937,6 +943,7 @@ typedef struct catinfo
 
 	map<long, ReinPos> arCurPos;
 	long iPosIndex; // index for position with num=0
+	deque<wstring> dqlvnm; // deque of level names
 
 } CatInfo;
 
@@ -997,6 +1004,8 @@ typedef struct reinelm
 	ELREF relmref;
 	int bTransientInProgress;
 
+	wstring relmLevName; // level name, use only for position search
+
 #ifdef _REIN_H_
 	DLLEXPORT
 #endif
@@ -1006,6 +1015,11 @@ typedef struct reinelm
 	DLLEXPORT
 #endif
 	int getElmFromElement(MSElementCP el, DgnModelRefP mrP);
+
+#ifdef _REIN_H_
+	DLLEXPORT
+#endif
+	wstring getReinElmLevName(bool bUpdateMember);
 
 
 } ReinElm;
@@ -1061,7 +1075,7 @@ typedef struct ReinModel
 
 	UInt32 elcount;
 	bool bCached;
-	bool bRefPlus; // catID совпадает с тем что в ACTIVEMODEL
+	//bool bRefPlus; // catID совпадает с тем что в ACTIVEMODEL
 
 	double refscale;
 
@@ -1136,6 +1150,7 @@ typedef struct reinprm
 	wstring wstr;
 
 	ReinElm* reP;
+	ReinPos* rpP;
 
 	map <long, reinprm> mapprm;
 	set <ELID> sids;

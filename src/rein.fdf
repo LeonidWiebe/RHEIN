@@ -285,6 +285,7 @@
 	extern UShort appTypeBarPoints;
 	extern UShort appTypeBarVerts;
 	extern UShort appTypeIsModel;
+	extern UShort appTypeReinLevels;
 	extern UShort appTypeReinCache;
 	extern UShort appTypeReinAssem;
 	extern UShort appTypeBarOver;
@@ -707,7 +708,7 @@ int readReinCacheFromElement(
 	MSElement* el
 );
 
-void saveBarSetInfo(void);
+void saveBarSetInfo(ReinPos* rpP, int bMapInsert);
 
 void hookNoteCombo(
 	DialogItemMessage* dimP
@@ -828,8 +829,8 @@ void reinHilitePos(ReinPos* rpP);
 void reinSelectPosRow(int num);
 
 void saveCatInfo(DgnModelRefP mrInP = NULL);
-void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle);
-void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle, bool bCheckUnder);
+//void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle);
+void getCatInfo(CatInfo* ciP, DgnModelRefP mrP, BINT bSetTitle, bool bCheckDB = false, bool bSetParent = false);
 
 void reinUpdateBarFacesAllViews(int drawmode, DgnModelRefP mrP, ELID elid);
 
@@ -1529,7 +1530,7 @@ void saveHidePosInfo(void);
 //void updateHidePosArray(int bReload, int refnum);
 void saveHidePosInfo(void);
 void deleteHidePosInfo(int bAllPosForRef);
-void deleteBarSetInfo(int bAllPosForRef);
+void deleteBarSetInfo(ReinPos* rpP, int bAllPosForRef, int bRemoveFromMap);
 
 int iterateForHidingPos(
 MSElementDescr  *edP,
@@ -1690,4 +1691,6 @@ int myClip_getRefBoundary(
 void myClip_free(CLIPDESC clipP, MSElementDescrP* edClipPP);
 
 int readRndFromElement(ELID* idP, UInt32* refnumP, MSElementCP elP);
+
+void saveModelLevels(DgnModelRefP mrP);
 

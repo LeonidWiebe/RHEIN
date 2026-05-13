@@ -1007,6 +1007,7 @@ void reinbar::vecclear(bool bResize)
 void reinbar::clear(int memres)
 {
 	modrefP = NULL;
+	elref = NULL;
 
 	bent[0].clear();
 	bent[1].clear();
@@ -1133,6 +1134,7 @@ reincache::reincache(void)
 	irefnum = 0;
 	refpath = L"";
 	elid = 0;
+	elref = NULL;
 	mrP = NULL;
 	pnum = 0;
 	wcscpy(desc, L"");
@@ -1164,6 +1166,65 @@ void catinfo::clearPosCalc()
 	{
 		it->second.clearCalc();
 	}
+}
+
+//////////////////////////////////////////
+bool reinpos::getIdentChars(MSWCH* wstr, int bForSave)
+{
+
+	UInt32 rn = 0;
+
+	if (!arefnum.empty())
+	{
+		rn = arefnum.back(); // обратный массив
+	}
+
+	if (bForSave)
+	{
+		_swprintf(wstr, L"%i|%i|%u|%I64u",
+			drawmode,
+			bar.inum,
+			rn, // ref path see below
+			bar.elemid
+		);
+	}
+	else
+	{
+		_swprintf(wstr, L"%i|%I64u",
+			bar.inum,
+			bar.elemid
+		);
+	}
+
+
+
+
+	// add ref path to wstr
+	for (deque<UInt32>::iterator it = arefnum.begin(); it != arefnum.end(); ++it)
+	{
+		{
+			MSWCH locstr[500];
+			_swprintf(locstr, L"|%u", *it);
+			wcscat(wstr, locstr);
+		}
+	}
+
+	return true;
+
+}
+
+//////////////////////////////////
+wstring reinpos::getIdentString()
+{
+
+	MSWCH wstr[1000];
+
+	getIdentChars(wstr, FALSE);
+
+	wstring retstr(wstr);
+
+	return retstr;
+
 }
 
 void reinpos::clearCalc()
@@ -1202,7 +1263,7 @@ void reinpos::clear()
 
 	bFromRef = false; // for show
 	pdID = 0; // posdefID
-	pcatID = 0;
+	pcatID = 0; //
 
 	pnum_cnd = 0;
 	mapind = 0;
@@ -1215,6 +1276,7 @@ void reinpos::clear()
 	//ZeroMemory(cmpopt, sizeof(cmpopt));
 
 	bPosXml = false;
+	bUpdate = false;
 }
 
 reinpos::reinpos(void)
@@ -1275,6 +1337,7 @@ void catinfo::clear()
 	writeLog("arCurPos.clear()", 0);
 	arCurPos.clear();
 	iPosIndex = -100;
+	dqlvnm.clear();
 
 	writeLogOut(__FUNCTION__, 0);
 }
@@ -4458,9 +4521,47 @@ int reinelm::getElmFromString(wstring str, DgnModelRefP mrP)
 #ifdef _REIN_H_
 extern "C" DLLEXPORT
 #endif
-int reinelm::getElmFromElement(MSElementCP elP, DgnModelRefP mrP)
+wstring reinelm::getReinElmLevName(bool bUpdateMember)
 {
 
+	LEVID lvid = 0;
+
+	wstring wsLevName = L"";
+
+	//if (relmLevName.length() == 0 || bUpdate)
+	{
+		MSElementDescr* edp = NULL;
+
+		mdlElmdscr_read(&edp, bel.ffpos[REIN_ELEM_ISO], bel.modrefP, 0, 0);
+
+		MSWCH         levName[512] = L"";
+
+		if (edp)
+		{
+			mdlElmdscr_getProperties(&lvid, 0, 0, 0, 0, 0, 0, 0, edp);
+
+			if (mdlLevel_getName(levName, 512, bel.modrefP, lvid) == SUCCESS)
+			{
+				wsLevName = levName;
+			}
+
+			mdlElmdscr_freeAll(&edp);
+		}
+
+	}
+
+	if (bUpdateMember) relmLevName = wsLevName;
+
+	return wsLevName;
+
+}
+
+////////////////////////////////////////////////////////////////
+#ifdef _REIN_H_
+extern "C" DLLEXPORT
+#endif
+int reinelm::getElmFromElement(MSElementCP elP, DgnModelRefP mrP)
+{
 	int res = SUCCESS;
 
 	XMLFragmentListP  oXMLFragmentList = NULL;
