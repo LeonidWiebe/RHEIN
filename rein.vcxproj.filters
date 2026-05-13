@@ -17,7 +17,7 @@
     <ClInclude Include="src\reinsgn.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\rein.fdf" />
+    <None Include="src\reinfunc.h" />
     <None Include="src\reinvers.r" />
     <None Include="src\rein.r" />
     <None Include="src\reincmd.r" />

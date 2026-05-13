@@ -204,7 +204,7 @@ typedef struct reinbar
 
 	void fromReinData(ReinData* rdP);
 
-	ELID saveReinData(ELID datelemid);
+	ELID saveReinData(ELID datelemid, void* v_relemP = NULL);
 
 	void setReinDataString(WCH* str);
 
@@ -214,7 +214,7 @@ typedef struct reinbar
 
 	ELID elemid; // ID хоз€ина (не хоз€ины а хоз€ева) - ReinSpace, ReinBar
 	ELID axid; // ID оси - ReinAxis
-	ELID brid; // bar ID (об стержн€ или ID референса дл€ выноски)
+	ELID brid; // bar ID (объемного стержн€ или ID референса дл€ выноски)
 	UInt32 ffpos[5];
 	int bartype; // BT_...
 	long contnum; // номер линии контура дл€ последовательности точек при построении стержней
@@ -1048,6 +1048,7 @@ typedef struct ReinModel
 	DVec3d arClipPts[2][100];
 
 	ReinElm* getReinElm(UInt32 fp);
+	ReinElm* findReinElm(ELID prntid, ELID axid); // from mapElms
 	ReinElm* findElementByFP(UInt32 fp);
 	ReinInfoRef* getRefPrefs();
 	void delRefPrefs(int iDpth);

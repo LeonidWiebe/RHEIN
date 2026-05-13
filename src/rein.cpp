@@ -321,7 +321,7 @@ using namespace std;
 
 //ViewMonitor	g_oViewMonitor;
 
-#include "rein.fdf"
+#include "reinfunc.h"
 
 
 ///////////////////////////////////////////////////////////
@@ -2355,16 +2355,14 @@ int	reinLocatePoint(
 		if (iAC == CMD_REIN_LOADS)
 		{
 			//reinSpaceLoads(filePosReinSpace, curElemModelRef);
-
-			//.....
 		}
 		else if (iAC == CMD_REIN_BAROVER)
 		{
-			reinSetOverInSpace(rBarOverInfo.dopopt[21]); // func: reinSetOverInSpace() call
+			reinSetOverInSpace(rBarOverInfo.dopopt[21]);
 		}
 		else if (iAC == CMD_REIN_BARSET)
 		{
-			reinSetBarInSpace(ptP, filePosRein, curElemModelRef, rInfo.option[16], rDopInfo.dopopt[6]); // func: reinSetBarInSpace() call
+			reinSetBarInSpace(ptP, filePosRein, curElemModelRef, rInfo.option[16], rDopInfo.dopopt[6]);
 		}
 		else if (iAC == CMD_REIN_CHLAP)
 		{
@@ -2387,10 +2385,11 @@ int	reinLocatePoint(
 
 	}
 
-	if (filePosReinBar > 0 && 
-			(
-			rInfo.option[0] == 0 || // если пустой стержень или
-			isModifyOptionChanged() // если выделена хотя бы одна галка
+	if (filePosReinBar > 0 
+			&& (!(iAC == CMD_REIN_BAROVER && rBarOverInfo.dopopt[21] == BAROVER_ACTION_RESET)) // идет сброс на линейном контуре, не трогаем
+			&& (
+				rInfo.option[0] == 0 // если пустой стержень или
+				|| isModifyOptionChanged() // если выделена хотя бы одна галка
 				|| iAC == CMD_REIN_DROP
 				|| iAC == CMD_REIN_BAROVER
 			)
@@ -2399,6 +2398,7 @@ int	reinLocatePoint(
 		ReinBar rb;
 		MSElementDescr* edp = NULL;
 
+		// copy space data to bar
 		copySpaceData(&rInfo.rsVal, &rb, TRUE, NULL, TRUE);
 
 		if (iAC == CMD_REIN_DROP) bDropReinData = TRUE;
@@ -5253,7 +5253,7 @@ DRAWMODE  drawMode  )
 	for (int b = 0; b < 2; b++)
 		mdlVec_zero(&linpts[b]);
 
-	//.......... рисуем рамку
+	//... ....... рисуем рамку
 
 	double rowhgt = mdlCnv_masterUnitsToUors(rDopInfo.dopval[0]);
 	double hgt;
@@ -10734,16 +10734,16 @@ int readReinBarFromElement(ReinBar* rbP, MSElementDescrCP edpBar, int bClear, in
 
 		if (eref)
 		{
-			ReinData rd;
+			ReinElement relem;
 			MSElementDescr* edp = NULL;
 
 			//sprintf(sLogMes, "mdlElmdscr_getByElemRef(...)\n"); writeLog(0, 0);
 			mdlElmdscr_getByElemRef (&edp, eref, edpBar->h.dgnModelRef, FALSE, 0);
 
 			//sprintf(sLogMes, "readReinDataFromElmd(...)\n"); writeLog(0, 0);
-			if (edp && readReinDataFromElmd(&rd, edp, rbP) == SUCCESS)
+			if (edp && readReinDataFromElmd(&relem, edp, rbP) == SUCCESS)
 			{
-				rbP->fromReinData(&rd);
+				rbP->fromReinData(&relem.rd);
 
 				//rbP->bartype = rd.dattype;
 				//rbP->diam = rd.datdiam;
@@ -10856,6 +10856,7 @@ int readReinSpaceFromElement(ReinElement* reP, MSElementCP elP, int bReadPoints)
 }
 
 ////////////////////////////////////////////////////////////
+// func in readBarOversFromElement
 int readBarOversFromElement(ReinElement* reP, MSElement* elP)
 {
 	int cnt = 0;
@@ -11241,7 +11242,7 @@ int xmlAddNoteInfo(ReinNote* rnP, WCH* strNoteFmt, MSElementDescr** edpP, int ie
 
 
 	// add elem array...... [refid, parent elemid, barnum]
-	// ....................
+	// .. ..................
 
 
 	return status;
@@ -17309,17 +17310,17 @@ ScanCriteria    *pScanCriteria // use pIterScanCrit
 
 			if (eref && !bShon)
 			{
-				ReinData rd;
+				//ReinData rd;
 				MSElementDescr* edp;
 
 				mdlElmdscr_getByElemRef (&edp, eref, ACTIVEMODEL, FALSE, 0);
 
-				if (edp && readReinDataFromElmd(&rd, edp, &rb) == SUCCESS)
+				if (edp && readReinDataFromElmd(&relem, edp, &rb) == SUCCESS)
 				{
 					//if (!bAdd) 
 						reinBarsDataDel(edp, TRUE); // ReinData
 					//if (bAdd) 
-						reinCreateDataBars(bAdd, &rd, &rb, edP);
+						reinCreateDataBars(bAdd, &relem, &rb, edP);
 					
 
 					mdlElmdscr_freeAll(&edp);
@@ -18159,7 +18160,7 @@ int reinSetLap(BarPoint* arBPts, DVec3d* p, int bOrg, int bcnt, double dlap, int
 			}
 		}
 
-		//..........
+		//. . ........
 		// потом все равно обрезать по generatePartial
 	}
 
@@ -24374,7 +24375,7 @@ ScanCriteria    *pScanCriteria
 			rmP = curRM->getRM(mrP); 
 			// случай когда барсет и элемент из разных референсов не проработан
 			// надо брать путь модели, путь барсета и склеивать их
-			//.......
+			//... ....
 		}
 
 
@@ -27983,11 +27984,13 @@ int scanBarOverFence(
 
 }
 
+
 //////////////////////////////
-//func: set bar over in space
+//func in reinSetOverInSpace
 void reinSetOverInSpace(int baract)
 {
 	ReinBar rb;
+	//ReinData rd;
 	ReinElement re;
 	ReinElm relm;
 	MSElementDescr* edp = NULL;
@@ -28013,7 +28016,6 @@ void reinSetOverInSpace(int baract)
 		filePosReinSpace = elementRef_getFilePos(eref);
 
 		mdlElmdscr_readToMaster(&edSpaceP, filePosReinSpace, curElemModelRef, 0, 0);
-		//mdlElmdscr_readToMaster(&edSpaceP, filePosReinSpace, curElemModelRef, 0, 0);
 
 		if (edSpaceP == NULL) return;
 
@@ -28026,87 +28028,7 @@ void reinSetOverInSpace(int baract)
 
 	if (readReinSpaceFromElmd(&re, edSpaceP, FALSE) == SUCCESS)
 	{
-		BarOver bo;
-		bo.inum = relm.bel.inum;
-
-		if (baract == BAROVER_ACTION_MOVE)
-		{
-			DPoint3d pMove;
-			Transform tmMove;
-			Transform tmMoveFirst;
-
-			if (rBarOverInfo.dopopt[18]) pMove.x = mdlCnv_masterUnitsToUors(rBarOverInfo.dopopt[15]); else pMove.x = 0.;
-			if (rBarOverInfo.dopopt[19]) pMove.y = mdlCnv_masterUnitsToUors(rBarOverInfo.dopopt[16]); else pMove.y = 0.;
-			if (rBarOverInfo.dopopt[20]) pMove.z = mdlCnv_masterUnitsToUors(rBarOverInfo.dopopt[17]); else pMove.z = 0.;
-
-			mdlTMatrix_getIdentity(&tmMove);
-			mdlTMatrix_setTranslation(&tmMove, &pMove);
-
-			map<int, BarOver>::iterator it = re.mapOvers.find(relm.bel.inum);
-			if (it != re.mapOvers.end()) // found
-			{
-				tmMoveFirst = it->second.tmov;
-				mdlTMatrix_multiply(&tmMove, &tmMoveFirst, &tmMove);
-			}
-			else
-			{ // insert if not exist
-				BarOver bo1;
-				bo1.inum = relm.bel.inum;
-				re.mapOvers[relm.bel.inum] = bo1;
-			}
-
-			re.mapOvers[relm.bel.inum].tmov = tmMove;
-
-			re.mapOvers[relm.bel.inum].isgnd = rBarOverInfo.dopopt[22];
-
-			if (mdlTMatrix_isIdentity(&tmMove)) 
-				re.mapOvers[relm.bel.inum].btmov = FALSE; 
-			else 
-				re.mapOvers[relm.bel.inum].btmov = TRUE;
-
-		}
-
-		//if (baract == BAROVER_ACTION_GROUND)
-		//{
-		//	bo.isgnd = 1;
-		//	re.mapOvers[bo.inum] = bo;
-		//}
-
-		if (baract == BAROVER_ACTION_DELETE)
-		{
-
-			// process fence if defined
-			if (mdlFence_isDefined())
-			{
-				ScanCriteria* scP = NULL;
-				UShort          typeMask[6];
-				int status;
-
-				for (UShort a = 0; a < 6; a++) typeMask[a] = 0;
-
-				typeMask[0] = TMSK0_LINE | TMSK0_ARC | TMSK0_LINE_STRING | TMSK0_CMPLX_STRING | TMSK0_ELLIPSE;
-
-				scP = mdlScanCriteria_create();
-				status = mdlScanCriteria_setReturnType(scP, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
-				status = mdlScanCriteria_setElmDscrCallback(scP, (PFScanElemDscrCallback)scanBarOverFence, &re);
-				status = mdlScanCriteria_setElementTypeTest(scP, typeMask, sizeof(typeMask));
-				status = mdlScanCriteria_setModel(scP, ACTIVEMODEL);
-				mdlXML_addXMLFragmentAttachmentScanTest(scP, &appID, &appTypeReinElm);
-				status = mdlScanCriteria_scan(scP, NULL, NULL, NULL);
-				status = mdlScanCriteria_free(scP);
-			}
-			else
-			{
-				bo.isdel = 1;
-				re.mapOvers[bo.inum] = bo;
-			}
-
-		}
-
-		if (baract == BAROVER_ACTION_RESET)
-		{
-			re.mapOvers.clear();
-		}
+		prepareBarOver(&re, &relm.bel, baract);
 
 		reinSpaceElmdCreate(filePosReinSpace, curElemModelRef, NULL, FALSE, &re);
 	}
@@ -28114,7 +28036,92 @@ void reinSetOverInSpace(int baract)
 	{
 		filePosReinBar = filePosReinSpace;
 		filePosReinSpace = 0;
+
+		if (rb.bartype != BT_AXIS)
+		{
+			if (baract == BAROVER_ACTION_RESET)
+			{
+				MSElementDescr* edRdP = NULL;
+
+				ELREF dref = getElemRefByID(ACTIVEMODEL, rb.elemid);
+				if (dref)
+				{
+					UInt32 dfpos = elementRef_getFilePos(dref);
+
+					mdlElmdscr_read(&edRdP, dfpos, ACTIVEMODEL, 0, 0);
+
+					if (edRdP && readReinDataFromElmd(&re, edRdP, &rb) == SUCCESS)
+					{
+
+						re.mapOvers.clear();
+
+						rb.fromReinData(&re.rd);
+
+						rb.elemid = rb.saveReinData(rb.elemid, &re);
+
+						mdlElmdscr_freeAll(&edRdP);
+
+						mdlElmdscr_rewrite(edSpaceP, edSpaceP, mdlElmdscr_getFilePos(edSpaceP)); // touch element to regen
+
+					}
+				}
+			}
+		}
+
+
 	}
+	else if (readReinDataFromElmd(&re, edSpaceP, &relm.bel) == SUCCESS)
+	{
+
+		if (baract == BAROVER_ACTION_DELETE)
+		{
+			prepareBarOver(&re, &relm.bel, baract);
+
+			relm.bel.fromReinData(&re.rd);
+
+			relm.bel.saveReinData(relm.bel.elemid, &re);
+
+
+			if (relm.bel.ffpos[REIN_ELEM_ISO])
+			{
+				int res = mdlElmdscr_undoableDelete(0, relm.bel.ffpos[REIN_ELEM_ISO], TRUE);
+
+				ELREF bref = getElemRefByID(relm.bel.modrefP, relm.bel.brid);
+				if (bref)
+				{
+					UInt32 barfpos = elementRef_getFilePos(bref);
+					mdlElmdscr_undoableDelete(0, barfpos, TRUE);
+				}
+			}
+			else if (relm.bel.ffpos[REIN_ELEM_BAR])
+			{
+				int res = mdlElmdscr_undoableDelete(0, relm.bel.ffpos[REIN_ELEM_BAR], TRUE);
+
+				ReinElm* relmP = curRM->findReinElm(relm.bel.elemid, relm.bel.axid);
+
+				if (relmP)
+				{
+					mdlElmdscr_undoableDelete(0, relmP->bel.ffpos[REIN_ELEM_ISO], TRUE);
+				}
+			}
+		}
+		else if (baract == BAROVER_ACTION_MOVE)
+		{
+			//...
+		}
+		else
+		{
+			//...
+		}
+
+
+
+
+
+	}
+
+
+
 
 	if (edSpaceP) mdlElmdscr_freeAll(&edSpaceP);
 
@@ -29554,9 +29561,14 @@ int getDataFromString(ReinData* rdP, wstring str, ReinBar* rbP)
 
 
 ///////////////////////////////////////////////////////////////
-int readReinDataFromElmd(ReinData* rdP, MSElementDescr  *edP, ReinBar* rbP)
+int readReinDataFromElmd(
+	ReinElement* relemP, // may be NULL
+	//ReinData* rdP, 
+	MSElementDescr  *edP, // element to get text from
+	ReinBar* rbP // bar to get additional data
+)
 {
-	if (rdP == NULL) return ERROR;
+	//if (relemP == NULL) return ERROR;
 	if (edP == NULL) return ERROR;
 
 	int ret = ERROR;
@@ -29576,12 +29588,28 @@ int readReinDataFromElmd(ReinData* rdP, MSElementDescr  *edP, ReinBar* rbP)
 		{
 			wstring wstr(wtxt);
 			mdlXMLFragmentList_free(&oXMLFragmentList);
-			ret = getDataFromString(rdP, wstr, rbP);
+
+			if (relemP)
+			{
+				ret = getDataFromString(&(relemP->rd), wstr, rbP);
+			}
+			else
+			{
+				ret = SUCCESS; // simply check ReinData element
+			}
+
+
 		}
 		else
 			ret = ERROR;
 
 	}
+
+	if (relemP && ret == SUCCESS)
+	{
+		readBarOversFromElement(relemP, (MSElementP)&edP->el);
+	}
+
 
 	if (iDebug) sprintf(sLogMes, "return %i\n", ret); writeLog(0, 0);
 	if (iDebug) writeLogOut(__FUNCTION__, 0); // readReinDataFromElmd out
@@ -30133,7 +30161,13 @@ int processSec(ReinBar* rbP, MSElementDescr* edpShape, double doffs, double dspa
 
 
 //////////////////////////////////////////////////////////
-void reinCreateDataBars(int bAdd, ReinData* rdP, ReinBar* rbP, MSElementDescr* edP)
+// func in reinCreateDataBars
+void reinCreateDataBars(
+					int bAdd, 
+					ReinElement* relemP, 
+					ReinBar* rbP, 
+					MSElementDescr* edP
+)
 {
 
 
@@ -30141,6 +30175,10 @@ void reinCreateDataBars(int bAdd, ReinData* rdP, ReinBar* rbP, MSElementDescr* e
 
 	ScanCriteria    *pScanCriteria;
 	int status;
+
+	if (relemP == NULL) return;
+
+	ReinData* rdP = &(relemP->rd);
 	
 	int evencnt[2] = {0,0};
 	evencnt[1] = rdP->datlap[2];
@@ -30271,8 +30309,19 @@ void reinCreateDataBars(int bAdd, ReinData* rdP, ReinBar* rbP, MSElementDescr* e
 
 			if (arDataBars[i].numpts > 1) 
 			{
-				arDataBars[i].createBar(edP, TRUE, TRUE, 0, 0, i + 1, iMaxNum,
-					evencnt[0] * rdP->datlap[0], evencnt[1] * rdP->datlap[1]);
+
+				map<int, BarOver>::iterator it = relemP->mapOvers.begin();
+				it = relemP->mapOvers.find(i+1); // inum is 1-based index
+
+				if (!(							// not (exist and deleted)
+					it != relemP->mapOvers.end()	// found
+					&& it->second.isdel			// deleted
+					))
+				{
+					arDataBars[i].createBar(edP, TRUE, TRUE, 0, 0, i + 1, iMaxNum,
+						evencnt[0] * rdP->datlap[0], evencnt[1] * rdP->datlap[1]);
+				}
+
 			}
 		}
 
@@ -30477,6 +30526,7 @@ void reinCreateDataBars(int bAdd, ReinData* rdP, ReinBar* rbP, MSElementDescr* e
 		{
 			arDataBars[i].elemid = rbP->elemid;
 
+
 			arDataBars[i].fromReinData(rdP);
 
 
@@ -30485,8 +30535,17 @@ void reinCreateDataBars(int bAdd, ReinData* rdP, ReinBar* rbP, MSElementDescr* e
 
 			if (arDataBars[i].numpts > 1) 
 			{
-				arDataBars[i].createBar(edP, TRUE, TRUE, 0, 0, i + 1, iNum,
-					evencnt[0] * rdP->datlap[0], evencnt[1] * rdP->datlap[1], bDropReinData);
+				map<int, BarOver>::iterator it = relemP->mapOvers.begin();
+				it = relemP->mapOvers.find(i + 1); // inum is 1-based index
+
+				if (!(							// not (exist and deleted)
+					it != relemP->mapOvers.end()	// found
+					&& it->second.isdel			// deleted
+					))
+				{
+					arDataBars[i].createBar(edP, TRUE, TRUE, 0, 0, i + 1, iNum,
+						evencnt[0] * rdP->datlap[0], evencnt[1] * rdP->datlap[1], bDropReinData);
+				}
 			}
 		}
 
@@ -33248,7 +33307,7 @@ ScanCriteria    *pScanCriteria
 
 
 
-				//.............
+				//.. ...........
 			}
 
 			mdlElmdscr_freeAll(&edTrP);
@@ -36442,3 +36501,92 @@ void posSaveFileXml(
 
 }
 
+
+/////////////////////
+void prepareBarOver(ReinElement* relemP, ReinBar* rbP, int baract)
+{
+
+	BarOver bo;
+	bo.inum = rbP->inum;
+
+	if (baract == BAROVER_ACTION_MOVE)
+	{
+		DPoint3d pMove;
+		Transform tmMove;
+		Transform tmMoveFirst;
+
+		if (rBarOverInfo.dopopt[18]) pMove.x = mdlCnv_masterUnitsToUors(rBarOverInfo.dopopt[15]); else pMove.x = 0.;
+		if (rBarOverInfo.dopopt[19]) pMove.y = mdlCnv_masterUnitsToUors(rBarOverInfo.dopopt[16]); else pMove.y = 0.;
+		if (rBarOverInfo.dopopt[20]) pMove.z = mdlCnv_masterUnitsToUors(rBarOverInfo.dopopt[17]); else pMove.z = 0.;
+
+		mdlTMatrix_getIdentity(&tmMove);
+		mdlTMatrix_setTranslation(&tmMove, &pMove);
+
+		map<int, BarOver>::iterator it = relemP->mapOvers.find(rbP->inum);
+		if (it != relemP->mapOvers.end()) // found
+		{
+			tmMoveFirst = it->second.tmov;
+			mdlTMatrix_multiply(&tmMove, &tmMoveFirst, &tmMove);
+		}
+		else
+		{ // insert if not exist
+			BarOver bo1;
+			bo1.inum = rbP->inum;
+			relemP->mapOvers[rbP->inum] = bo1;
+		}
+
+		relemP->mapOvers[rbP->inum].tmov = tmMove;
+
+		relemP->mapOvers[rbP->inum].isgnd = rBarOverInfo.dopopt[22];
+
+		if (mdlTMatrix_isIdentity(&tmMove))
+			relemP->mapOvers[rbP->inum].btmov = FALSE;
+		else
+			relemP->mapOvers[rbP->inum].btmov = TRUE;
+
+	}
+
+	//if (baract == BAROVER_ACTION_GROUND)
+	//{
+	//	bo.isgnd = 1;
+	//	relemP->mapOvers[bo.inum] = bo;
+	//}
+
+	if (baract == BAROVER_ACTION_DELETE)
+	{
+
+		// process fence if defined
+		if (mdlFence_isDefined())
+		{
+			ScanCriteria* scP = NULL;
+			UShort          typeMask[6];
+			int status;
+
+			for (UShort a = 0; a < 6; a++) typeMask[a] = 0;
+
+			typeMask[0] = TMSK0_LINE | TMSK0_ARC | TMSK0_LINE_STRING | TMSK0_CMPLX_STRING | TMSK0_ELLIPSE;
+
+			scP = mdlScanCriteria_create();
+			status = mdlScanCriteria_setReturnType(scP, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
+			status = mdlScanCriteria_setElmDscrCallback(scP, (PFScanElemDscrCallback)scanBarOverFence, relemP);
+			status = mdlScanCriteria_setElementTypeTest(scP, typeMask, sizeof(typeMask));
+			status = mdlScanCriteria_setModel(scP, ACTIVEMODEL);
+			mdlXML_addXMLFragmentAttachmentScanTest(scP, &appID, &appTypeReinElm);
+			status = mdlScanCriteria_scan(scP, NULL, NULL, NULL);
+			status = mdlScanCriteria_free(scP);
+		}
+		else
+		{
+			bo.isdel = 1;
+			relemP->mapOvers[bo.inum] = bo;
+		}
+
+	}
+
+	if (baract == BAROVER_ACTION_RESET)
+	{
+		relemP->mapOvers.clear();
+	}
+
+
+}

@@ -269,7 +269,7 @@ using namespace std;
 #include "reinvers.h"
 
 
-#include "rein.fdf"
+#include "reinfunc.h"
 
 
 
@@ -2898,7 +2898,7 @@ int reinbar::createComplexBarAxisElem(MSElementDescr** edPP, MSElement* elTempla
 }
 
 ///////////////////////////
-
+// func in reinbar->createBar
 int reinbar::createBar(
 	MSElementDescr* edP,
 	int bBarReady,
@@ -3237,7 +3237,7 @@ int reinbar::createBar(
 	{
 
 		BINT iVisible = TRUE;
-		rbOkP->axid = reinCreateBarAxisLine(NULL, rbOkP, iVisible, lev); // acht: создание оси ReinAxis
+		rbOkP->axid = reinCreateBarAxisLine(NULL, rbOkP, iVisible, lev); // создание оси ReinAxis
 
 		fpbar = reinSweepBarByPath(rbOkP, diam, 0, 0, edpChain, barnum, &lev, NULL, 0.0);
 
@@ -3878,6 +3878,32 @@ void ReinModel::setCached(bool bSetCached)
 }
 
 //////////////////////////////////////////////////
+ReinElm* ReinModel::findReinElm(ELID prntid, ELID axid)
+{
+	ReinElm* reP = NULL;
+
+	for (map<UInt32, ReinElm>::iterator it = mapElms.begin(); it != mapElms.end(); ++it)
+	{
+		if (it->second.bel.elemid == prntid && it->second.bel.axid == axid)
+		{
+			reP = &(it->second);
+			break;
+		}
+	}
+
+	if (reP) return reP;
+
+	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+	{
+		reP = it->second.findReinElm(prntid, axid);
+
+		if (reP) break;
+	}
+
+	return reP;
+}
+
+//////////////////////////////////////////////////
 ReinElm* ReinModel::findElementByFP(UInt32 fp)
 {
 
@@ -4205,12 +4231,15 @@ void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int i
 }
 
 ////////////////////////////////
-ELID reinbar::saveReinData(ELID datelemid)
+//func in reinbar::saveReinData
+ELID reinbar::saveReinData(ELID datelemid, void* v_relemP)
 {
 	ELID elid = 0;
 	MSElementDescr* pXmlFragmentElement = NULL;
 	int status;
 	XMLFragmentListP pCurrent = NULL;
+
+	ReinElement* relemP = (ReinElement*)v_relemP;
 
 	writeLogIn(__FUNCTION__, 0);
 
@@ -4226,10 +4255,15 @@ ELID reinbar::saveReinData(ELID datelemid)
 	// create new one
 	status = mdlXMLFragmentList_createXMLElementDescriptor(&pXmlFragmentElement, &pCurrent, TRUE);
 
+
+
 	if (NULL != pXmlFragmentElement)
 	{
 
-		UInt32 fp;
+		UInt32 fp = 0;
+
+		// add BarOver
+		if (relemP) xmlAddBarOverrides(relemP, &pXmlFragmentElement);
 
 		if (datelemid == 0)
 		{
@@ -4242,12 +4276,12 @@ ELID reinbar::saveReinData(ELID datelemid)
 
 			if (eref)
 			{
-				ReinData rd;
+				//ReinData rd;
 				MSElementDescr* edp = NULL;
 
 				mdlElmdscr_getByElemRef(&edp, eref, ACTIVEMODEL, FALSE, 0);
 
-				if (edp && readReinDataFromElmd(&rd, edp, this) == SUCCESS)
+				if (edp && readReinDataFromElmd(NULL, edp, this) == SUCCESS)
 				{
 					mdlElmdscr_rewrite(pXmlFragmentElement, NULL, mdlElmdscr_getFilePos(edp));
 					elid = mdlElement_getID(&pXmlFragmentElement->el);

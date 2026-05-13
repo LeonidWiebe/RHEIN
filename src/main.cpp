@@ -258,7 +258,7 @@ using namespace std;
 
 //ViewMonitor	g_oViewMonitor;
 
-#include "rein.fdf"
+#include "reinfunc.h"
 
 
 
@@ -638,7 +638,6 @@ extern "C" DLLEXPORT void cmdReinModify(
 		//	mdlElmdscr_readToMaster (&edP, filePositions[i], fileNums[i], FALSE, NULL);
 		//	if (edP)
 		//	{
-		//		//....
 		//		mdlElmdscr_freeAll(&edP);
 		//	}
 		//}
@@ -4172,9 +4171,9 @@ void  callbackElmDscrCopy(
 					mdlElmdscr_getByElemRef(&edCopyP, eref, sourceModelRef, FALSE, 0);
 					if (iDebug) sprintf(sLogMes, "get edCopyP - source element\n"); writeLog(0, 0);
 
-					ReinData rd;
+					//ReinData rd;
 
-					if (readReinDataFromElmd(&rd, edCopyP, &reCopyFrom.bel) == SUCCESS)
+					if (readReinDataFromElmd(NULL, edCopyP, &reCopyFrom.bel) == SUCCESS)
 					{
 						ScanCriteria* pScanCriteria;
 						int status;
@@ -4870,7 +4869,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 						if (edp)
 						{
-							ReinData rd;
+							//ReinData rd;
 
 							if (readReinBarFromElement(&rb, edp, TRUE) == SUCCESS)
 							{
@@ -4887,7 +4886,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 								rbP->elemid = mdlElement_getID(&edp->el);
 								rbP->modrefP = edp->h.dgnModelRef;
 							}
-							else if (readReinDataFromElmd(&rd, edp, &relm.bel) == SUCCESS)
+							else if (readReinDataFromElmd(NULL, edp, &relm.bel) == SUCCESS)
 							{
 								rbP = &relm.bel;
 								rbP->elemid = mdlElement_getID(&edp->el);
@@ -5146,6 +5145,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 
 ///////////////////////////////////////
+	// func in callback Locate Filter
 	LocateFilterStatus  callbackLocateFilter(
 #if defined (MSVERSION) && (MSVERSION == 0xa00)
 		DgnPlatform::LOCATE_Action  action,
@@ -5283,8 +5283,11 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 					ret = LOCATE_FILTER_STATUS_Neutral;
 
 				// блокируем операции для произв. эл-тов отдельных стержней
-				if ((relm.bel.inum == 0 || relm.bel.bartype != BT_AXIS) &&
-					rInfo.option[4] // если включено отображение ReinBar
+				if (
+					(relm.bel.inum == 0 
+					//|| relm.bel.bartype != BT_AXIS // блокирует операции с производными линейного контура
+					) 
+					&& rInfo.option[4] // если включено отображение ReinBar
 					&& !(cnum == CMD_0x0e0300 && relm.bel.inum > 0)  // copy from contour
 					&& !(cnum == CMD_0x0C0300 && relm.bel.inum > 0)  // move from contour
 					&& !(cnum == CMD_0x010100 // common selection
@@ -5292,6 +5295,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 														// вернули тк если щелкаешь на стержень - не выделяется ось
 						)  // element selection for line contours (for iDblClickFP)
 					&& !(cnum == CMD_0x010200)  // dimension
+					//&& !(cnum == CMD_0x190100)  // delete element (it will be removed from contour)
 					)
 				{
 					ret = LOCATE_FILTER_STATUS_Reject;
@@ -5951,6 +5955,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 
 	///////////////////////////////////
+	// func in callbackElmDscrToFile
 	ElmDscrToFile_Status  callbackElmDscrToFile
 	(
 		ElmDscrToFile_Actions       action,
@@ -5968,7 +5973,6 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 		//    ELMDTF_ACTION_DELETE    = 2,
 		//    ELMDTF_ACTION_REPLACE   = 3
 		//    } ElmDscrToFile_Actions;
-
 
 
 		ElmDscrToFile_Status ret = ELMDTF_STATUS_SUCCESS;
@@ -6148,7 +6152,9 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 				ret = ELMDTF_STATUS_REPLACE;
 			}*/
 
-			if (rb.bartype != BT_AXIS && rb.elemid > 0)
+			if (rb.bartype != BT_AXIS && rb.elemid > 0 // correct linear contour parameters
+				&& cnum != CMD_REIN_BAROVER // not for this command
+				)
 			{
 				UInt32 ggn = 0;
 				//MSElementDescr* edpBar = NULL;
@@ -6167,11 +6173,11 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 				if (tcb->fbfdcn.gglk || iDataCopyCount > 0)
 				{
-					ReinData rd;
+					//ReinData rd;
 					MSElementDescr* edp = NULL;
 					mdlElmdscr_getProperties(0, &ggn, 0, 0, 0, 0, 0, 0, newEdP);
 					mdlElmdscr_read(&edp, ggn, modelRef, 0, 0);
-					if (edp && readReinDataFromElmd(&rd, edp, &rb) == SUCCESS)
+					if (edp && readReinDataFromElmd(NULL, edp, &rb) == SUCCESS)
 					{
 						//mdlElmdscr_setProperties(newEdP, 0, &ggn, 0, 0, 0, 0, 0, 0);
 						//mdlElmdscr_duplicate (replacementEdPP, newEdP);
@@ -6300,7 +6306,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 			MSElementDescr* edpBar = NULL; // стержень который будем создавать
 
 			{
-				ReinData rd;
+				//ReinData rd;
 
 				//if (readReinBarFromElement(&rb, edCopyP, TRUE) == SUCCESS) // не сработает никогда
 				//{
@@ -6337,7 +6343,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 						copySpaceData(&relem.rs, &rb, TRUE, NULL, FALSE);
 
 				}
-				else if (readReinDataFromElmd(&rd, edCopyP, &reCopyFrom.bel) == SUCCESS)
+				else if (readReinDataFromElmd(NULL, edCopyP, &reCopyFrom.bel) == SUCCESS)
 				{
 					bTransform = TRUE;
 
@@ -6490,7 +6496,6 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 				MSElementDescr* edSpaceP = NULL;
 
-
 				ELREF eref = getElemRefByID(modelRef, re.bel.elemid);
 
 				UInt32 fp = elementRef_getFilePos(eref);
@@ -6537,6 +6542,114 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 			}
 
 		}
+
+		// todo удаление производного элемента из линейного контура
+		// пока не доделано, не работает
+		if (newEdP == NULL && oldEdP
+			&& action == ELMDTF_ACTION_DELETE
+			&& cnum == CMD_0x190100 // delete
+			)
+		{
+			writeLog("process", 0, "DELETE command");
+
+			res = readReinElmIso(&re, oldEdP, TRUE, FALSE);
+
+			if (res == SUCCESS)
+			{
+				MSElementDescr* edPrntP = NULL;
+
+				ELREF eref = getElemRefByID(modelRef, re.bel.elemid);
+
+				UInt32 fp = elementRef_getFilePos(eref);
+
+				mdlElmdscr_readToMaster(&edPrntP, fp, modelRef, 0, 0);
+
+				if (edPrntP && readReinSpaceFromElmd(&relem, edPrntP, FALSE) == SUCCESS)
+				{
+
+					ret = ELMDTF_STATUS_ABORT;
+
+					//...
+				}
+				else 
+					if (readReinDataFromElmd(&relem // 
+												, edPrntP // ReinData element
+												, &re.bel // additional data from bar
+											) == SUCCESS)
+				{
+
+					// срабатывает при регенерации (deleteReinElms())... флаг?
+
+					ret = ELMDTF_STATUS_ABORT;
+
+					/*
+					
+					//...mapOvers...
+
+					//rbP = &re.bel;
+					//rbP->elemid = mdlElement_getID(&edPrntP->el);
+					//rbP->modrefP = edPrntP->h.dgnModelRef;
+
+					if (re.bel.ffpos[REIN_ELEM_ISO])
+					{
+						ReinElm* relmP = curRM->getReinElm(re.bel.ffpos[REIN_ELEM_ISO]);
+
+						if (relmP)
+						{
+							relmP->elemflags |= REINEL_FLAG_DIRT; // ISO deleted
+
+							prepareBarOver(&relem, &re.bel, BAROVER_ACTION_DELETE);
+
+							re.bel.fromReinData(&relem.rd);
+
+							re.bel.saveReinData(re.bel.elemid, &relem);
+
+							relmP->bel.ffpos[REIN_ELEM_ISO] = 0;
+
+						}
+
+					}
+					else if (re.bel.ffpos[REIN_ELEM_BAR])
+					{
+						ReinElm* relmP = curRM->findReinElm(re.bel.elemid, re.bel.axid);
+
+						if (relmP)
+						{
+
+							if (relmP->elemflags & REINEL_FLAG_DIRT)
+							{
+
+							}
+							else
+							{
+								ELREF bref = mdlModelRef_getElementRef(ACTIVEMODEL, relmP->bel.ffpos[REIN_ELEM_ISO]);
+
+								if (bref)
+								{
+									relmP->bel.ffpos[REIN_ELEM_BAR] = 0;
+
+									mdlElmdscr_undoableDelete(0, relmP->bel.ffpos[REIN_ELEM_ISO], TRUE);
+								}
+
+							}
+
+						}
+					}
+
+
+					ret = ELMDTF_STATUS_SUCCESS;
+
+					*/
+
+				}
+
+
+				if (edPrntP) mdlElmdscr_freeAll(&edPrntP);
+
+			}
+		}
+
+
 
 		if (iDebug)
 		{

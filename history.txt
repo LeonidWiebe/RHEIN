@@ -156,5 +156,9 @@ These operations are experimental.
 4) Fixes
 
 14.8.24
-new keyin: REIN POS DBSAVE LEVELS - save level names for current model
-New combinations of positions detecting
+new keyin: REIN POS DBSAVE LEVELS - save level names for current model to use this combinations of positions detecting
+Other fixes
+
+14.8.25
+Command for Bar deleting from contour - now works in linear contours
+Bar moving for linear comtours will be presented in future versions 

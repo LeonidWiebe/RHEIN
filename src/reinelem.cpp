@@ -269,7 +269,7 @@ using namespace std;
 #include "reinvers.h"
 
 
-#include "rein.fdf"
+#include "reinfunc.h"
 
 
 
@@ -277,6 +277,7 @@ using namespace std;
 void reinelement::clear(void)
 {
 	rs.clear();
+	rd.clear();
 
 	fpRS = 0;
 	idRS = 0;

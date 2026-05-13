@@ -14,6 +14,7 @@ typedef struct reinelement
 	void clear();
 
 	ReinSpace rs;
+	ReinData rd;
 	UInt32 fpRS; // file position
 	ELID idRS;
 	DgnModelRefP  modelRef;

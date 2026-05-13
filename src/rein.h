@@ -161,6 +161,7 @@
 #define REINEL_FLAG_RBND		4 // real bend (iCfgVar_BendNewDraw == 2)
 #define REINEL_FLAG_NMCH		8 // no match aecosim elements
 #define REINEL_FLAG_CTCH		16 // catched position
+#define REINEL_FLAG_DIRT		32 // deleted
 
 #define REINBAR_FLAG_CONT		1 // новый способ определения номера контура
 //#define REINBAR_FLAG_....		2
@@ -220,6 +221,7 @@
 #define CMD_0x050101 0x05010100 // surface by extrusion
 #define CMD_0x050102 0x05010200 // surface by revolution
 #define CMD_0x0C0300 0x0C030000 // move
+#define CMD_0x190100 0x19010000 // delete element
 
 
 #endif
