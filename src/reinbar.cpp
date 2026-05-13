@@ -341,7 +341,7 @@ void reindata::clear(void)
 	//dattrmPar[4][1] = 0;
 
 	datposcalc = 0;
-	datspace = 0;
+	datspacef = 0.0;
 	datoffset[0] = 0;
 	datoffset[1] = 0;
 }
@@ -604,6 +604,7 @@ void reinspace::clear(void)
 	runmet = 0;
 	diam = 0;
 	space = 0;
+	spacef = 0.0;
 	spacerad = 0;
 	offset[0] = 0;
 	offset[1] = 0;
@@ -1061,7 +1062,8 @@ void reinbar::clear(int memres)
 	length = 0.;
 
 	diam = 0;
-	space = 0;
+	//space = 0;
+	spacef = 0.0;
 	spacerad = 0;
 	offset[0] = 0; // для построения на SURFACE_ELM
 	offset[1] = 0; // для построения на SURFACE_ELM
@@ -1168,7 +1170,12 @@ void catinfo::clearPosCalc()
 	}
 }
 
-//////////////////////////////////////////
+/// <summary>
+/// получение ключа для опции отображаемого стержня
+/// </summary>
+/// <param name="wstr">ключ</param>
+/// <param name="bForSave">1 для сохранения в файл, 0 - для ключа mapBarSet</param>
+/// <returns></returns>
 bool reinpos::getIdentChars(MSWCH* wstr, int bForSave)
 {
 
@@ -1213,8 +1220,11 @@ bool reinpos::getIdentChars(MSWCH* wstr, int bForSave)
 
 }
 
-//////////////////////////////////
-wstring reinpos::getIdentString()
+/// <summary>
+/// получение ключа для mapBarSet
+/// </summary>
+/// <returns></returns>
+wstring reinpos::getMapIdentString()
 {
 
 	MSWCH wstr[1000];
@@ -1331,6 +1341,7 @@ void catinfo::clear()
 	SCPY(catmodname, L(""));
 	SCPY(catfullname, L(""));
 	bAutoCats = FALSE;
+	iActive = 0;
 
 	if (iDebug) sprintf(sLogMes, "arCurPos.size() = %u\n", (UInt32)arCurPos.size()); writeLog(0, 0, 0, 1);
 
@@ -1379,6 +1390,8 @@ void reinprm::clear()
 	uints.clear();
 
 	edP = NULL;
+	mrP = NULL;
+	fp = 0;
 }
 
 reinprm::reinprm()
@@ -1409,6 +1422,7 @@ void ReinModel::Init()
 	refscale = 1.0;
 	//iPosQty = 0;
 	bCached = false;
+	bMissed = false; // if ref file not found
 	//bRefPlus = false;
 
 	refPrefsP = NULL;
@@ -1435,6 +1449,19 @@ void ReinModel::Init()
 		mdlTransient_free(&tedSecP, 0);
 	}
 	tedSecP = NULL;
+
+	for (map<UInt32, TransDescrP>::iterator it = mapTedCntP.begin(); it != mapTedCntP.end();)
+	{
+		if (it->second && mdlTransient_isValid(it->second))
+		{
+			mdlTransient_free(&it->second, TRUE);
+			it = mapTedCntP.erase(it);
+			continue;
+		}
+		++it;
+	}
+	mapTedCntP.clear();
+
 
 }
 
@@ -1739,6 +1766,26 @@ UInt32 ReinModel::getElemCount(int iDpth) // -1 unlimited
 	return icnt + elcount;
 }
 
+/////////////////////////////////////////
+UInt32 ReinModel::getBarSetSize() //
+{
+	UInt32 icnt = 0;
+
+	writeLogIn(__FUNCTION__, 0);
+
+	icnt = mapBarSet.size();
+
+	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
+	{
+		icnt = icnt + it->second.getBarSetSize();
+	}
+
+	writeLogOut(__FUNCTION__, 0);
+
+
+	return icnt;
+}
+
 
 ////////////////////////////////////////
 //  ===== ReinModel CONSTRUCTOR ===== //
@@ -1757,9 +1804,22 @@ void ReinModel::Init(DgnModelRefP mrP, long reinelemcnt)
 
 	//rmParentP = rmPrntP;
 
+	bMissed = false;
+
 	if (mdlModelRef_isActiveModel(mrP))
 		mdlModelRef_getFileName(mrP, rmname, 500); // берет неправильное имя если референс выключен
+	else // reference
+	{
+		BINT isMis = FALSE;
+		mdlRefFile_getBooleanParameters(&isMis, REFERENCE_FILENOTFOUND, mrP);
+		if (isMis)
+		{
+			bMissed = true;
+			writeLog("ref file not found, return", 0, 0, 1);
+			writeLogOut(__FUNCTION__, 0);
+		}
 
+	}
 	//if (rnum == 2)
 	//	int a = 0;
 
@@ -2135,6 +2195,7 @@ void ReinModel::Init(DgnModelRefP mrP, long reinelemcnt)
 			//arMrP[rn] = new ReinModel(modelRef, elcnt, this); // происходит отработка конструктора
 
 			ReinModel rm(modelRef, elcnt);
+
 			arMrP.insert(pair<UInt32, ReinModel>(rn, rm));
 
 			if (iDebug) sprintf(sLogMes, "new ReinModel allocated\n"); writeLog(0, 0);
@@ -2214,6 +2275,18 @@ ReinModel::~ReinModel(void)
 	}
 	tedSecP = NULL;
 
+	for (map<UInt32, TransDescrP>::iterator it = mapTedCntP.begin(); it != mapTedCntP.end();)
+	{
+		if (it->second && mdlTransient_isValid(it->second))
+		{
+			mdlTransient_free(&it->second, TRUE);
+			it = mapTedCntP.erase(it);
+			continue;
+		}
+		++it;
+	}
+	mapTedCntP.clear();
+
 	if (iDebug) sprintf(sLogMes, "clear exclude vectors...\n"); writeLog(0, 0);
 	vExIds.clear();
 	vExFps.clear();
@@ -2221,7 +2294,6 @@ ReinModel::~ReinModel(void)
 	//mapClash.clear();
 
 	writeLogOut(__FUNCTION__, 0);
-
 }
 
 ///////////////////////////////////////////
@@ -2233,8 +2305,9 @@ ReinModel* ReinModel::getRM(DgnModelRefP mrP)
 
 	if (mrP == modelP) return this;
 
+	if (arMrP.empty()) return NULL; // nowhere to search
+
 	for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
-		//for (int i = 0; i < MAX_REF_SLOT; i++)
 	{
 		if (it->second.modelP == mrP)
 		{
@@ -2247,7 +2320,6 @@ ReinModel* ReinModel::getRM(DgnModelRefP mrP)
 	if (rmRetP == NULL)
 	{
 		for (map<UInt32, ReinModel>::iterator it = arMrP.begin(); it != arMrP.end(); ++it)
-			//for (int i = 0; i < MAX_REF_SLOT; i++)
 		{
 			rmRetP = it->second.getRM(mrP);
 
@@ -3438,14 +3510,14 @@ XMLFragmentListP reinbar::createReinBarXml()
 		trmp[5] = termPar[2][1];
 	}
 
-	if (space == 0) space = iSpaceDefault; // no space2
+	if ((int)spacef == 0) spacef = (double)iSpaceDefault; // no space2
 
-	_swprintf(wstr, L"REINBAR;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%I64u;%i;%i;%i;%i",
+	_swprintf(wstr, L"REINBAR;%i;%i;%i;%i;%.1f;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%I64u;%i;%i;%i;%i",
 		runmet,
 		diam,
 		segmIndex,
 		elemEDoffset,
-		space, // аргументы потом используются когда создается SURFACE_ELM
+		spacef, // аргументы потом используются когда создается SURFACE_ELM
 		offset[0],
 		-offset[1], // для совместимости хранится с отриц. значением
 		lap[0],
@@ -3489,7 +3561,7 @@ void reinbar::fromReinData(ReinData* rdP)
 	runmet = rdP->datrunmet;
 	bendrad = rdP->datbdrad;
 	poscalc = rdP->datposcalc;
-	space = rdP->datspace;
+	spacef = rdP->datspacef;
 	lap[0] = rdP->datlap[0];
 	lap[1] = rdP->datlap[1];
 	lap[2] = rdP->datlap[2];
@@ -4021,7 +4093,7 @@ void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int i
 
 	if (bScanPos)
 	{
-		mapCats.clear();
+		mapCats.clear(); // выхывается только для curRM (корневой)
 		catPosXml.clearPosCalc();
 
 		scanFilePositions(this, mrP, true, true);
@@ -4127,14 +4199,27 @@ void ReinModel::reloadCurBars(bool bScan, bool bUpdateListBox, int iDepth, int i
 
 			scP = mdlScanCriteria_create();
 			status = mdlScanCriteria_setReturnType(scP, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
-			status = mdlScanCriteria_setElmDscrCallback(scP, (PFScanElemDscrCallback)iterateLoadReinBars, &getCat());
+			status = mdlScanCriteria_setElmDscrCallback(scP, (PFScanElemDscrCallback)iterateLoadReinElms, &getCat());
 			status = mdlScanCriteria_setElementTypeTest(scP, typeMask, sizeof(typeMask));
 			mdlXML_addXMLFragmentAttachmentScanTest(scP, &appID, &appTypeReinElm);
 			status = mdlScanCriteria_setModel(scP, mrP);
 			status = mdlScanCriteria_scan(scP, NULL, NULL, NULL);
 			status = mdlScanCriteria_free(scP);
 
-			writeLog("model_elements_scan", -1, 0, 0);
+			writeLog("lin_contours_scan", -1, 0, 0);
+
+			/* linear contour arrows*/
+			if (mdlModelRef_isActiveModel(mrP))
+			{
+				scP = mdlScanCriteria_create();
+				status = mdlScanCriteria_setReturnType(scP, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
+				status = mdlScanCriteria_setElmDscrCallback(scP, (PFScanElemDscrCallback)iterateLoadReinBars, 0);
+				status = mdlScanCriteria_setElementTypeTest(scP, typeMask, sizeof(typeMask));
+				mdlXML_addXMLFragmentAttachmentScanTest(scP, &appID, &appTypeReinBar);
+				status = mdlScanCriteria_setModel(scP, mrP);
+				status = mdlScanCriteria_scan(scP, NULL, NULL, NULL);
+				status = mdlScanCriteria_free(scP);
+			}
 
 		}
 
@@ -4281,10 +4366,14 @@ ELID reinbar::saveReinData(ELID datelemid, void* v_relemP)
 
 				mdlElmdscr_getByElemRef(&edp, eref, ACTIVEMODEL, FALSE, 0);
 
-				if (edp && readReinDataFromElmd(NULL, edp, this) == SUCCESS)
+				if (edp)
 				{
-					mdlElmdscr_rewrite(pXmlFragmentElement, NULL, mdlElmdscr_getFilePos(edp));
-					elid = mdlElement_getID(&pXmlFragmentElement->el);
+					if (readReinDataFromElmd(NULL, edp, this) == SUCCESS)
+					{
+						mdlElmdscr_rewrite(pXmlFragmentElement, NULL, mdlElmdscr_getFilePos(edp));
+						elid = mdlElement_getID(&pXmlFragmentElement->el);
+					}
+
 					mdlElmdscr_freeAll(&edp);
 				}
 			}
@@ -4333,9 +4422,9 @@ void reinbar::setReinDataString(WCH* str)
 	int datt = 1;
 	if (bartype != BT_AXIS) datt = bartype;
 
-	if (space == 0) space = iSpaceDefault;
+	if ((int)spacef == 0) spacef = (double)iSpaceDefault;
 
-	SPRN(str, L("%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i"),
+	SPRN(str, L("%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%.1f;%i;%i"),
 		diam,			// 0
 		runmet,		// 1
 		lap[0],		// 2
@@ -4352,7 +4441,7 @@ void reinbar::setReinDataString(WCH* str)
 		trmp[5],			// 13
 		datt,				// 14
 		poscalc,		// 15
-		space,			// 16
+		spacef,			// 16
 		offset[0],		// 17
 		offset[1]		// 18 минус поставить когда будет сделана отработка
 	);
@@ -4611,6 +4700,38 @@ wstring reinelm::getReinElmLevName(bool bUpdateMember)
 	return wsLevName;
 
 }
+
+/*
+////////////////////////////////////////////////////////////////
+#ifdef _REIN_H_
+extern "C" DLLEXPORT
+#endif
+int reinelm::getElmFromElement(ELID elid) // active model
+{
+	int res = SUCCESS;
+
+	ELREF eref = getElemRefByID(ACTIVEMODEL, elid);
+
+	if (eref)
+	{
+		MSElementDescr* edp = NULL;
+
+		mdlElmdscr_getByElemRef(&edp, eref, ACTIVEMODEL, FALSE, 0);
+
+		if (edp)
+		{
+
+			res = getElmFromElement(&(edp->el), ACTIVEMODEL);
+
+			mdlElmdscr_freeAll(&edp);
+		}
+
+	}
+
+	return res;
+
+}
+*/
 
 ////////////////////////////////////////////////////////////////
 #ifdef _REIN_H_

@@ -1935,3 +1935,125 @@ Private Sub Exchange(Index() As Long, ByVal i As Long, ByVal J As Long)
    Index(i) = Index(J)
    Index(J) = Temp
 End Sub
+
+
+
+
+
+Public Sub prepReinViews()
+
+
+    Dim ee As ElementEnumerator
+    Dim esc As ElementScanCriteria
+    
+    Set esc = New ElementScanCriteria
+    Dim oPH As PropertyHandler
+    Dim v As Variant
+    
+    esc.ExcludeAllTypes
+    esc.IncludeType msdElementTypeView
+    
+    Dim ScanForSavedViewsForActiveModel As New Collection
+    
+    Set ee = ActiveModelReference.Scan(esc)
+    
+    
+    Dim cnt As Long
+    
+    
+    Do While ee.MoveNext
+        cnt = cnt + 1
+    Loop
+    
+    
+    Dim strMes As String
+    strMes = "Будет проведена подготовка сохраненных видов модели арматуры для их подключения в чертежи армирования" & vbNewLine
+    strMes = strMes & "Количество сохраненных видов на изменение - " & cnt & vbNewLine
+    strMes = strMes & "Подтвердите выполнение операции"
+    
+    Dim res As VbMsgBoxResult
+    
+    res = MsgBox(strMes, vbYesNo, "Подготовка видов")
+    
+    
+    If res = vbNo Then Exit Sub
+    
+    
+    
+    ee.Reset
+    
+    
+    Do While ee.MoveNext
+
+        
+        Dim sv As SavedViewElement
+        Set sv = ee.Current.AsSavedViewElement
+        
+        Set oPH = CreatePropertyHandler(sv)
+        
+        'Dim sss() As String
+        'sss = oPH.GetAccessStrings()
+
+        
+        oPH.SelectByAccessString "ForwardDisplay"
+        v = oPH.GetValue()
+        oPH.SetValue (True)
+        
+        oPH.SelectByAccessString "CutDisplay"
+        v = oPH.GetValue()
+        oPH.SetValue (False)
+        
+        oPH.SelectByAccessString "ForwardDisplayStyle"
+        v = oPH.GetValue()
+        oPH.SetValue ("From View")
+        
+        
+        oPH.SelectByAccessString "BaseDisplayStyle"
+        v = oPH.GetValue()
+        oPH.SetValue ("Wireframe")
+        
+        
+        
+'        oPH.SelectByAccessString "Markers"
+'        v = oPH.GetValue()
+'        oPH.SetValue (False)
+        
+        
+        
+        
+        oPH.SelectByAccessString "ClipVolume"
+        v = oPH.GetValue()
+        oPH.SetValue (False)
+        
+        oPH.SelectByAccessString "ClipBack"
+        v = oPH.GetValue()
+        oPH.SetValue (True)
+        
+        oPH.SelectByAccessString "ClipFront"
+        v = oPH.GetValue()
+        oPH.SetValue (True)
+        
+        
+'        Dim at As Attachment
+'        For Each at In sv.SavedViewModelReference.Attachments
+'            at.DisplayFlag = True
+'        Next
+        
+'        Dim eee As ElementEnumerator
+'        Set eee = sv.GetRelatedElements(False, msdMemberTraverseManipulate)
+'        Do While ee.MoveNext
+'            Debug.Print ee.Current.Type
+'        Loop
+
+        
+'        If sv.SavedViewModelReference Is ActiveModelReference Then
+'            ScanForSavedViewsForActiveModel.Add sv
+'        End If
+    Loop
+    
+    
+    res = MsgBox("Настройка видов завершена", vbOKOnly, "Подготовка видов")
+
+
+End Sub
+

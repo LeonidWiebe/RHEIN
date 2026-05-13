@@ -62,6 +62,7 @@
 #define ItemList_REIN_NOTE           5
 #define ItemList_REIN_BAROVER        7
 #define ItemList_REIN_BARMOVE        8
+#define ItemList_REIN_BARVIEW        9
 
 
 
@@ -210,6 +211,7 @@
 #define CMD_0x050101 0x0501010000000000UI64
 #define CMD_0x050102 0x0501020000000000UI64
 #define CMD_0x0C0300 0x0C03000000000000UI64 // move
+#define CMD_0x190100 0x1901000000000000UI64 // delete element
 
 
 #else // v8i
@@ -528,6 +530,7 @@ SEC = As summary
 #define OPTIONBUTTONID_NoteStyle			401
 #define OPTIONBUTTONID_LineStyles			1001
 #define OPTIONBUTTONID_PresOpt				96
+#define OPTIONBUTTONID_BarView				98
 
 #define TOGGLE_NoteDim						401
 #define TOGGLE_NoteBarSet					402
@@ -558,9 +561,10 @@ SEC = As summary
 #define BUTTON_DBSAVE	4
 #define BUTTON_POSDRAW	5
 #define BUTTON_AGREE	7
-#define BUTTON_POSNUM	8
+#define BUTTON_POSNUM	8 // also dynamic / cached
 
 #define DLGITEM_TEXT_SPACE		3
+#define DLGITEM_TEXT_SPACE_F		310
 //#define DLGITEM_TEXT_SPACE_2	309
 
 #define MODTYPE_NONE						0
@@ -573,6 +577,8 @@ SEC = As summary
 #define BAROVER_ACTION_RESET				1
 #define BAROVER_ACTION_DELETE				2
 //#define BAROVER_ACTION_GROUND				3 // заземление
+
+#define BARVIEW_ACTION_STD					0
 
 #define BARSET_GAP				10
 

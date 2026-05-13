@@ -62,12 +62,11 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1C1C8D19-F586-4ED7-839F-41745AF16DAF}</ProjectGuid>
     <RootNamespace>rein</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>rein</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>Makefile</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
@@ -162,9 +161,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='aecosim|x64'">
     <IncludePath>C:\Program Files\Bentley\OpenBuildings CONNECT Edition\OpenBuildingsDesignerSDK\include;C:\Program Files\Bentley\OpenBuildings CONNECT Edition\OpenBuildingsDesignerSDK\OBDSDK\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='station|x64'">
-    <IncludePath>C:\Program Files\Bentley\MicroStationCONNECTSDK\include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='station|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -225,6 +222,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='station|x64'">
     <ClCompile>
       <PreprocessorDefinitions>D_CONNECT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Program Files\Bentley\MicroStation2023SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='aecosim|x64'">

@@ -123,7 +123,7 @@ typedef struct reindata
 	//vector<vector<int>> dattrmPar;
 	int dattrmPar[10][2];
 	int datposcalc;
-	int datspace;
+	double datspacef;
 	int datoffset[2];
 } ReinData;
 
@@ -261,7 +261,8 @@ typedef struct reinbar
 	ReinSegm sgts[MAX_BAR_VERTICES];
 
 	double length; // берется из элемента
-	int space; // для построения на SURFACE_ELM
+	//int space; // для построения на SURFACE_ELM
+	double spacef; // 
 	int spacerad;
 	int offset[2]; // для построения на SURFACE_ELM
 	int bendrad; // радиус загиба
@@ -565,8 +566,9 @@ typedef struct reinspace
 	int runmet;
 	int diam;
 	int diam2; // diameter to remember
-	int space;
-	int space2; // для поперечной арматуры
+	int space; // for option
+	double spacef;
+	//int space2; // для поперечной арматуры
 	int spacerad;
 	int offset[2];
 	int bendrad;
@@ -843,7 +845,7 @@ typedef struct reinpos
 	void clearCalc();
 
 	bool getIdentChars(MSWCH* wstr, int bForSave);
-	wstring getIdentString();
+	wstring getMapIdentString();
 
 	//reinpos operator=(const reinpos & other);
 
@@ -931,7 +933,9 @@ typedef struct catinfo
 	catinfo();
 	void clear();
 	void clearPosCalc();
+#if defined (MSVERSION) && (MSVERSION == 0x8b0)
 	int getPositionsFromDom(XmlDomRef dom);
+#endif
 	UInt32 projID;
 	UInt32 catID; // ID корневого каталога для основной модели
 	UInt32 catModID; // ID каталога для модели, который определяется по имени модели из отношений view_object_catalog
@@ -945,6 +949,7 @@ typedef struct catinfo
 	long iPosIndex; // index for position with num=0
 	deque<wstring> dqlvnm; // deque of level names
 
+	int iActive;
 } CatInfo;
 
 /// <summary>
@@ -1017,6 +1022,11 @@ typedef struct reinelm
 #endif
 	int getElmFromElement(MSElementCP el, DgnModelRefP mrP);
 
+//#ifdef _REIN_H_
+//	DLLEXPORT
+//#endif
+//	int getElmFromElement(ELID elid);
+
 #ifdef _REIN_H_
 	DLLEXPORT
 #endif
@@ -1074,10 +1084,13 @@ typedef struct ReinModel
 	UInt32 getExFpCount(int iDpth);
 	UInt32 getExIdCount(int iDpth);
 
+	UInt32 getBarSetSize();
+
 	DgnModelRefP modelP;
 
 	UInt32 elcount;
 	bool bCached;
+	bool bMissed;
 	//bool bRefPlus; // catID совпадает с тем что в ACTIVEMODEL
 
 	double refscale;
@@ -1112,6 +1125,8 @@ typedef struct ReinModel
 	map<ELID, UInt32> mapBars;
 	//map<ELID, ReinPos> mapBarSet;
 
+	map <wstring, ReinPos> mapBarSet;
+
 	//vector<ReinElm> vecElms;
 	//vector<ELID> vExIds;
 	//vector<UInt32> vExFps;
@@ -1120,9 +1135,11 @@ typedef struct ReinModel
 
 	WCH rmname[500];
 
-	TransDescrP tedSecP;
+	TransDescrP tedSecP; // section transient points to snap
+	//TransDescrP tedCntP; // contour transients
+	map<UInt32, TransDescrP> mapTedCntP;
 
-	CatInfo mrci; // model ref cat info
+	CatInfo mrci; // modelref database catalog info
 
 	//	map <UInt32, ReinClash> mapClash; // точки коллизий
 
@@ -1163,6 +1180,8 @@ typedef struct reinprm
 	deque <UInt32> uints;
 
 	MSElementDescrP edP;
+	DgnModelRefP mrP;
+	UInt32 fp;
 
 } ReinPrm;
 

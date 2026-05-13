@@ -52,3 +52,4 @@
 #define CMD_REIN_VISIT                          0x01280000  /* PARAMETERS */ 
 #define CMD_REIN_BAROVER                        0x01290000  /* PARAMETERS */ 
 #define CMD_REIN_CONCRETE                       0x012a0000  /* PARAMETERS */ 
+#define CMD_REIN_BARVIEW                        0x012b0000  /* PARAMETERS */ 

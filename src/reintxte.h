@@ -109,6 +109,7 @@
 #define TXT_87_1					"change"
 #define TXT_87_2					"delete"
 #define TXT_87_3					"reset"
+#define TXT_87_4					"clip set"
 #define TXT_88						"Reinforcement"
 #define TXT_89						"Manipulate with bars of closed contour"
 #define TXT_90						"Set reinforcement properties"

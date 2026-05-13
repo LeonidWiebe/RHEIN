@@ -22,6 +22,7 @@
 #define COMMANDID_REIN_NOTE           5
 #define COMMANDID_REIN_SIDE           6
 #define COMMANDID_REIN_BAROVER        7
+#define COMMANDID_REIN_BARVIEW        8
 
 #else
 
@@ -108,6 +109,7 @@ CommandTable CT_CMDS =
     {  40, CT_NONE, INHERIT, NONE , "VISIT"}, // показать скрытые элементы и снова скрыть
     {  41, CT_NONE, INHERIT, NONE , "BAROVER"}, // переопределение данных стержня в контуре (в т.ч. удаление)
     {  42, CT_NONE, INHERIT, NONE , "CONCRETE"},
+    {  43, CT_NONE, INHERIT, NONE , "BARVIEW"}, // показ стержня на отдельном виде
 };
 
 

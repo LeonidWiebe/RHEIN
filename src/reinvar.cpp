@@ -294,6 +294,8 @@ ReinView arViewPlanes[8];
 //DVec3d arViewDelta[8];
 
 int BRYS = FALSE;
+int bScanInProgress = FALSE;
+int bReloadInProgress = FALSE;
 
 TransDescrP arTransNodes = NULL;
 TransDescrP arTransMufts = NULL;
@@ -348,6 +350,7 @@ ReinAxis raxis;
 ReinElm arelm;
 ReinElm crelm;
 ReinElm drelm;
+ReinElm erelm;
 ReinElm urelm;
 DVec3d ptsCalc[MAX_BAR_VERTICES];
 DVec3d calcTrPts[MAX_BAR_VERTICES];
@@ -359,8 +362,9 @@ long calcRfa[MAX_BAR_VERTICES];
 int calcF[MAX_BAR_VERTICES]; // флаги дл€ переменных сегментов, 1 - гориз., 2 - верт.
 DVec3d ptstmp[MAX_BAR_VERTICES];
 //ReinSpace rrs;
-ReinElement rrelem;
-ReinBar rrb;
+ReinElement rrelem; // for operations
+ReinElement urelem; // for update
+//ReinBar rrb;
 DVec3d arPtsX[MAX_BAR_VERTICES];
 DVec3d arPtsO[MAX_BAR_VERTICES];
 double arDepthX[MAX_BAR_VERTICES];
@@ -421,6 +425,7 @@ int iCfgVar_SpaceHoldLine = FALSE; // держать шаг стержней при косом выт€гивании
 int iCfgVar_SortPlus = FALSE; // sort by parameters
 int iCfgVar_SectionPoints = FALSE; // make transient section points
 int iCfgVar_ProjectID_Override = 0; // override projectID for srtmID and matID when poslist db save
+int iCfgVar_BarSetRefNesting = -1; // bar set ref nesting
 
 int iCfgVar_Class_Elm = 0;
 int iCfgVar_Class_Spc = 0;
@@ -547,10 +552,10 @@ vector<ReinVert> daMufts;
 vector<SpecLine> daDrawLines;
 vector<SpecText> daDrawTexts;
 
-map <wstring, ReinPos> mapBarSet;
+//map <wstring, ReinPos> mapBarSet;
 map <STRING, ReinPrm> mapSimPos;
 
-MSWCH sset[10000];
+//MSWCH sset[10000];
 deque<wstring> setstr;
 
 map <UInt32, CatInfo> mapCats;
@@ -725,6 +730,8 @@ UInt32 filePosReinSurf = 0;
 UInt32 filePosReinFrom = 0;
 //UInt32 filePosReinOver = 0;
 
+vector<ReinCache> vElemLoc; // vElemLoc[0].pnum == filePosRein
+
 BOOL bDropReinData = false;
 
 int iReinBarSelectedQty = 0;
@@ -796,6 +803,7 @@ double dSketchPointZ = 0.;
 int iEmpty = 0;
 
 int iDebug = 0;
+int iBeta = 1;
 
 //#if defined (MSVERSION) && (MSVERSION == 0xa00)
 ofstream fileLog;

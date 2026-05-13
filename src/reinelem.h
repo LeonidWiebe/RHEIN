@@ -13,6 +13,7 @@ typedef struct reinelement
 
 	void clear();
 
+	ReinBar rb;
 	ReinSpace rs;
 	ReinData rd;
 	UInt32 fpRS; // file position

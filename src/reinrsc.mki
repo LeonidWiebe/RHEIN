@@ -9,11 +9,6 @@ rCompOpts + -i$(o)
 
 maRscs = $(o)$(appName).mi      \
          $(o)$(appName).rsc
-		 
-		 
-# mdlapps -> reinsrc
-
-reinsrc = c:/Offtake/rein14/
 
 #------------------------------------------------------------------------
 # Create & compile the app's dialog resources using rcomp

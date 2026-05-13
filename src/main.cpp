@@ -386,7 +386,7 @@ extern "C" DLLEXPORT void cmdBarOverride(
 {
 	iAC = CMD_REIN_BAROVER;
 
-	nSearchTypes = 3;
+	//nSearchTypes = 3;
 	//searchType[0] = ARC_ELM;
 	//searchType[1] = CMPLX_STRING_ELM;
 	//searchType[2] = ELLIPSE_ELM;
@@ -408,6 +408,35 @@ extern "C" DLLEXPORT void cmdBarOverride(
 
 }
 
+/////////////////////////////////
+extern "C" DLLEXPORT void cmdBarView(
+	char* unparsedP
+)
+//cmdNumber   CMD_REIN_BARVIEW
+{
+	iAC = CMD_REIN_BARVIEW;
+
+	//nSearchTypes = 3;
+	//searchType[0] = ARC_ELM;
+	//searchType[1] = CMPLX_STRING_ELM;
+	//searchType[2] = ELLIPSE_ELM;
+
+	// ReinElm & ReinSpace
+	nSearchTypes = 9;
+	searchType[0] = SHAPE_ELM;
+	searchType[1] = CMPLX_SHAPE_ELM;
+	searchType[2] = LINE_ELM;
+	searchType[3] = LINE_STRING_ELM;
+	searchType[4] = CMPLX_STRING_ELM;
+	searchType[5] = ARC_ELM;
+	searchType[6] = CELL_HEADER_ELM;
+	searchType[7] = SURFACE_ELM;
+	searchType[8] = ELLIPSE_ELM;
+
+
+	startModify();
+
+}
 /////////////////////////////////
 extern "C" DLLEXPORT void cmdBarSet(
 	char* unparsedP
@@ -654,7 +683,8 @@ extern "C" DLLEXPORT void cmdReinModify(
 			{
 				rInfo.rsVal.runmet = relem.rs.runmet;
 				rInfo.rsVal.diam = relem.rs.diam;
-				rInfo.rsVal.space = relem.rs.space;
+				//rInfo.rsVal.space = relem.rs.space;
+				rInfo.rsVal.spacef = relem.rs.spacef;
 				//rInfo.rsVal.space2 = relem.rs.space2;
 				rInfo.rsVal.offset[0] = relem.rs.offset[0];
 				rInfo.rsVal.offset[1] = relem.rs.offset[1];
@@ -674,32 +704,33 @@ extern "C" DLLEXPORT void cmdReinModify(
 				//rInfo.rsVal.trmPar[2][1] = relem.rs.trmPar[2][1];
 			}
 
-			if (readReinBarFromElement(&rb, edP, TRUE) == SUCCESS)
+			if (readReinBarFromElement(&relem, edP, TRUE) == SUCCESS)
 			{
-				rInfo.rsVal.runmet = rb.runmet;
-				rInfo.rsVal.diam = rb.diam;
-				rInfo.rsVal.space = rb.space;
-				////rInfo.rsVal.space2 = rb.space2;
-				rInfo.rsVal.offset[0] = rb.offset[0];
-				rInfo.rsVal.offset[1] = rb.offset[1];
-				rInfo.rsVal.bendrad = rb.bendrad;
-				rInfo.rsVal.poscalc = rb.poscalc;
-				rInfo.rsVal.lap[0] = rb.lap[0];
-				rInfo.rsVal.lap[1] = rb.lap[1];
-				rInfo.rsVal.lap[2] = rb.lap[2];
-				rInfo.rsVal.trm[0] = rb.term[0];
-				rInfo.rsVal.trm[1] = rb.term[1];
+				rInfo.rsVal.runmet = relem.rb.runmet;
+				rInfo.rsVal.diam = relem.rb.diam;
+				//rInfo.rsVal.space = relem.rb.space;
+				rInfo.rsVal.spacef = relem.rb.spacef;
+				////rInfo.rsVal.space2 = relem.rb.space2;
+				rInfo.rsVal.offset[0] = relem.rb.offset[0];
+				rInfo.rsVal.offset[1] = relem.rb.offset[1];
+				rInfo.rsVal.bendrad = relem.rb.bendrad;
+				rInfo.rsVal.poscalc = relem.rb.poscalc;
+				rInfo.rsVal.lap[0] = relem.rb.lap[0];
+				rInfo.rsVal.lap[1] = relem.rb.lap[1];
+				rInfo.rsVal.lap[2] = relem.rb.lap[2];
+				rInfo.rsVal.trm[0] = relem.rb.term[0];
+				rInfo.rsVal.trm[1] = relem.rb.term[1];
 
 				for (int i = 0; i < 10; i++)
 				{
-					rInfo.rsVal.trmPar[i][0] = rb.termPar[i][0];
-					rInfo.rsVal.trmPar[i][1] = rb.termPar[i][1];
+					rInfo.rsVal.trmPar[i][0] = relem.rb.termPar[i][0];
+					rInfo.rsVal.trmPar[i][1] = relem.rb.termPar[i][1];
 				}
-				//rInfo.rsVal.trmPar[0][1] = rb.termPar[0][1];
-				//rInfo.rsVal.trmPar[1][0] = rb.termPar[1][0];
-				//rInfo.rsVal.trmPar[1][1] = rb.termPar[1][1];
-				//rInfo.rsVal.trmPar[2][0] = rb.termPar[2][0];
-				//rInfo.rsVal.trmPar[2][1] = rb.termPar[2][1];
+				//rInfo.rsVal.trmPar[0][1] = relem.rb.termPar[0][1];
+				//rInfo.rsVal.trmPar[1][0] = relem.rb.termPar[1][0];
+				//rInfo.rsVal.trmPar[1][1] = relem.rb.termPar[1][1];
+				//rInfo.rsVal.trmPar[2][0] = relem.rb.termPar[2][0];
+				//rInfo.rsVal.trmPar[2][1] = relem.rb.termPar[2][1];
 			}
 
 
@@ -1320,6 +1351,8 @@ extern "C" DLLEXPORT void cmdReinVersion(
 	_swprintf(wss, L"RHEIN %s, version %u.%u.%u.%u (c) Wiebe apps  \nCompilation %s %s",
 		wsapp, VERSAPP, VERSMAJ, VERSMID, VERSMIN, VERDATE, VERTIME);
 
+	if (iBeta) wcscat(wss, L" (the program is in testing)");
+
 	//#if defined (MSVERSION) && (MSVERSION == 0xa00)
 	//	mdlOutput_messageCenter(MESSAGE_INFO, wss, wss, MESSAGE_ALERT_BALLOON);
 	//#else
@@ -1366,6 +1399,21 @@ extern "C" DLLEXPORT void cmdReload(
 		)
 	{
 		bRegen = FALSE;
+	}
+
+	if (unparsedP &&
+		(strcmp(unparsedP, "spaces") == 0)
+		)
+	{
+		ScanCriteria* scP = mdlScanCriteria_create();
+		int status = mdlScanCriteria_setReturnType(scP, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
+		status = mdlScanCriteria_setElmDscrCallback(scP, (PFScanElemDscrCallback)iterateLoadReinSpaces, 0);
+		mdlXML_addXMLFragmentAttachmentScanTest(scP, &appID, &appTypeReinSpace);
+		status = mdlScanCriteria_setModel(scP, ACTIVEMODEL);
+		status = mdlScanCriteria_scan(scP, NULL, NULL, NULL);
+		status = mdlScanCriteria_free(scP);
+
+		return;
 	}
 
 
@@ -1585,6 +1633,41 @@ extern "C" DLLEXPORT void cmdHidepos(
 	mdlDialog_dmsgsPrint(L("======= CATALOG INFO ======"));
 	mdlDialog_dmsgsPrint(s);
 
+	mdlDialog_dmsgsPrint(L("   vvvvvvv CATALOG REF INFO vvvvvvv"));
+	ModelRefIteratorP  iterator;
+	DgnModelRefP	modelRef;
+	mdlModelRefIterator_create(&iterator, ACTIVEMODEL, MRITERATE_PrimaryChildRefs, -1);
+	while (NULL != (modelRef = mdlModelRefIterator_getNext(iterator)))
+	{
+		WCH  fpath[500] = L("");
+		WCH  fName[300] = L("");
+		ReinModel* rmP = curRM->getRM(modelRef);
+
+		if (rmP)
+		{
+			deque<UInt32> aref;
+			rmP->getRefPath(&aref);
+
+			for (deque<UInt32>::reverse_iterator it = aref.rbegin(); it != aref.rend(); ++it)
+			{
+				SPRN(fName, L("[%u]"), *it);
+				if (SLEN(fpath) > 0) SCAT(fpath, L("->"));
+				SCAT(fpath, fName);
+			}
+		}
+
+		getCatInfo(&ci, modelRef, false, false);
+
+		SPRN(s, L("   ref (%s), proj %i, cat %i"), fpath, ci.projID, ci.catModID);
+
+		mdlDialog_dmsgsPrint(s);
+
+	}
+
+	mdlModelRefIterator_free(&iterator);
+	mdlDialog_dmsgsPrint(L("   ^^^^^^^ CATALOG REF INFO ^^^^^^^"));
+
+
 	mdlDialog_dmsgsPrint(L("======= HIDING POSITIONS INFORMATION ======"));
 
 
@@ -1633,16 +1716,16 @@ extern "C" DLLEXPORT void cmdHidepos(
 	}
 
 
-	if (mapBarSet.size() == 0) mdlDialog_dmsgsPrint(L("no barset positions"));
+	if (curRM->mapBarSet.size() == 0) mdlDialog_dmsgsPrint(L("no barset positions"));
 	else
 	{
 
-		SPRN(s, L("======= BARS SETTINGS INFORMATION ====== (%u elements)"), (UInt32)mapBarSet.size());
-		mdlDialog_dmsgsPrint(s);
+		//SPRN(s, L("======= BARS SETTINGS INFORMATION ====== (%u elements)"), curRM->mapBarSet.size());
+		//mdlDialog_dmsgsPrint(s);
 
 		barSetFenceProcess(-1); // clear hilited
 
-		for (map <wstring, ReinPos>::iterator rpItP = mapBarSet.begin(); rpItP != mapBarSet.end(); ++rpItP)
+		for (map <wstring, ReinPos>::iterator rpItP = curRM->mapBarSet.begin(); rpItP != curRM->mapBarSet.end(); ++rpItP)
 		{
 			//ReinPos* rpP = *rpItP;
 			//ReinPos* rpItP = &(daCurBarSet[i]);
@@ -1698,7 +1781,7 @@ extern "C" DLLEXPORT void cmdHidepos(
 		}
 	}
 
-	char slev[5000];
+	WCH slev[5000];
 	wstring wstrlev = getReinModelLevelsString(ACTIVEMODEL);
 
 	SCPW2M(slev, wstrlev.c_str(), 5000);
@@ -2702,6 +2785,8 @@ extern "C" DLLEXPORT void cmdPosDraw(
 
 }
 
+#if defined (MSVERSION) && (MSVERSION == 0x8b0)
+
 ////////////////
 int getAttrInt(XmlNodeRef pNodeRef, MSWCH* attrname)
 {
@@ -2725,6 +2810,7 @@ double getAttrDbl(XmlNodeRef pNodeRef, MSWCH* attrname)
 
 	return 0.;
 }
+
 
 
 ///////////////////////
@@ -2907,12 +2993,16 @@ int catinfo::getPositionsFromDom(XmlDomRef dom)
 	return ret;
 }
 
+#endif
+
 /////////////////////////////////
 extern "C" DLLEXPORT void cmdPosLoadXml(
 	char* unparsedP
 )
 //cmdNumber   CMD_REIN_POS_LOAD
 {
+
+#if defined (MSVERSION) && (MSVERSION == 0x8b0)
 
 	string sline;
 	int res;
@@ -2928,7 +3018,7 @@ extern "C" DLLEXPORT void cmdPosLoadXml(
 	}
 	else
 	{
-		int res = mdlDialog_fileOpen(fname, 0, 0, "", "*.xml", 0, "file to open");
+		res = mdlDialog_fileOpen(fname, 0, 0, "", "*.xml", 0, "file to open");
 
 		if (res != SUCCESS) return;
 	}
@@ -2961,6 +3051,8 @@ extern "C" DLLEXPORT void cmdPosLoadXml(
 
 
 	mdlXMLDom_free(dom);
+
+#endif
 
 }
 
@@ -3252,6 +3344,7 @@ SubstituteElemStatus callbackUpdateElement(
 
 	//ELREF erefClip = viewPortP->GetClipBoundElementRef();
 
+	if (bReloadInProgress) return retVal;
 
 	// если DRAW_PURPOSE_Pick и идет замена newEdPP, то привязка не срабатывает
 	//if (drawPurpose == DRAW_PURPOSE_Pick) return retVal;
@@ -3382,13 +3475,13 @@ typedef enum DrawPurpose
 
 	if (rmP->bCached)
 	{
-		if (readReinSpaceFromElmd(&rrelem, edp, FALSE) == SUCCESS)
+		if (readReinSpaceFromElmd(&urelem, edp, FALSE) == SUCCESS)
 		{
 			writeLogOut(__FUNCTION__, "bCached", TRUE);
 			return SUBSTELEM_STATUS_Block;
 		}
 
-		if (readReinBarFromElement(&rrb, edp, TRUE) == SUCCESS)
+		if (readReinBarFromElement(&urelem, edp, TRUE) == SUCCESS)
 		{
 			writeLogOut(__FUNCTION__, "bCached", TRUE);
 			return SUBSTELEM_STATUS_Block;
@@ -3546,7 +3639,7 @@ typedef enum DrawPurpose
 			if (bFound == FALSE)
 				iBlock = iBlock | BLOCK_EXC;
 		}
-		else if (readReinBarFromElement(&rrb, edp, TRUE) == SUCCESS)
+		else if (readReinBarFromElement(&urelem, edp, TRUE) == SUCCESS)
 		{
 			ELID elid;
 			UInt32 i;
@@ -3578,7 +3671,7 @@ typedef enum DrawPurpose
 				iBlock = iBlock | BLOCK_EXC;
 
 		}
-		else if (readReinSpaceFromElmd(&rrelem, edp, FALSE) == SUCCESS)
+		else if (readReinSpaceFromElmd(&urelem, edp, FALSE) == SUCCESS)
 		{
 			ELID elid;
 			UInt32 i;
@@ -3749,7 +3842,7 @@ StatusInt  callbackSelectUserFunction(
 
 	if (edp && rmP)
 	{
-		ReinBar rb;
+		//ReinBar rb;
 		//ReinSpace rs;
 		ReinElement relem;
 		ReinElm relm;
@@ -3806,7 +3899,7 @@ StatusInt  callbackSelectUserFunction(
 
 			ret = ERROR; // юлокиреум выделение для всех производных элементов
 		}
-		else if (readReinBarFromElement(&rb, edp, TRUE) == SUCCESS)
+		else if (readReinBarFromElement(&relem, edp, TRUE) == SUCCESS)
 		{
 			// блокировка выделения неотображающихся
 			if (iModelType == 0 && arPlotCfgVar[REIN_PLOT_BAR] != 0)
@@ -3891,7 +3984,12 @@ void   callbackReferencAttached(
 	ReinModel rm(modelRef, -1);
 	curRM->arMrP.insert(pair<UInt32, ReinModel>(rn, rm));
 
-	curRM->arMrP[rn].reloadCurBars(true, true, 2, TRUE);
+	curRM->arMrP[rn].reloadCurBars(true, 
+									true, 
+									2, 
+									TRUE, 
+									false // чтобы не срабатывал mapCats.clear
+									);
 
 	//reloadHidingPositions(); // все уже загружено до нас
 
@@ -3950,7 +4048,7 @@ void   callbackReferenceModified  (
 #endif
 		&& rmP->mapElms.empty() // если при старте MS референс выключен то элементы тоже не загружены
 		)
-		rmP->reloadCurBars(true, true, 2, TRUE);
+		rmP->reloadCurBars(true, true, 2, TRUE, false);
 
 
 #if defined (MSVERSION) && (MSVERSION == 0x8b0)
@@ -3970,6 +4068,17 @@ void   callbackReferenceModified  (
 		{
 			mdlTransient_free(&rmP->tedSecP, TRUE);
 			rmP->tedSecP = NULL;
+		}
+
+		for (map<UInt32, TransDescrP>::iterator it = rmP->mapTedCntP.begin(); it != rmP->mapTedCntP.end();)
+		{
+			if (it->second && mdlTransient_isValid(it->second))
+			{
+				mdlTransient_free(&it->second, TRUE);
+				it = rmP->mapTedCntP.erase(it);
+				continue;
+			}
+			++it;
 		}
 
 		//rmP->reloadCurBars(true, true, 2, TRUE);
@@ -4173,19 +4282,23 @@ void  callbackElmDscrCopy(
 
 					//ReinData rd;
 
-					if (readReinDataFromElmd(NULL, edCopyP, &reCopyFrom.bel) == SUCCESS)
+					if (edCopyP)
 					{
-						ScanCriteria* pScanCriteria;
-						int status;
+						if (readReinDataFromElmd(NULL, edCopyP, &reCopyFrom.bel) == SUCCESS)
+						{
+							ScanCriteria* pScanCriteria;
+							int status;
 
-						pScanCriteria = mdlScanCriteria_create();
-						status = mdlScanCriteria_setReturnType(pScanCriteria, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
-						status = mdlScanCriteria_setElmDscrCallback(pScanCriteria, (PFScanElemDscrCallback)scanForCopyDataBars, &reCopyFrom.bel.elemid);
-						status = mdlScanCriteria_setModel(pScanCriteria, ACTIVEMODEL);
-						mdlXML_addXMLFragmentAttachmentScanTest(pScanCriteria, &appID, &appTypeReinBar);
-						status = mdlScanCriteria_scan(pScanCriteria, NULL, NULL, NULL);
-						status = mdlScanCriteria_free(pScanCriteria);
+							pScanCriteria = mdlScanCriteria_create();
+							status = mdlScanCriteria_setReturnType(pScanCriteria, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
+							status = mdlScanCriteria_setElmDscrCallback(pScanCriteria, (PFScanElemDscrCallback)scanForCopyDataBars, &reCopyFrom.bel.elemid);
+							status = mdlScanCriteria_setModel(pScanCriteria, ACTIVEMODEL);
+							mdlXML_addXMLFragmentAttachmentScanTest(pScanCriteria, &appID, &appTypeReinBar);
+							status = mdlScanCriteria_scan(pScanCriteria, NULL, NULL, NULL);
+							status = mdlScanCriteria_free(pScanCriteria);
+						}
 
+						//mdlElmdscr_freeAll(&edCopyP);
 					}
 				}
 			}
@@ -5282,6 +5395,9 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 				else if (cnum == CMD_REIN_BAROVER)
 					ret = LOCATE_FILTER_STATUS_Neutral;
 
+				if (cnum == CMD_REIN_BARVIEW)
+					ret = LOCATE_FILTER_STATUS_Neutral;
+
 				// блокируем операции для произв. эл-тов отдельных стержней
 				if (
 					(relm.bel.inum == 0 
@@ -5956,7 +6072,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 	///////////////////////////////////
 	// func in callbackElmDscrToFile
-	ElmDscrToFile_Status  callbackElmDscrToFile
+	ElmDscrToFile_Status  callbackElmDscrToFile // acht regen
 	(
 		ElmDscrToFile_Actions       action,
 		DgnModelRefP       modelRef,
@@ -6102,6 +6218,27 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 				bChange = true;
 			}
 
+
+#if defined (MSVERSION) && (MSVERSION == 0x8b0)
+
+			DgnCacheP dfP = Bentley::Ustn::ISessionMgr::GetActiveDgnCache();
+			MSDgnFileP fileP = dfP->GetMSDgnFile();
+			wstring dsname = L"Wireframe";
+
+			int ind = Bentley::Ustn::DisplayStyleManager::GetIndexForDisplayStyle(*dsname.c_str(), fileP);
+
+#else
+
+			//DgnCacheP dfP = Bentley::Ustn::ISessionMgr::GetActiveDgnFile();
+			DgnFileP fileP = ISessionMgr::GetActiveDgnFile();
+			//wstring dsname = L"Wireframe";
+
+			int ind = DisplayStyleManager::GetIndexForDisplayStyle(L"Wireframe", fileP);
+
+#endif
+
+			mdlElement_setDisplayStyle(&newEdP->el, ind);
+
 			//double trn = mdlElement_getTransparency(&newEdP->el);
 			//if (!EQ(trn, 0.))
 			//{
@@ -6177,20 +6314,25 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 					MSElementDescr* edp = NULL;
 					mdlElmdscr_getProperties(0, &ggn, 0, 0, 0, 0, 0, 0, newEdP);
 					mdlElmdscr_read(&edp, ggn, modelRef, 0, 0);
-					if (edp && readReinDataFromElmd(NULL, edp, &rb) == SUCCESS)
+					if (edp)
 					{
-						//mdlElmdscr_setProperties(newEdP, 0, &ggn, 0, 0, 0, 0, 0, 0);
-						//mdlElmdscr_duplicate (replacementEdPP, newEdP);
+						if (readReinDataFromElmd(NULL, edp, &rb) == SUCCESS)
+						{
+							//mdlElmdscr_setProperties(newEdP, 0, &ggn, 0, 0, 0, 0, 0, 0);
+							//mdlElmdscr_duplicate (replacementEdPP, newEdP);
 
-						//if (rb.barflags & REINBAR_FLAG_CONT) 
-						//{
-							//if (addConttNum(&rb) == SUCCESS)
-						//	mdlXMLFragmentList_stripAllFromElement (NULL, &(*replacementEdPP)->el);
-						//	XMLFragmentListP    pCurrentOrg = rb.createReinBarElement();
-						//	mdlXMLFragmentList_attachToElement(&pCurrentOrg, replacementEdPP, TRUE);
-						//}
+							//if (rb.barflags & REINBAR_FLAG_CONT) 
+							//{
+								//if (addConttNum(&rb) == SUCCESS)
+							//	mdlXMLFragmentList_stripAllFromElement (NULL, &(*replacementEdPP)->el);
+							//	XMLFragmentListP    pCurrentOrg = rb.createReinBarElement();
+							//	mdlXMLFragmentList_attachToElement(&pCurrentOrg, replacementEdPP, TRUE);
+							//}
 
-						//ret = ELMDTF_STATUS_REPLACE;
+							//ret = ELMDTF_STATUS_REPLACE;
+						}
+
+						mdlElmdscr_freeAll(&edp);
 					}
 					else
 					{
@@ -6552,7 +6694,7 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 		{
 			writeLog("process", 0, "DELETE command");
 
-			res = readReinElmIso(&re, oldEdP, TRUE, FALSE);
+			res = readReinElmIso(&re, oldEdP, FALSE, FALSE);
 
 			if (res == SUCCESS)
 			{
@@ -6567,7 +6709,8 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 				if (edPrntP && readReinSpaceFromElmd(&relem, edPrntP, FALSE) == SUCCESS)
 				{
 
-					ret = ELMDTF_STATUS_ABORT;
+					if (bScanInProgress == FALSE)
+						ret = ELMDTF_STATUS_ABORT;
 
 					//...
 				}
@@ -6580,7 +6723,8 @@ void vecAllocLong(vector<vector<long>>* vecP, int iSize)
 
 					// срабатывает при регенерации (deleteReinElms())... флаг?
 
-					ret = ELMDTF_STATUS_ABORT;
+					if (bScanInProgress == FALSE) 
+						ret = ELMDTF_STATUS_ABORT;
 
 					/*
 					
@@ -7585,7 +7729,10 @@ extern "C" DLLEXPORT  int MdlMain
 	}
 
 
-	if (mdlSystem_getCfgVar(0, L("REIN_START_AND_UNLOAD"), 0) == SUCCESS)
+
+
+
+	if (getCfgVar(0, L("REIN_START_AND_UNLOAD")) == SUCCESS)
 	{
 		//printf("REIN_START_AND_UNLOAD\n");
 
@@ -7750,6 +7897,7 @@ extern "C" DLLEXPORT  int MdlMain
 		{ (CmdHandler)cmdBarEndsDialog,	CMD_REIN_BARENDS_DIALOG		},
 		{ (CmdHandler)cmdBarSet,		CMD_REIN_BARSET				},
 		{ (CmdHandler)cmdBarOverride,	CMD_REIN_BAROVER			},
+		{ (CmdHandler)cmdBarView,		CMD_REIN_BARVIEW			},
 		{ (CmdHandler)cmdReinList,		CMD_REIN_POS				},
 		{ (CmdHandler)cmdPosClear,		CMD_REIN_POS_CLEAR			},
 		{ (CmdHandler)cmdPosSaveXml,	CMD_REIN_POS_SAVE			},
@@ -8052,7 +8200,8 @@ extern "C" DLLEXPORT  int MdlMain
 
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "runmet", &rInfo.rsVal.runmet);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "diam", &rInfo.rsVal.diam);
-	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "space", &rInfo.rsVal.space);
+	//mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "space", &rInfo.rsVal.space);
+	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_DOUBLE), "spacef", &rInfo.rsVal.spacef);
 	//mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "space2", &rInfo.rsVal.space2);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "spacerad", &rInfo.rsVal.spacerad);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "offset", &rInfo.rsVal.offset[0]);
@@ -8102,6 +8251,7 @@ extern "C" DLLEXPORT  int MdlMain
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "ibmz", &rBarOverInfo.dopopt[20]);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "bact", &rBarOverInfo.dopopt[21]);
 	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "igrnd", &rBarOverInfo.dopopt[22]);
+	mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "bview", &rBarOverInfo.dopopt[23]); // set clip view for bar
 
 	//mdlDialog_publishBasicVariable(setP, mdlCExpression_getType(TYPECODE_LONG), "", &rDopInfo.dopopt[15]); - license agree
 

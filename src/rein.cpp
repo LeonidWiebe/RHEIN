@@ -777,7 +777,8 @@ void copySpaceData(ReinSpace* rsP, ReinBar* rbP, int bSpaceToBar, ReinSpace* rsO
 		rbP->runmet = rsP->runmet;
 		rbP->diam = rsP->diam;
 
-		rbP->space = rsP->space;
+		//rbP->space = rsP->space;
+		rbP->spacef = rsP->spacef;
 		//rbP->space2 = rsP->space2;
 		rbP->spacerad = rsP->spacerad;
 		rbP->bendrad = rsP->bendrad;
@@ -830,7 +831,7 @@ void copySpaceData(ReinSpace* rsP, ReinBar* rbP, int bSpaceToBar, ReinSpace* rsO
 		if (rsOptP == NULL || (rsOptP != NULL && !rsOptP->runmet)) rsP->runmet = rbP->runmet;
 		if (rsOptP == NULL || (rsOptP != NULL && !rsOptP->diam)) rsP->diam = rbP->diam;
 
-		if (rsOptP == NULL || (rsOptP != NULL && !rsOptP->space)) { rsP->space = rbP->space;} //rsP->space2 = rbP->space2;
+		if (rsOptP == NULL || (rsOptP != NULL && !rsOptP->space)) rsP->spacef = rbP->spacef; //rsP->space2 = rbP->space2;
 		if (rsOptP == NULL || (rsOptP != NULL && !rsOptP->spacerad)) rsP->spacerad = rbP->spacerad;
 		if (rsOptP == NULL || (rsOptP != NULL && !rsOptP->bendrad)) rsP->bendrad = rbP->bendrad;
 		if (rsOptP == NULL || (rsOptP != NULL && !rsOptP->poscalc)) rsP->poscalc = rbP->poscalc;
@@ -1294,11 +1295,11 @@ int fenceContent(int* stepP)
 
 		if (iACStep == 0)
 		{
-			wstring str = p.getIdentString();
+			wstring str = p.getMapIdentString();
 
-			map <wstring, ReinPos>::iterator it = mapBarSet.find(str); // 
+			map <wstring, ReinPos>::iterator it = curRM->mapBarSet.find(str); // 
 
-			if (it != mapBarSet.end()) // found
+			if (it != curRM->mapBarSet.end()) // found
 			{
 				it->second.bar.modrefP = mrP;
 				it->second.bar.elref = edInP->h.elementRef;
@@ -1309,7 +1310,7 @@ int fenceContent(int* stepP)
 			{
 				p.bUpdate = true;
 
-				mapBarSet[str] = p;
+				curRM->mapBarSet[str] = p;
 			}
 
 
@@ -1371,7 +1372,11 @@ void barSetFenceProcess(int step)
 	if (step == 0)
 	{
 		mdlState_startFenceCommand(
+#if defined (MSVERSION) && (MSVERSION == 0x8b0)
 			(MdlFunctionP)fenceContent, // works as reinLocatePoint
+#else
+			(StateFunc_FenceContentOp)fenceContent, // works as reinLocatePoint
+#endif
 			NULL,
 			(StateFunc_DataPoint)reinLocatePoint, 
 			(StateFunc_Reset)mdlState_startDefaultCommand, 
@@ -1379,7 +1384,7 @@ void barSetFenceProcess(int step)
 
 		mdlFence_process(0); // only hilite, set bUpdate flags, runs fenceContent()
 
-		for (map<wstring, ReinPos>::iterator rpItP = mapBarSet.begin(); rpItP != mapBarSet.end(); ++rpItP)
+		for (map<wstring, ReinPos>::iterator rpItP = curRM->mapBarSet.begin(); rpItP != curRM->mapBarSet.end(); ++rpItP)
 		{
 			if (rpItP->second.bUpdate && rpItP->second.bar.elref && rpItP->second.bar.modrefP)
 				mdlLocate_hiliteElement(rpItP->second.bar.elref, rpItP->second.bar.modrefP);
@@ -1390,7 +1395,7 @@ void barSetFenceProcess(int step)
 	{
 		//mdlFence_process(0); // runs fenceContent()
 
-		for (map <wstring, ReinPos>::iterator rpItP = mapBarSet.begin(); rpItP != mapBarSet.end(); ++rpItP)
+		for (map <wstring, ReinPos>::iterator rpItP = curRM->mapBarSet.begin(); rpItP != curRM->mapBarSet.end(); ++rpItP)
 		{
 			if (rpItP->second.bUpdate)
 			{
@@ -1405,7 +1410,7 @@ void barSetFenceProcess(int step)
 					rpItP->second.bUpdate = false;
 				}
 				else
-					mapBarSet.erase(rpItP);
+					curRM->mapBarSet.erase(rpItP);
 
 			}
 		}
@@ -1534,7 +1539,8 @@ MSElementDescr  *elemDscrP  //  => element descr
 /////////////////////////////////////////////
 int reinProcessReinBar(MSElementDescr**  edp, int view, UInt32 elEDoffset)
 {
-	ReinBar       rb ; 
+	ReinElement       relem ; 
+	//ReinBar       rb ; 
 	MSElementDescr*  edpRS = *edp;
 	//DialogBox *dbP;
 
@@ -1542,9 +1548,9 @@ int reinProcessReinBar(MSElementDescr**  edp, int view, UInt32 elEDoffset)
 
 	rInfo.option[0] = 0;
 
-	if (readReinBarFromElement(&rb, edpRS, TRUE) == SUCCESS)
+	if (readReinBarFromElement(&relem, edpRS, TRUE) == SUCCESS)
 	{
-		copySpaceData(&rInfo.rsVal, &rb, FALSE, &rInfo.rsOpt, TRUE);
+		copySpaceData(&rInfo.rsVal, &relem.rb, FALSE, &rInfo.rsOpt, TRUE);
 
 		// возможно следует сделать новую комагнду чтобы можно было поменять главный сегмент
 		// сейчас если mainline определен, его поменять нельзя, закоментарено:
@@ -1560,7 +1566,10 @@ int reinProcessReinBar(MSElementDescr**  edp, int view, UInt32 elEDoffset)
 
 		rInfo.option[0] = 1;
 		
+		rrelem.mapOvers = relem.mapOvers;
+
 		syncToolbox();
+
 		if (!mdlModelRef_isActiveModel(curElemModelRef)) startModify();
 	}
 	else // пустой элемент, идет создание стержня
@@ -1603,7 +1612,7 @@ int reinProcessReinSpace(MSElementDescr** edp, int view, UInt32 elEDoffset, UInt
 		rInfo.rsVal.bartype = BT_AXIS;
 		if (!rInfo.rsOpt.runmet) rInfo.rsVal.runmet = relem.rs.runmet;
 		if (!rInfo.rsOpt.diam) rInfo.rsVal.diam = relem.rs.diam;
-		if (!rInfo.rsOpt.space) rInfo.rsVal.space = relem.rs.space; //rInfo.rsVal.space2 = relem.rs.space2;}
+		if (!rInfo.rsOpt.space) rInfo.rsVal.spacef = relem.rs.spacef; //rInfo.rsVal.space2 = relem.rs.space2;}
 		if (!rInfo.rsOpt.offset[0]) rInfo.rsVal.offset[0] = relem.rs.offset[0];
 		if (!rInfo.rsOpt.offset[1]) rInfo.rsVal.offset[1] = relem.rs.offset[1];
 		if (!rInfo.rsOpt.bendrad) rInfo.rsVal.bendrad = relem.rs.bendrad;
@@ -1683,7 +1692,49 @@ void reinLocateShowElem(DPoint3dCP point, int view)
 	//ReinBar rb;
 	int ret;
 
-	filePosRein = mdlElement_getFilePos(FILEPOS_CURRENT, &curElemModelRef);
+
+
+	//DisplayPathP dpP = mdlLocate_getCurrPath();
+	//for (int i = 0; i < mdlDisplayPath_getCount(dpP); ++i)
+	//{
+	//	ElementRef  eref = mdlDisplayPath_getElem(dpP, i);
+	//}
+
+	ReinCache prm;
+
+	//filePosRein = mdlElement_getFilePos(FILEPOS_CURRENT, &curElemModelRef);
+	// неа
+
+	if (!vElemLoc.empty())
+	{
+		printf("eeee tak delo ne poidet");
+		return;
+	}
+
+
+	filePosRein = mdlLocate_findElement(point, view, FALSE, ComponentMode_None, TRUE);
+	curElemModelRef = mdlLocate_getCurrModelRef();
+
+	prm.pnum = filePosRein;
+	prm.mrP = curElemModelRef;
+
+
+	while (prm.pnum)
+	{
+		vElemLoc.push_back(prm);
+
+		prm.pnum = mdlLocate_findElement(point, view, TRUE, ComponentMode_None, TRUE);
+		prm.mrP = mdlLocate_getCurrModelRef();
+
+	}
+
+	// не то
+	//prm.fp = mdlElement_getFilePos(FILEPOS_CURRENT, &prm.mrP);
+	//while (prm.fp)
+	//{
+	//	vElemLoc.push_back(prm);
+	//	prm.fp = mdlElement_getFilePos(FILEPOS_NEXT_ELE, &prm.mrP);
+	//}
 
 #if defined (MSVERSION) && (MSVERSION == 0xa00)
 	filePosRSElementOffset = mdlLocate_getComponentOffset();
@@ -1695,7 +1746,8 @@ void reinLocateShowElem(DPoint3dCP point, int view)
 	filePosReinSpace = 0;
 	filePosReinSurf = 0;
 
-	if (filePosRein == 0) return;
+	if (vElemLoc.empty()) return;
+	if (filePosRein == 0) return; // old
 	//if (filePosRSElementOffset == 0) 	return;
 
 
@@ -1703,7 +1755,7 @@ void reinLocateShowElem(DPoint3dCP point, int view)
 
 
 
-	if (iAC == CMD_REIN_BARSET 
+	if (iAC == CMD_REIN_BARSET || iAC == CMD_REIN_BARVIEW
 		|| iAC == CMD_REIN_BAROVER
 		)
 	{
@@ -1713,7 +1765,7 @@ void reinLocateShowElem(DPoint3dCP point, int view)
 			RETURN_LOGOUT
 		}
 
-		if (iAC == CMD_REIN_BARSET)
+		if (iAC == CMD_REIN_BARSET || iAC == CMD_REIN_BARVIEW)
 		{
 			if (readReinElmIso(&re, edpRS, FALSE, FALSE) == SUCCESS)
 			{
@@ -1736,6 +1788,7 @@ void reinLocateShowElem(DPoint3dCP point, int view)
 
 	if (mdlModelRef_isActiveModel(curElemModelRef) == FALSE)
 	{
+		vElemLoc.clear();
 		filePosRein = 0;
 		filePosRSElementOffset = 0;
 		mdlLocate_clearHilited(TRUE);
@@ -1767,6 +1820,20 @@ void reinLocateShowElem(DPoint3dCP point, int view)
 
 		if (eref)
 		{
+
+			DPoint3d prng[4];
+			ScanRange sr;
+
+			mdlElmdscr_computeRange(&prng[0], &prng[1], edpRS, NULL);
+
+			sr.xlowlim = (Int64)(prng[0].x - mdlCnv_masterUnitsToUors(dDupTol));
+			sr.ylowlim = (Int64)(prng[0].y - mdlCnv_masterUnitsToUors(dDupTol));
+			sr.zlowlim = (Int64)(prng[0].z - mdlCnv_masterUnitsToUors(dDupTol));
+
+			sr.xhighlim = (Int64)(prng[1].x + mdlCnv_masterUnitsToUors(dDupTol));
+			sr.yhighlim = (Int64)(prng[1].y + mdlCnv_masterUnitsToUors(dDupTol));
+			sr.zhighlim = (Int64)(prng[1].z + mdlCnv_masterUnitsToUors(dDupTol));
+
 			mdlElmdscr_freeAll(&edpRS);
 
 			mdlElmdscr_getByElemRef(&edpRS, eref, MASTERFILE, FALSE, 0);
@@ -1781,21 +1848,76 @@ void reinLocateShowElem(DPoint3dCP point, int view)
 				//filePosReinSurf = mdlElement_getHeaderFilePos(filePosRein, MASTERFILE);
 				//if (filePosReinSurf == filePosRein) filePosReinSurf = 0;
 
-				mdlLocate_changeCurrPath(filePosRein, MASTERFILE);
+				ReinElement relem;
 
-				mdlLocate_hilitePath(mdlLocate_getCurrPath());
+				if (readReinSpaceFromElmd(&relem, edpRS, 0) == SUCCESS)
+				{
+					mdlLocate_changeCurrPath(filePosRein, MASTERFILE);
+
+					mdlLocate_hilitePath(mdlLocate_getCurrPath());
 
 #if defined (MSVERSION) && (MSVERSION == 0xa00)
-				filePosRSElementOffset = mdlLocate_getComponentOffset();
+					filePosRSElementOffset = mdlLocate_getComponentOffset();
 #else
-				filePosRSElementOffset = mdlLocate_getCurrElemFilePos();
+					filePosRSElementOffset = mdlLocate_getCurrElemFilePos();
 #endif
 
-				if (mdlElmdscr_read(&edpRS, filePosRein, curElemModelRef, 0, 0) == 0)
-				{
-					RETURN_LOGOUT
+					if (mdlElmdscr_read(&edpRS, filePosRein, curElemModelRef, 0, 0) == 0)
+					{
+						RETURN_LOGOUT
+					}
 				}
+				else if (readReinDataFromElmd(&relem, edpRS, 0) == SUCCESS)
+				{
+					//RETURN_LOGOUT
 
+					mdlElmdscr_freeAll(&edpRS);
+
+					ScanCriteria* pScanCriteria;
+					int status;
+
+					ReinPrm prm;
+					prm.prmid = re.bel.elemid;
+
+					pScanCriteria = mdlScanCriteria_create();
+					status = mdlScanCriteria_setReturnType(pScanCriteria, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
+					status = mdlScanCriteria_setElmDscrCallback(pScanCriteria, (PFScanElemDscrCallback)scanFindBars, &prm);
+					status = mdlScanCriteria_setModel(pScanCriteria, ACTIVEMODEL);
+					mdlXML_addXMLFragmentAttachmentScanTest(pScanCriteria, &appID, &appTypeReinBar);
+					status = mdlScanCriteria_setRangeTest(pScanCriteria, &sr); // СУПЕР
+					status = mdlScanCriteria_scan(pScanCriteria, NULL, NULL, NULL);
+					status = mdlScanCriteria_free(pScanCriteria);
+
+					if (!prm.uints.empty())
+					{
+						for (deque<UInt32>::iterator it = prm.uints.begin(); it != prm.uints.end(); ++it)
+						{
+
+							mdlLocate_changeCurrPath(*it, MASTERFILE);
+
+							filePosRein = *it;
+#if defined (MSVERSION) && (MSVERSION == 0xa00)
+							filePosRSElementOffset = 0;
+#else
+							filePosRSElementOffset = filePosRein;
+#endif
+
+							break;
+						}
+
+						mdlLocate_hilitePath(mdlLocate_getCurrPath());
+
+						if (mdlElmdscr_read(&edpRS, filePosRein, curElemModelRef, 0, 0) == 0)
+						{
+							RETURN_LOGOUT
+						}
+					}
+					else
+					{
+						RETURN_LOGOUT
+					}
+
+				}
 			}
 		}
 		else
@@ -2200,7 +2322,7 @@ int	reinChangeSelected(
 				{
 					if (rInfo.rsOpt.runmet)    relem.rs.runmet = rInfo.rsVal.runmet;
 					if (rInfo.rsOpt.diam)      relem.rs.diam = rInfo.rsVal.diam;
-					if (rInfo.rsOpt.space)  relem.rs.space = rInfo.rsVal.space; //relem.rs.space2 = rInfo.rsVal.space2;}
+					if (rInfo.rsOpt.space) relem.rs.spacef = rInfo.rsVal.spacef; //relem.rs.space2 = rInfo.rsVal.space2;}
 					if (rInfo.rsOpt.offset[0]) relem.rs.offset[0] = rInfo.rsVal.offset[0];
 					if (rInfo.rsOpt.offset[1]) relem.rs.offset[1] = rInfo.rsVal.offset[1];
 					if (rInfo.rsOpt.bendrad)       relem.rs.bendrad = rInfo.rsVal.bendrad;
@@ -2232,7 +2354,7 @@ int	reinChangeSelected(
 				{
 					if (rInfo.rsOpt.runmet)    rb.runmet = rInfo.rsVal.runmet;
 					if (rInfo.rsOpt.diam)      rb.diam = rInfo.rsVal.diam;
-					if (rInfo.rsOpt.space)     rb.space = rInfo.rsVal.space; // no space2
+					if (rInfo.rsOpt.space) rb.spacef = rInfo.rsVal.spacef; // no space2
 					if (rInfo.rsOpt.offset[0]) rb.offset[0] = rInfo.rsVal.offset[0];
 					if (rInfo.rsOpt.offset[1]) rb.offset[1] = rInfo.rsVal.offset[1];
 					if (rInfo.rsOpt.bendrad)       rb.bendrad = rInfo.rsVal.bendrad;
@@ -2362,7 +2484,19 @@ int	reinLocatePoint(
 		}
 		else if (iAC == CMD_REIN_BARSET)
 		{
-			reinSetBarInSpace(ptP, filePosRein, curElemModelRef, rInfo.option[16], rDopInfo.dopopt[6]);
+			if (!vElemLoc.empty())
+			{
+				int bPlaceDim = rDopInfo.dopopt[6];
+
+				for (vector<ReinCache>::iterator it = vElemLoc.begin(); it != vElemLoc.end(); ++it)
+				{
+					reinSetBarInSpace(ptP, it->pnum, it->mrP, rInfo.option[16], bPlaceDim);
+					bPlaceDim = FALSE; // хватит
+				}
+
+			}
+
+			//reinSetBarInSpace(ptP, filePosRein, curElemModelRef, rInfo.option[16], rDopInfo.dopopt[6]);
 		}
 		else if (iAC == CMD_REIN_CHLAP)
 		{
@@ -2407,8 +2541,11 @@ int	reinLocatePoint(
 
 		if (rb.bartype != BT_AXIS) // также сохранять ReinData если поменялась, остальные параметры сохранять в элементе
 		{ // create data
-			rb.saveReinData(rb.elemid);
+			rb.saveReinData(rb.elemid, &rrelem);
+
 			rb.barflags |= REINBAR_FLAG_CONT;
+
+			rrelem.mapOvers.clear(); // global element clear;
 		}
 
 		mdlLocate_clearHilited(TRUE);
@@ -2480,6 +2617,8 @@ void startModify()
 	filePosRein = 0;
 	filePosReinBar = 0;
 	filePosReinSpace = 0;
+
+	vElemLoc.clear();
 
 	bDropReinData = FALSE;
 
@@ -2776,6 +2915,8 @@ void reloadCurBarsAll(int iLoadRefs) // загрузка элементов референсов для информ
 
 	//if (iLoadRefs == -1) iDepth = 0;
 
+	bReloadInProgress = TRUE;
+
 	writeLogIn(__FUNCTION__, 0);
 
 
@@ -2912,7 +3053,13 @@ void reloadCurBarsAll(int iLoadRefs) // загрузка элементов референсов для информ
 
 
 
-	mdlInput_sendKeyin("MDL KEYIN RCAT RCAT UPDATE", 0, 0, 0);
+#if defined (MSVERSION) && (MSVERSION == 0x8b0)
+	mdlInput_sendKeyin(L("MDL KEYIN RCAT RCAT UPDATE"), 0, MSINPUTQ_HEAD, 0);
+#else
+	mdlInput_sendSynchronizedKeyin(L"MDL KEYIN RCAT RCAT UPDATE", false, MSINPUTQ_HEAD, 0);
+#endif
+
+	bReloadInProgress = FALSE;
 
 
 	writeLogOut(__FUNCTION__, 0);
@@ -3394,7 +3541,7 @@ void getReinInfoFromString(ReinNoteSet& ri, MSWCH* str)
 //#else
 		L"\n",
 //#endif
-		wcslen(strReinInfo) - 10) != SUCCESS) return;
+		wcslen(str) + 10) != SUCCESS) return;
 
 	if (setstr.empty()) return;
 
@@ -3451,7 +3598,7 @@ void getReinInfoFromString(ReinDopInfo& ri, MSWCH* str)
 //#else
 		L"\n",
 //#endif
-		wcslen(strReinDopInfo) - 10) != SUCCESS) return;
+		wcslen(str) + 10) != SUCCESS) return;
 
 	if (setstr.empty()) return;
 
@@ -3487,7 +3634,7 @@ void getReinInfoFromString(ReinInfo& ri, MSWCH* str)
 //#else
 		L"\n",
 //#endif
-		wcslen(strReinInfo) - 10) != SUCCESS) return;
+		wcslen(str) + 10) != SUCCESS) return;
 
 	if (setstr.empty()) return;
 
@@ -3534,7 +3681,10 @@ void getReinInfoFromString(ReinInfo& ri, MSWCH* str)
 			ri.rsVal.diam = _wtoi(it->substr(wcslen(L"rInfo.rsVal.diam=")).c_str());
 
 		if (it->find(L"rInfo.rsVal.space=") != string::npos)
-			ri.rsVal.space = _wtoi(it->substr(wcslen(L"rInfo.rsVal.space=")).c_str());
+		{
+			//ri.rsVal.space = _wtoi(it->substr(wcslen(L"rInfo.rsVal.space=")).c_str());
+			ri.rsVal.spacef = _wtof(it->substr(wcslen(L"rInfo.rsVal.space=")).c_str());
+		}
 		//if (it->find(L"rInfo.rsVal.space2=") != string::npos)
 		//	ri.rsVal.space2 = _wtoi(it->substr(wcslen(L"rInfo.rsVal.space2=")).c_str());
 
@@ -3703,7 +3853,7 @@ void setReinInfoString(ReinInfo &ri, wstring* wstr)
 	_swprintf(str, L"rInfo.rsVal.diam=%i\n", ri.rsVal.diam);
 	wstr->append(str);
 
-	_swprintf(str, L"rInfo.rsVal.space=%i\n", ri.rsVal.space);
+	_swprintf(str, L"rInfo.rsVal.space=%.1f\n", ri.rsVal.spacef);
 	wstr->append(str);
 	//_swprintf(str, L"rInfo.rsVal.space2=%i\n", ri.rsVal.space2);
 	//wstr->append(str);
@@ -3737,7 +3887,8 @@ void setRienInfoDefaults()
 
 	rInfo.rsVal.runmet = 0;
 	rInfo.rsVal.diam  = 20;
-	rInfo.rsVal.space  = iSpaceDefault;
+	//rInfo.rsVal.space  = iSpaceDefault;
+	rInfo.rsVal.spacef  = (double)iSpaceDefault;
 	//rInfo.rsVal.space2  = iSpaceDefault;
 	rInfo.rsVal.bendrad  = 0;
 	rInfo.rsVal.offset[0] = 50;
@@ -4353,6 +4504,11 @@ void setDefaultStyles()
 		iCfgVar_SectionPoints = STOI(v);
 	else
 		iCfgVar_SectionPoints = FALSE;
+
+	if (getCfgVarEx(v, L"REIN_BARSET_REF_NESTING") == SUCCESS)
+		iCfgVar_BarSetRefNesting = STOI(v);
+	else
+		iCfgVar_BarSetRefNesting = -1;
 
 
 
@@ -6599,7 +6755,7 @@ int setElemDescrTooltip(
 
 		sprintf(sdia, "\nдиаметр %i", rsP->diam);
 		if (ilent > 0) sprintf(slenr, "\nдлина %i", ilent);
-		sprintf(sspa, "\nшаг %i", rsP->space);
+		sprintf(sspa, "\nшаг %.1f", rsP->spacef);
 
 		strcpy(str, spos);
 
@@ -6698,7 +6854,7 @@ int setElemDescrTooltip(
 		//if (rad > 0) sprintf(srad, "\nрадиус %i", rad);
 		if (ilent > 0) sprintf(slenr, "\nдлина %i", ilent);
 
-		sprintf(sspa, "\nшаг %i", rbP->space);
+		sprintf(sspa, "\nшаг %.1f", rbP->spacef);
 
 		strcpy(str, spos);
 
@@ -6709,7 +6865,7 @@ int setElemDescrTooltip(
 		if (ilent > 0) strcat(str, slenr);
 
 
-		if (rbP->bartype != BT_AXIS && rbP->space > 0) strcat(str, sspa);
+		if (rbP->bartype != BT_AXIS && (int)rbP->spacef > 0) strcat(str, sspa);
 
 
 
@@ -8977,6 +9133,7 @@ void hookToolBox(
 			SPRN(str, L("Rhein v%u.%u"), VERSMID, VERSMIN);
 			if (bNoLoad) SCAT(str, L(" (no data mode)"));
 			if (iDebug) SCAT(str, L(" (debug)"));
+			if (iBeta) SCAT(str, L(" (testing)"));
 
 			//if (iCfgVar_BarCompare_3d > 0)
 			mdlWindow_titleSet((MSWNDP)dmP->db, str);
@@ -9506,7 +9663,8 @@ UInt32	reinSpaceElmdCreate(UInt32 fpos, DgnModelRefP mrP, ReinSpace* rsP, int bU
 	{
 		rs.runmet = rInfo.rsVal.runmet;
 		rs.diam = rInfo.rsVal.diam;
-		rs.space = rInfo.rsVal.space;
+		//rs.space = rInfo.rsVal.space;
+		rs.spacef = rInfo.rsVal.spacef;
 		//rs.space2 = rInfo.rsVal.space2;
 		rs.offset[0] = rInfo.rsVal.offset[0];
 		rs.offset[1] = rInfo.rsVal.offset[1];
@@ -9863,12 +10021,21 @@ void combAxisElem(BINT bDelete)
 
 }
 
-/////////////////////////////////////////////////
-// func: сканирование для удаления элементов 
-// appTypeReinAxis, appTypeReinElm
+
+
+
+///<summary>
+/// запуск скана на удаление производных элементов.
+/// <para>удаляются типы appTypeReinAxis, appTypeReinElm</para>
+/// 
+/// <param name="ELID id"></param>
+/// <param name="int bBrys"/>
+/// <param name="ScanRange* srP"/>
+/// <param name="DgnModelRefP mrInP"/>
+///</summary>
 void deleteReinElms(ELID id, int bBrys, ScanRange* srP, DgnModelRefP mrInP)
 {
-
+	// 
 	ScanCriteria    *scP;
 	int             status;
 	//UShort          typeMask[6];
@@ -9895,6 +10062,8 @@ void deleteReinElms(ELID id, int bBrys, ScanRange* srP, DgnModelRefP mrInP)
 	//				TMSK0_LINE_STRING | 
 	//				TMSK0_CMPLX_STRING | TMSK0_ELLIPSE;
 
+	bScanInProgress = TRUE;
+
 	scP = mdlScanCriteria_create();
 	status = mdlScanCriteria_setReturnType (scP,MSSCANCRIT_ITERATE_ELMDSCR,FALSE,TRUE);
 	status = mdlScanCriteria_setElmDscrCallback (scP, (PFScanElemDscrCallback)iterateDeleteReinElms, ids);
@@ -9916,6 +10085,8 @@ void deleteReinElms(ELID id, int bBrys, ScanRange* srP, DgnModelRefP mrInP)
 	status = mdlScanCriteria_setModel (scP, mrP);
 	status = mdlScanCriteria_scan (scP,NULL,NULL,NULL);
 	status = mdlScanCriteria_free (scP);
+
+	bScanInProgress = FALSE;
 
 
 	if (bBrys) BRYS = FALSE;
@@ -10615,14 +10786,15 @@ int readReinAxisFromElement(ReinAxis* raP, MSElementCP elP)
 	return SUCCESS;
 }
 
-////////////////////////////////////////////////////////////
-int readReinBarFromElement(ReinBar* rbP, MSElementDescrCP edpBar, int bClear)
-{
-	return readReinBarFromElement(rbP, edpBar, bClear, TRUE);
-}
 
 ////////////////////////////////////////////////////////////
-int readReinBarFromElement(ReinBar* rbP, MSElementDescrCP edpBar, int bClear, int bReadData)
+//int readReinBarFromElement(ReinElement* relemP, MSElementDescrCP edpBar, int bClear)
+//{
+//	return readReinBarFromElement(&relemP, edpBar, bClear, TRUE, relemP);
+//}
+
+////////////////////////////////////////////////////////////
+int readReinBarFromElement(ReinBar* rbP, MSElementDescrCP edpBar, int bClear)
 {
 
 	if (rbP == NULL) return ERROR;
@@ -10630,37 +10802,34 @@ int readReinBarFromElement(ReinBar* rbP, MSElementDescrCP edpBar, int bClear, in
 
 	writeLogIn(__FUNCTION__, 0); // readReinBarFromElement in
 
-	int iInstSuccess = ERROR;
+	//int iInstSuccess = ERROR;
 	XMLFragmentListP  oXMLFragmentList = NULL;
 
-	//sprintf(sLogMes, "rbP == %p, edpBar == %p, bClear = %i, bReadData = %i\n", rbP, edpBar, bClear, bReadData); writeLog(0, 0);
-
-	//sprintf(sLogMes, "if (bClear) rbP->clear();\n"); writeLog(0, 0);
+	int ret = SUCCESS;
 
 	if (bClear) rbP->clear();
 
-/*
-#if defined (MSVERSION) && (MSVERSION == 0xa00) // ECX
-	DgnECInstancePtr insP = getECInstance(L"ReinSchema", L"ReinBar", edpBar);
-	if (insP.IsValid())
+	/*
+	#if defined (MSVERSION) && (MSVERSION == 0xa00) // ECX
+		DgnECInstancePtr insP = getECInstance(L"ReinSchema", L"ReinBar", edpBar);
+		if (insP.IsValid())
+		{
+			iInstSuccess = readFromECInstance(rbP, insP);
+		}
+	#endif
+	*/
+	//if (iInstSuccess != SUCCESS)
 	{
-		iInstSuccess = readFromECInstance(rbP, insP);
-	}
-#endif
-*/
-	if (iInstSuccess != SUCCESS)
-	{
-		int ret = SUCCESS;
 
 		try
 		{
 			//sprintf(sLogMes, "mdlElement_hasXMLFragmentAttachment(...)\n"); writeLog(0, 0);
 
-			MSElementP elP = (MSElementP)&(edpBar->el);
+			MSElementP elP = (MSElementP) & (edpBar->el);
 
 			if (mdlElement_hasXMLFragmentAttachment(elP, &appID, &appTypeReinBar))
 			{
-				if (mdlXMLFragmentList_extractFromElementByAppIDAndType (&oXMLFragmentList, elP,
+				if (mdlXMLFragmentList_extractFromElementByAppIDAndType(&oXMLFragmentList, elP,
 					&appID, &appTypeReinBar) == SUCCESS)
 				{
 					//sprintf(sLogMes, "mdlXMLFragmentList_extractFromElementByAppIDAndType success\n"); writeLog(0, 0);
@@ -10727,49 +10896,38 @@ int readReinBarFromElement(ReinBar* rbP, MSElementDescrCP edpBar, int bClear, in
 	//sprintf(sLogMes, "rbP->elemid == %I64u\n", rbP->elemid); writeLog(0, 0);
 
 
-	if (bReadData && rbP->bartype != BT_AXIS && rbP->elemid > 0)
+	return ret;
+}
+
+////////////////////////////////////////////////////////////
+int readReinBarFromElement(ReinElement* relemP, MSElementDescrCP edpBar, int bClear, int bReadData)
+{
+
+	if (readReinBarFromElement(&(relemP->rb), edpBar, bClear) != SUCCESS)
+		return ERROR;
+
+
+	if (bReadData && relemP->rb.bartype != BT_AXIS && relemP->rb.elemid > 0)
 	{
-		ELREF eref = getElemRefByID(edpBar->h.dgnModelRef, rbP->elemid);
+		ELREF eref = getElemRefByID(edpBar->h.dgnModelRef, relemP->rb.elemid);
 
 
 		if (eref)
 		{
-			ReinElement relem;
+			//ReinElement relem;
 			MSElementDescr* edp = NULL;
 
 			//sprintf(sLogMes, "mdlElmdscr_getByElemRef(...)\n"); writeLog(0, 0);
 			mdlElmdscr_getByElemRef (&edp, eref, edpBar->h.dgnModelRef, FALSE, 0);
 
 			//sprintf(sLogMes, "readReinDataFromElmd(...)\n"); writeLog(0, 0);
-			if (edp && readReinDataFromElmd(&relem, edp, rbP) == SUCCESS)
+			if (edp)
 			{
-				rbP->fromReinData(&relem.rd);
-
-				//rbP->bartype = rd.dattype;
-				//rbP->diam = rd.datdiam;
-				//rbP->runmet = rd.datrunmet;
-				//rbP->bendrad = rd.datbdrad;
-				//rbP->poscalc = rd.datposcalc;
-				//rbP->space = rd.datspace;
-				//rbP->lap[0] = rd.datlap[0];
-				//rbP->lap[1] = rd.datlap[1];
-				//rbP->lap[2] = rd.datlap[2];
-				//rbP->term[0] = rd.dattrm[0];
-				//rbP->term[1] = rd.dattrm[1];
-				//rbP->offset[0] = rd.datoffset[0];
-				//rbP->offset[1] = rd.datoffset[1];
-				//rbP->termPar[0][0] = rd.dattrmPar[0][0];
-				//rbP->termPar[1][0] = rd.dattrmPar[1][0];
-				//rbP->termPar[2][0] = rd.dattrmPar[2][0];
-				//rbP->termPar[3][0] = rd.dattrmPar[3][0];
-				//rbP->termPar[4][0] = rd.dattrmPar[4][0];
-				//rbP->termPar[0][1] = rd.dattrmPar[0][1];
-				//rbP->termPar[1][1] = rd.dattrmPar[1][1];
-				//rbP->termPar[2][1] = rd.dattrmPar[2][1];
-				//rbP->termPar[3][1] = rd.dattrmPar[3][1];
-				//rbP->termPar[4][1] = rd.dattrmPar[4][1];
+				if (readReinDataFromElmd(relemP, edp, &(relemP->rb)) == SUCCESS)
+					relemP->rb.fromReinData(&relemP->rd);
 
 				mdlElmdscr_freeAll(&edp);
+
 			}
 		}
 	}
@@ -11960,26 +12118,28 @@ int readFromString(char* func, deque<wstring>* setP, wstring wstr, wchar_t* sep,
 	//MSWCH wsep[5];
 	//wcscpy(wsep, sep.c_str());
 
-	if (wstr.length() == 0) return ERROR;
+	if (wstr.size() == 0) return ERROR;
 
-	if (wstr.length() > iLenChk)
+	if (wstr.size() > iLenChk)
 	{
 		WCH str[1000];
-		SPRN(str, L("readFromString() alert, string length %I64u\n"), wstr.length());
+		SPRN(str, L("readFromString() alert, string length %I64u\n"), wstr.size());
 		mdlOutput_messageCenter(MESSAGE_ERROR, L("readFromString() alert"), str, MESSAGE_ALERT_BALLOON);
 
 		return ERROR;
 	}
 
-	size_t ln = wstr.length() + 10;
+	size_t ln = wstr.size() + 10;
 
-	//MSWCH* dups = new MSWCH[ln];
+	MSWCH* dups = new MSWCH[ln];
+	//vector<MSWCH> dups(ln);
 
-	wcsncpy(sset, wstr.c_str(), ln - 5);
+	wcsncpy(dups, wstr.c_str(), ln - 5);
+	//wcsncpy(sset, wstr.c_str(), ln - 5);
 
 	MSWCH* wtok = NULL;
 
-	wtok = wcstok(sset, sep);
+	wtok = wcstok(dups, sep);
 	while (wtok)
 	{
 		wstring locstr(wtok);
@@ -11987,7 +12147,8 @@ int readFromString(char* func, deque<wstring>* setP, wstring wstr, wchar_t* sep,
 		wtok = wcstok(NULL, sep);
 	}
 
-	//delete [] dups;
+	delete [] dups;
+	//dups.clear();
 
 #else
 
@@ -12113,9 +12274,9 @@ int readFromECInstance(ReinSpace* rsP, DgnECInstancePtr insP)
 
 
 	if (insP->GetValue(v, L"ReinBarSpacing") == ECN::ECObjectsStatus::ECOBJECTS_STATUS_Success)
-		rsP->space = v.GetInteger();
+		rsP->spacef = v.GetDouble();
 
-	if (rsP->space == 0) rsP->space = iSpaceDefault;
+	if ((int)rsP->spacef == 0) rsP->spacef = (double)iSpaceDefault;
 
 
 	if (insP->GetValue(v, L"ReinBarOffset1") == ECN::ECObjectsStatus::ECOBJECTS_STATUS_Success)
@@ -12223,9 +12384,9 @@ int readFromECInstance(ReinBar* rbP, DgnECInstancePtr insP)
 	if (rbP->runmet > 3) rbP->runmet = 3;
 
 	if (insP->GetValue(v, L"ReinBarSpacing") == ECN::ECObjectsStatus::ECOBJECTS_STATUS_Success) 
-		rbP->space = v.GetInteger();
+		rbP->spacef = v.GetDouble();
 
-	if (rbP->space == 0) rbP->space = iSpaceDefault;
+	if ((int)rbP->spacef == 0) rbP->spacef = (double)iSpaceDefault;
 
 	if (insP->GetValue(v, L"ReinBarOffset1") == ECN::ECObjectsStatus::ECOBJECTS_STATUS_Success) 
 		rbP->offset[0] = v.GetInteger();
@@ -12345,8 +12506,9 @@ int readReinBarFromString(ReinBar* rbP, wstring str)
 	rbP->elemEDoffset = _wtoi(it->c_str());
 
 	IF_IT_nxt IF_IT_end return SUCCESS;
-	rbP->space = _wtoi(it->c_str()); // no space2
-	if (rbP->space == 0) rbP->space = iSpaceDefault; // 5
+	//rbP->space = _wtoi(it->c_str());
+	rbP->spacef = _wtof(it->c_str());
+	if ((int)rbP->spacef == 0) rbP->spacef = (double)iSpaceDefault; // 5
 
 	IF_IT_nxt IF_IT_end return SUCCESS;
 	rbP->offset[0] = _wtoi(it->c_str());
@@ -12716,8 +12878,9 @@ int readReinSpaceFromString(ReinSpace* rsP, wstring str)
 	rsP->diam = _wtoi(it->c_str());
 
 	IF_IT_nxt IF_IT_end return ERROR;
-	rsP->space = _wtoi(it->c_str());
-	if (rsP->space == 0) rsP->space = iSpaceDefault;
+	//rsP->space = _wtoi(it->c_str());
+	rsP->spacef = _wtof(it->c_str());
+	if ((int)rsP->spacef == 0) rsP->spacef = (double)iSpaceDefault;
 
 	IF_IT_nxt IF_IT_end return ERROR;
 	rsP->offset[0] = _wtoi(it->c_str());
@@ -12779,9 +12942,9 @@ int readReinSpaceFromString(ReinSpace* rsP, wstring str)
 	IF_IT_nxt IF_IT_end return SUCCESS; // 20
 	rsP->poscalc = _wtoi(it->c_str());
 
-	IF_IT_nxt IF_IT_end return SUCCESS;
-	rsP->space2 = _wtoi(it->c_str());
-	if (rsP->space2 <= 0) rsP->space2 = iSpaceDefault;
+	//IF_IT_nxt IF_IT_end return SUCCESS;
+	//rsP->space2 = _wtoi(it->c_str());
+	//if (rsP->space2 <= 0) rsP->space2 = iSpaceDefault;
 
 
 /*
@@ -13056,7 +13219,7 @@ bool attachECInstance(
 		|| wcscmp(className, L"ReinCont") == 0
 		)
 	{
-		wipInstance.SetValue(L"ReinBarSpacing", ECN::ECValue(rbP->space));
+		wipInstance.SetValue(L"ReinBarSpacing", ECN::ECValue(rbP->spacef));
 		wipInstance.SetValue(L"ReinLap", ECN::ECValue(rbP->lap[2]));
 
 		if (rbP->lap[0]) wipInstance.SetValue(L"ReinLap1", ECN::ECValue(rbP->lap[0]));
@@ -13756,15 +13919,15 @@ UInt32 createReinSpaceElement(MSElementDescr** edP, ReinSpace* rsP, UInt32 fpos,
 		trmp[5] = rsP->trmPar[2][1];
 	}
 
-	if (rsP->space == 0) rsP->space = iSpaceDefault;
-	if (rsP->space2 <= 0) rsP->space2 = iSpaceDefault;
+	if ((int)rsP->spacef == 0) rsP->spacef = (double)iSpaceDefault;
+	//if (rsP->space2 <= 0) rsP->space2 = iSpaceDefault;
 
 	if (rsP != NULL)
 	{
-		_swprintf(wstr, L"REINSPACE;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i",
+		_swprintf(wstr, L"REINSPACE;%i;%i;%.1f;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i;%i",
 			rsP->runmet, 
 			rsP->diam,
-			rsP->space, 
+			rsP->spacef, 
 			rsP->offset[0],
 			rsP->elemEDoffset,
 			rsP->segmIndex,
@@ -13782,7 +13945,7 @@ UInt32 createReinSpaceElement(MSElementDescr** edP, ReinSpace* rsP, UInt32 fpos,
 			trmp[4],
 			trmp[5],
 			rsP->poscalc,
-			rsP->space2
+			0 // reserved
 			);
 	}
 	else
@@ -14240,11 +14403,16 @@ void reloadBarsData(int iREType, int bRegen, int iStep)
 
 }
 
-
-//////////////////////////////////////////////////////
+/**
+* удаляет производные элементы,
+* принадлежащие элементу edP (1-й аргумент)
+* @param MSElementDescr edP - образующий элемент
+* @param int bUseScanRange - ограничить скан
+* @return void
+*/
 void reinBarsDataDel(
-MSElementDescr  *edP,
-int bUseScanRange
+MSElementDescr  *edP, // образующий элемент
+int bUseScanRange // ограничить скан
 )
 {
 
@@ -15469,6 +15637,7 @@ int reinCreateComplexBarAxis2(
 
 
 //////////////////////////////////////////////////////////////////
+// func create note
 void createNote(MSElement* elP, DVec3d* arPnt, int numPnt, WCH* txt, MSWCH* sDimStyleName)
 {
 	if (elP == NULL) return;
@@ -16632,9 +16801,9 @@ int bAddElem
 
 
 
-	if (rsP->space) cqty = (int)
+	if ((int)rsP->spacef > 0) cqty = (int)
 		(
-			(w - mdlCnv_masterUnitsToUors(rsP->offset[0])) / mdlCnv_masterUnitsToUors(rsP->space) 
+			(w - mdlCnv_masterUnitsToUors(rsP->offset[0])) / mdlCnv_masterUnitsToUors(rsP->spacef) 
 			+ 1.
 		);
 
@@ -16746,7 +16915,7 @@ int bAddElem
 
 		rcP->dist[2] = mdlCnv_uorsToMasterUnits(d);
 
-		d += mdlCnv_masterUnitsToUors(rsP->space);
+		d += mdlCnv_masterUnitsToUors(rsP->spacef);
 
 
 		//printf("%i %i\n", rcP->qty, bLast);
@@ -16754,7 +16923,7 @@ int bAddElem
 	}
 
 
-	rcP->dist[1] = rsP->offset[0] + rsP->space * (rcP->qty - 1);
+	rcP->dist[1] = (double)rsP->offset[0] + rsP->spacef * (rcP->qty - 1);
 
 	rcP->cnt = cnt;
 
@@ -16882,9 +17051,9 @@ int reinCalcSurfExtrusion(
 
 	// correct space according to angle
 	if (iCfgVar_SpaceHoldLine)
-		dspace = mdlCnv_masterUnitsToUors(rb.space) / cos(dan);
+		dspace = mdlCnv_masterUnitsToUors(rb.spacef) / cos(dan);
 	else
-		dspace = mdlCnv_masterUnitsToUors(rb.space);
+		dspace = mdlCnv_masterUnitsToUors(rb.spacef);
 
 	doffs[0] = mdlCnv_masterUnitsToUors(rb.offset[0]) / cos(dan);
 	doffs[1] = mdlCnv_masterUnitsToUors(rb.offset[1]) / cos(dan);
@@ -17048,7 +17217,7 @@ bool isLevelDisplayed(MSElementDescr* edP, DgnModelRefP mrP, ReinElm* reP)
 		res = mdlLevel_getDisplay(&bdsp, mrP, lid);
 		eddP = eddP->h.firstElem;
 
-		if (reP && iCfgVar_PosListMerge)
+		if (reP && iCfgVar_PosListMerge == 2)
 		{
 			MSWCH levName[512];
 			int st = mdlLevel_getName(levName, 512, mrP, lid);
@@ -17315,18 +17484,36 @@ ScanCriteria    *pScanCriteria // use pIterScanCrit
 
 				mdlElmdscr_getByElemRef (&edp, eref, ACTIVEMODEL, FALSE, 0);
 
-				if (edp && readReinDataFromElmd(&relem, edp, &rb) == SUCCESS)
+				if (edp)
 				{
-					//if (!bAdd) 
-						reinBarsDataDel(edp, TRUE); // ReinData
-					//if (bAdd) 
-						reinCreateDataBars(bAdd, &relem, &rb, edP);
-					
+					if (readReinDataFromElmd(&relem, edp, &rb) == SUCCESS)
+					{
+						//if (!bAdd) 
+							reinBarsDataDel(edp, TRUE); // ReinData
+						//if (bAdd) 
+							reinCreateDataBars(bAdd, &relem, &rb, edP);
+					}
 
 					mdlElmdscr_freeAll(&edp);
 
 					if (pIterScanCrit != NULL) // regen
 						arElemID[iElemIDcount++] = rb.elemid;
+				}
+			}
+
+			if (bAdd)
+				iterateLoadReinBars(edP, 0, 0); // add
+			else
+			{
+				map<UInt32, TransDescrP>::iterator it = curRM->mapTedCntP.find(mdlElmdscr_getFilePos(edP));
+
+				if (it != curRM->mapTedCntP.end()) // found
+				{
+					if (it->second && mdlTransient_isValid(it->second))
+					{
+						mdlTransient_free(&it->second, TRUE);
+						it = curRM->mapTedCntP.erase(it);
+					}
 				}
 			}
 
@@ -17605,8 +17792,8 @@ int reinCalcSpace(
 						 )
 {
 	int num = 0, i;
-	double space;
-	double offset;
+	double m_space = 0.;
+	double m_offset = 0.;
 	
 	MSElementDescr* edpFP = NULL;
 
@@ -17642,13 +17829,13 @@ int reinCalcSpace(
 
 	if (bUors)
 	{
-		mdlCnv_masterToUOR(&space, rsPt->space, mrP);
-		mdlCnv_masterToUOR(&offset, rsPt->offset[0], mrP);
+		mdlCnv_masterToUOR(&m_space, rsPt->spacef, mrP);
+		mdlCnv_masterToUOR(&m_offset, rsPt->offset[0], mrP);
 	}
 	else
 	{
-		space = rsPt->space;
-		offset = rsPt->offset[0];
+		m_space = rsPt->spacef;
+		m_offset = rsPt->offset[0];
 	}
 
 
@@ -17739,14 +17926,14 @@ int reinCalcSpace(
 		//}
 
 
-		if (space > 1.)
-			rcP->qty = (int)((rcP->width - offset) / space + 1.);
+		if (m_space > 1.)
+			rcP->qty = (int)((rcP->width - m_offset) / m_space + 1.);
 		else
 			rcP->qty = 0;
 
 
-		rcP->dist[0] = offset;
-		rcP->dist[1] = offset + space * (rcP->qty - 1);
+		rcP->dist[0] = m_offset;
+		rcP->dist[1] = m_offset + m_space * (rcP->qty - 1);
 
 	}
 	else // complex calc
@@ -19096,7 +19283,107 @@ void updateReinBarSegments(
 }
 
 /////////////////////////////////
+int iterateLoadReinSpaces(
+	MSElementDescr* edP,
+	void* prm,
+	ScanCriteria* pScanCriteria
+)
+{
+
+	//DgnCacheP dfP = Bentley::Ustn::ISessionMgr::GetActiveDgnCache();
+	//MSDgnFileP fileP = dfP->GetMSDgnFile();
+	//wstring dsname = L"Wireframe";
+
+	//int ind = Bentley::Ustn::DisplayStyleManager::GetIndexForDisplayStyle(*dsname.c_str(), fileP);
+
+	//mdlElement_setDisplayStyle(&edP->el, ind);
+
+	mdlElmdscr_rewrite(edP, 0, mdlElmdscr_getFilePos(edP));
+
+
+	return SUCCESS;
+}
+
+
+/////////////////////////////////
 int iterateLoadReinBars(
+	MSElementDescr* edP,
+	void* prm,
+	ScanCriteria* pScanCriteria
+)
+{
+	ReinBar rb;
+	if (readReinBarFromElement(&rb, edP, 0) != SUCCESS) return 0;
+
+	if (rb.bartype == BT_AXIS) return 0; // only for contours
+
+	WCH* sVarName = L("REIN_DISPLAY_LINCONT_ARROWS");
+	WCH  sVarValue[10];
+
+	if (getCfgVar(sVarValue, sVarName) == SUCCESS)
+	//if (mdlSystem_getCfgVar(sVarValue, sVarName, 10) == SUCCESS)
+	{
+		if (STOI(sVarValue) == 0)
+			return 1; // end scan
+	}
+	else
+		return 1; // end scan
+
+	// create transients
+	//========================================================
+
+	MSElementDescr* edpB = edP;
+	DVec3d pdst[2];
+	DVec3d ptmp[3];
+
+	UInt32 fp = mdlElmdscr_getFilePos(edpB);
+
+	double dspace = mdlCnv_masterUnitsToUors(rb.offset[0]);
+	ReinModel* rmP = curRM->getRM(edP->h.dgnModelRef);
+
+	int res = mdlElmdscr_pointAtDistance(&pdst[0], &pdst[1], dspace, edpB, 0);
+
+	while (rmP && res == SUCCESS)
+	{
+		double dgap = mdlCnv_masterUnitsToUors(dCfgVar_BarFace);// *(mdlCnv_masterUnitsToUors(50000.) / pdst[0].z);
+
+
+		mdlVec_scaleInPlace(&pdst[1], dgap);
+		mdlVec_add(&pdst[1], &pdst[0], &pdst[1]);
+		mdlCone_create(&elTmp, &c0w0s0, 0, dgap/4., &pdst[0], &pdst[1], 0);
+
+		UInt32 levelID = LEVEL_NULL_ID;
+		mdlElmdscr_getProperties(&levelID, 0, 0, 0, 0, 0, 0, 0, edP);
+
+
+		MSElementDescr* edpA = NULL;
+
+		mdlElmdscr_new(&edpA, 0, &elTmp);
+
+		func_amp(mdlElmdscr_setProperties, edpA), & levelID, 0, 0, 0, 0, 0, 0, 0);
+
+
+		MSWCH str[100];
+		_swprintf(str, L"@@@@@%u", fp);
+
+		erelm.clear();
+		xmlAddCacheInfo(&erelm, &edpA, str, false, rmP);
+
+		//ReinInfoRef* rirP = rmP->getRefPrefs();
+		//if (rirP && rirP->lim) // не фурычит т.к. не синхронизировано
+		rmP->mapTedCntP[fp] = mdlTransient_addElemDescr(rmP->mapTedCntP[fp], edpA, FALSE, 0x00ff, DRAW_MODE_Normal, 1, 0, 0);
+
+		dspace += mdlCnv_masterUnitsToUors(rb.spacef);
+
+		res = mdlElmdscr_pointAtDistance(&pdst[0], &pdst[1], dspace, edpB, 0);
+	}
+	//========================================================
+
+	return SUCCESS;
+}
+
+/////////////////////////////////
+int iterateLoadReinElms(
 MSElementDescr  *edP,
 CatInfo*            ciP,
 ScanCriteria    *pScanCriteria
@@ -19514,10 +19801,12 @@ ScanCriteria    *pScanCriteria
 
 				if (prmP->ival[1]) // delete from map
 				{
-					map <wstring, ReinPos>::iterator it = mapBarSet.find(prm.wstr);
-					if (it != mapBarSet.end()) // found
+					wstring str = prmP->rpP->getMapIdentString();
+
+					map <wstring, ReinPos>::iterator it = curRM->mapBarSet.find(str);
+					if (it != curRM->mapBarSet.end()) // found
 					{
-						mapBarSet.erase(it);
+						curRM->mapBarSet.erase(it);
 						/*
 						// todo relmP->drwopt[0]
 						for (map<UInt32, ReinElm>::iterator it = rmP->mapElms.begin(); it != rmP->mapElms.end(); ++it)
@@ -20679,7 +20968,8 @@ int  view
 	mdlCell_create(&eCell, NULL, NULL, FALSE);
 	mdlElmdscr_new (&edpDyn, NULL, &eCell);
 
-	int ispace = 0;
+	//int ispace = 0;
+	double dspace = 0;
 	int ipos = 0;
 	int iqty = 0;
 
@@ -20745,11 +21035,11 @@ int  view
 
 				if (readReinBarFromElement(&rb, edp, TRUE) == SUCCESS)
 				{
-					ispace = rb.space;
+					dspace = rb.spacef;
 				}
 				else if (readReinSpaceFromElmd(&relem, edp, FALSE) == SUCCESS)
 				{
-					ispace = relem.rs.space;
+					dspace = relem.rs.spacef;
 				}
 
 				mdlElmdscr_freeAll(&edp);
@@ -20793,7 +21083,7 @@ int  view
 	if (arPos[1] == ipos) iqty = arPosCount[1];
 	if (arPos[2] == ipos) iqty = arPosCount[2]; //...
 
-	ispace = ispace * iPosCount;
+	dspace = dspace * iPosCount;
 
 
 	setReinNoteText();
@@ -23522,7 +23812,7 @@ void saveBarSetInfo(ReinPos* rpP, int bMapInsert)
 			rpP->getIdentChars(wstr, FALSE);
 
 			wstring str = wstr;
-			mapBarSet[str] = *rpP;
+			curRM->mapBarSet[str] = *rpP;
 			/*
 			// todo relmP->drwopt[0]
 			for (map<UInt32, ReinElm>::iterator it = rmP->mapElms.begin(); it != rmP->mapElms.end(); ++it)
@@ -24418,7 +24708,7 @@ ScanCriteria    *pScanCriteria
 
 		bool bFoumd = false;
 
-		for (map <wstring, ReinPos>::iterator rpItP = mapBarSet.begin(); rpItP != mapBarSet.end(); ++rpItP)
+		for (map <wstring, ReinPos>::iterator rpItP = curRM->mapBarSet.begin(); rpItP != curRM->mapBarSet.end(); ++rpItP)
 		//for (UInt32 i = 0; i < elemIterCount2 || i < daCurBarSet.size(); i++)
 		{
 			//ReinPos* rpItP = &(daCurBarSet[i]);
@@ -24474,7 +24764,9 @@ ScanCriteria    *pScanCriteria
 
 			//daCurBarSet.push_back(rp);
 
-			mapBarSet[prm.wstr] = rp;
+			wstring str = rp.getMapIdentString();
+
+			curRM->mapBarSet[str] = rp;
 		}
 
 
@@ -24551,11 +24843,14 @@ void reloadHidingPositions(bool onlyHidePos)
 	status = mdlScanCriteria_free (pScanCriteria);
 
 	// данные из референсов
+	if (iCfgVar_BarSetRefNesting)
 	{
 		ModelRefIteratorP  iterator;
 		DgnModelRefP	modelRef;
+		int dpth = -1;
+		if (iCfgVar_BarSetRefNesting > 0) dpth = iCfgVar_BarSetRefNesting - 1; // if 0 - iterate root modelRef, see mdl help
 
-		mdlModelRefIterator_create (&iterator, ACTIVEMODEL, MRITERATE_PrimaryChildRefs, -1);
+		mdlModelRefIterator_create (&iterator, ACTIVEMODEL, MRITERATE_PrimaryChildRefs, dpth);
 
 		while (NULL != (modelRef = mdlModelRefIterator_getNext (iterator)))
 		{
@@ -24575,7 +24870,7 @@ void reloadHidingPositions(bool onlyHidePos)
 
 	//daCurBarSet.clear();
 	//daCurBarSet.reserve(icnt);
-	mapBarSet.clear();
+	curRM->mapBarSet.clear();
 
 	elemIterCount2 = 0;
 	pScanCriteria= mdlScanCriteria_create ();
@@ -24587,11 +24882,14 @@ void reloadHidingPositions(bool onlyHidePos)
 	status = mdlScanCriteria_free (pScanCriteria);
 
 	// данные из референсов
+	if (iCfgVar_BarSetRefNesting)
 	{
 		ModelRefIteratorP  iterator;
 		DgnModelRefP	modelRef;
+		int dpth = -1;
+		if (iCfgVar_BarSetRefNesting > 0) dpth = iCfgVar_BarSetRefNesting - 1; // if 0 - iterate root modelRef, see mdl help
 
-		mdlModelRefIterator_create (&iterator, ACTIVEMODEL, MRITERATE_PrimaryChildRefs, -1);
+		mdlModelRefIterator_create (&iterator, ACTIVEMODEL, MRITERATE_PrimaryChildRefs, dpth);
 
 		while (NULL != (modelRef = mdlModelRefIterator_getNext (iterator)))
 		{
@@ -24747,7 +25045,7 @@ int checkPos(ReinPos* rpP, int* bExP)
 }
 */
 ////////////////////////////////////
-void posListAddRow(ListModel* pListModel, ReinPos* rpP, bool bRealPos, long ind, double dSortPosNum)
+void posListAddRow(ListModel* pListModel, ReinPos* rpP, bool bRealPos, long ind, double dSortPosNum, bool bSaveBtn)
 {
 
 	WCH v[500];
@@ -25088,14 +25386,18 @@ void posListAddRow(ListModel* pListModel, ReinPos* rpP, bool bRealPos, long ind,
   //  }
 
 	if (
-		!EQ(rpP->base_qty, 0.) && !EQ(rpP->file_qty_rm, 0.) && rpP->file_qty_p != 0 &&
-		(
-		rpP->bar.runmet == 1 && fabs(rpP->base_qty - rpP->file_qty_rm) > 0.1 ||
-		rpP->bar.runmet != 1 && (long)rpP->base_qty != rpP->file_qty_p ||
-		rpP->bar.runmet > 1 && rpP->base_ms_max != rpP->file_ms_max ||
-		rpP->bar.runmet > 1 && rpP->base_ms_min != rpP->file_ms_min
-			|| rpP->bar_mem.diam > 0 && !barsEqual( &rpP->bar_mem, &rpP->bar)
-		))
+			!EQ(rpP->base_qty, 0.) 
+			&& !EQ(rpP->file_qty_rm, 0.) 
+			&& rpP->file_qty_p != 0
+			&& (
+				rpP->bar.runmet == 1 && fabs(rpP->base_qty - rpP->file_qty_rm) > 0.1
+				|| rpP->bar.runmet != 1 && (long)rpP->base_qty != rpP->file_qty_p
+				|| rpP->bar.runmet > 1 && rpP->base_ms_max != rpP->file_ms_max
+				|| rpP->bar.runmet > 1 && rpP->base_ms_min != rpP->file_ms_min
+				|| rpP->bar_mem.diam > 0 && !barsEqual( &rpP->bar_mem, &rpP->bar)
+			)
+			&& bSaveBtn
+		)
 	{
 		ListCell    *pCel;
 		pCel = mdlListRow_getCellAtIndex (pRow, REIN_LISTB_SAVE);
@@ -25297,6 +25599,10 @@ ListModel* createListBoxPos(
 	ReinPos rpNull; // cleared in constr
 
 
+	CatInfo& poscat = rmP->getCat();
+
+
+
 	if (iCfgVar_SortPlus)
 	{
 		set<ReinPos, cmppos> setPos;
@@ -25335,10 +25641,10 @@ ListModel* createListBoxPos(
 				{
 					double d;
 					if (rpP->bar.pnum < pnum) d = (double)rpP->bar.pnum; else d = (double)pnum;
-					posListAddRow(pListModel, &rpNull, false, -1, d + (double)(abs(rpP->bar.pnum - pnum) / 2));
+					posListAddRow(pListModel, &rpNull, false, -1, d + (double)(abs(rpP->bar.pnum - pnum) / 2), (poscat.iActive != -1));
 				}
 
-				posListAddRow(pListModel, rpP, true, rpP->mapind, (double)pnum);
+				posListAddRow(pListModel, rpP, true, rpP->mapind, (double)pnum, (poscat.iActive != -1));
 
 				pnum = rpP->bar.pnum;
 			}
@@ -25363,10 +25669,10 @@ ListModel* createListBoxPos(
 				{
 					double d;
 					if (rpP->bar.pnum < pnum) d = (double)rpP->bar.pnum; else d = (double)pnum;
-					posListAddRow(pListModel, &rpNull, false, -1, d + (double)(abs(rpP->bar.pnum - pnum) / 2));
+					posListAddRow(pListModel, &rpNull, false, -1, d + (double)(abs(rpP->bar.pnum - pnum) / 2), (poscat.iActive != -1));
 				}
 
-				posListAddRow(pListModel, rpP, true, rpP->mapind, (double)pnum);
+				posListAddRow(pListModel, rpP, true, rpP->mapind, (double)pnum, (poscat.iActive != -1));
 
 				pnum = rpP->bar.pnum;
 			}
@@ -27079,7 +27385,11 @@ void prepareSketchPoints(DVec3d* ptsh, int numpts, double prefWdt, double prefHg
 
 }
 
-//////////////////////////
+/// <summary>
+/// функция отрисовки эскиза стержня
+/// </summary>
+/// <param name="dbP"></param>
+/// <param name="diP"></param>
 void reinListBoxDrawPos(MSDLGP dbP,  DialogItem* diP)
 {
 	//curPos.bar.apts
@@ -27093,6 +27403,7 @@ void reinListBoxDrawPos(MSDLGP dbP,  DialogItem* diP)
 	//MSElementDescr* edpDisplay = NULL;
 
 	DVec3d ptsBarSk[MAX_BAR_VERTICES];
+	//vector<DVec3d>ptsBarSk;
 
 	int bFillet = FALSE;
 
@@ -27115,9 +27426,14 @@ void reinListBoxDrawPos(MSDLGP dbP,  DialogItem* diP)
 
 	for (int i = 0; i < curPos.bar.cnumpts; i++)
 	{
-		ptsBarSk[i].x = mdlCnv_masterUnitsToUors(curPos.bar.apts[i].x); // построение арко по точке на элементе
-		ptsBarSk[i].y = mdlCnv_masterUnitsToUors(curPos.bar.apts[i].y);
-		ptsBarSk[i].z = mdlCnv_masterUnitsToUors(curPos.bar.apts[i].z);
+		DVec3d p;
+
+		p.x = mdlCnv_masterUnitsToUors(curPos.bar.apts[i].x); // построение арко по точке на элементе
+		p.y = mdlCnv_masterUnitsToUors(curPos.bar.apts[i].y);
+		p.z = mdlCnv_masterUnitsToUors(curPos.bar.apts[i].z);
+
+		ptsBarSk[i] = p;
+		//ptsBarSk.push_back(p);
 	}
 
 	if (curPos.bar.noplanar == 2) mdlRMatrix_multiplyPointArray(ptsBarSk, &rmIso, curPos.bar.cnumpts);
@@ -27142,6 +27458,10 @@ void reinListBoxDrawPos(MSDLGP dbP,  DialogItem* diP)
 
 
 	prepareSketchPoints(ptsBarSk, curPos.bar.cnumpts, -1, -1, (curPos.bar.noplanar == 0));
+
+
+	//if (ptsBarSk.size() != curPos.bar.cnumpts)
+	//	return;
 
 	// mdlElmdscr_computeRange in ms connect not working if element not saved in file
 	for (int i = 0; i < curPos.bar.cnumpts; i++)
@@ -27755,12 +28075,12 @@ void insertCurBarsMember2(ReinElm* reToAddP, MSElementDescr* edP, UInt32 iBarFP,
 
 
 	//File = 0, Pos = 4002838
-	//File = 0, Pos = 4001502
+	//File=8, Pos=4200696
 
 	//if (fp == 4002838)
 	//	__asm nop;
 
-	//if (fp == 4000039)
+	//if (fp == 4200696)
 	//	__asm nop;
 
 
@@ -28050,14 +28370,17 @@ void reinSetOverInSpace(int baract)
 
 					mdlElmdscr_read(&edRdP, dfpos, ACTIVEMODEL, 0, 0);
 
-					if (edRdP && readReinDataFromElmd(&re, edRdP, &rb) == SUCCESS)
+					if (edRdP)
 					{
+						if (readReinDataFromElmd(&re, edRdP, &rb) == SUCCESS)
+						{
+							re.mapOvers.clear();
 
-						re.mapOvers.clear();
+							rb.fromReinData(&re.rd);
 
-						rb.fromReinData(&re.rd);
+							rb.elemid = rb.saveReinData(rb.elemid, &re);
+						}
 
-						rb.elemid = rb.saveReinData(rb.elemid, &re);
 
 						mdlElmdscr_freeAll(&edRdP);
 
@@ -28161,9 +28484,10 @@ void reinSetBarInSpace(DVec3d *ptP, UInt32 fp, DgnModelRefP mrP, int idrawmode, 
 
 		deleteBarSetInfo(&curPos, FALSE, TRUE); // также удалить из массива
 
-		if (curPos.drawmode > 0) saveBarSetInfo(&curPos, TRUE);
-
-		//reloadHidingPositions(); // pushed after element save
+		if (curPos.drawmode > 0) 
+			saveBarSetInfo(&curPos, TRUE);
+		//else
+		//	reloadHidingPositions(); // pushed after element save
 
 		// размер
 		if (rmP && curPos.drawmode > 0 && bPlaceDim)
@@ -28533,7 +28857,7 @@ void scanFilePositions(ReinModel* rmP, DgnModelRefP mrP, bool bClearCats, bool b
 					);
 
 
-		if (iCfgVar_PosListMerge) // new var?
+		if (iCfgVar_PosListMerge == 2) // new var?
 		{
 			wstring wstrlev = L"";
 			wchar_t wsep[5] = L"|\0\0";
@@ -28597,8 +28921,21 @@ void scanFilePositions(ReinModel* rmP, DgnModelRefP mrP, bool bClearCats, bool b
 			//if (!rmP->mrci.arCurPos.empty()) // models without saved positions are also needed to fill them by elements
 
 			mapCats[ctID] = rmP->mrci;
+			mapCats[ctID].iActive = -1; // not active
+
+			if (mdlModelRef_isActiveModel(mrP) && !rmP->mrci.arCurPos.empty())
+				mapCats[ctID].iActive = 1;
 
 			if (iDebug) sprintf(sLogMes, "cat %u redefined to common\n", rmP->mrci.catID); writeLog(0, 0, 0, 1);
+		}
+		else if (rmP->mrci.arCurPos.size() > 0 && it->second.arCurPos.empty()) // если есть сохраненные позиции для этого каталога
+		{
+			it->second.arCurPos = rmP->mrci.arCurPos;
+		}
+		else if (rmP->mrci.arCurPos.size() > 0 && !it->second.arCurPos.empty()) // сохраненные позиции в разных  файлах, принадлежащим одному каталогу
+		{
+			// объединять? флаг для подсветки?
+			//...
 		}
 	}
 
@@ -29451,16 +29788,16 @@ int getDataFromString(ReinData* rdP, wstring str, ReinBar* rbP)
 		rdP->datposcalc = _wtoi(it->c_str());			// 15
 
 	IF_IT_nxt IF_IT
-		rdP->datspace = _wtoi(it->c_str());
-	else 
-		rdP->datspace = rbP->space;			// 16
+		rdP->datspacef = _wtof(it->c_str());
+	else if (rbP)
+		rdP->datspacef = rbP->spacef;			// 16
 
-	if (rdP->datspace == 0) 
-		rdP->datspace = iSpaceDefault;
+	if ((int)rdP->datspacef == 0) 
+		rdP->datspacef = (double)iSpaceDefault;
 
 	IF_IT_nxt IF_IT
 		rdP->datoffset[0] = _wtoi(it->c_str());
-	else 
+	else if (rbP)
 		rdP->datoffset[0] = rbP->offset[0];			// 17
 
 	IF_IT_nxt IF_IT
@@ -29469,7 +29806,7 @@ int getDataFromString(ReinData* rdP, wstring str, ReinBar* rbP)
 		//if (rdP->datoffset[1] > 0) rdP->datoffset[1] = 0;
 		//if (rdP->datoffset[1] < 0) rdP->datoffset[1] = -rdP->datoffset[1];
 	}
-	else
+	else if (rbP)
 		rdP->datoffset[1] = rbP->offset[1];			// 18
 
 
@@ -29565,7 +29902,7 @@ int readReinDataFromElmd(
 	ReinElement* relemP, // may be NULL
 	//ReinData* rdP, 
 	MSElementDescr  *edP, // element to get text from
-	ReinBar* rbP // bar to get additional data
+	ReinBar* rbP // bar to get additional data, may be NULL
 )
 {
 	//if (relemP == NULL) return ERROR;
@@ -29660,7 +29997,8 @@ int intersectDataBars2(
 
 					rbP = &arDataBars[arDataNums[elemIterCount]];
 
-					rbP->space = rb.space;
+					//rbP->space = rb.space;
+					rbP->spacef = rb.spacef;
 					rbP->spacerad = rb.spacerad;
 					rbP->offset[0] = rb.offset[0];
 					rbP->offset[1] = rb.offset[1];
@@ -29746,7 +30084,8 @@ ScanCriteria    *pScanCriteria
 
 			ReinBar* rbP = &reCopyFrom.bel;
 
-			rbP->space = rb.space;
+			//rbP->space = rb.space;
+			rbP->spacef = rb.spacef;
 			rbP->spacerad = rb.spacerad;
 			rbP->offset[0] = rb.offset[0];
 			rbP->offset[1] = rb.offset[1];
@@ -29817,7 +30156,7 @@ ScanCriteria    *pScanCriteria
 
 
 //////////////////////////////////////////////////////
-int createDataBars(
+int calcDataBars(
 MSElementDescr  *edP,
 MSElementDescr  *edNxtP,
 ELID*         elidP,
@@ -29836,8 +30175,8 @@ int iBarType
 	{
 
 		// определение шага/отступа
-		if (rb.space > 0)
-			dspace = mdlCnv_masterUnitsToUors(rb.space);
+		if ((int)rb.spacef > 0)
+			dspace = mdlCnv_masterUnitsToUors(rb.spacef);
 		else
 			dspace = mdlCnv_masterUnitsToUors(iSpaceDefault);
 
@@ -29862,7 +30201,8 @@ int iBarType
 				//	rbP = &(arDataBars.back());
 				//}
 
-				rbP->space = rb.space;
+				//rbP->space = rb.space;
+				rbP->spacef = rb.spacef;
 				rbP->spacerad = rb.spacerad;
 				rbP->offset[0] = rb.offset[0];
 				rbP->offset[1] = rb.offset[1];
@@ -29912,7 +30252,8 @@ int iBarType
 
 			rbP = &arDataBars[0]; //  arDataBars.data(); // pointer to array or first element
 
-			rbP->space = rb.space;
+			//rbP->space = rb.space;
+			rbP->spacef = rb.spacef;
 			rbP->spacerad = rb.spacerad;
 			rbP->offset[0] = rb.offset[0];
 			rbP->offset[1] = rb.offset[1];
@@ -30033,7 +30374,8 @@ int iBarType
 				//	rbP = &(arDataBars.back());
 				//}
 
-				rbP->space = rb.space;
+				//rbP->space = rb.space;
+				rbP->spacef = rb.spacef;
 				rbP->spacerad = rb.spacerad;
 				rbP->offset[0] = rb.offset[0];
 				rbP->offset[1] = rb.offset[1];
@@ -30275,7 +30617,7 @@ void reinCreateDataBars(
 
 			elemCount = i;
 
-			createDataBars(edp[0], edp[1], &rbP->elemid, iBarType);
+			calcDataBars(edp[0], edp[1], &rbP->elemid, iBarType);
 
 		}
 
@@ -30486,7 +30828,7 @@ void reinCreateDataBars(
 		//if (rdP->datspace < 0)
 		//	dspace = mdlCnv_masterUnitsToUors(arDataBars[0].space);
 		//else
-			dspace = mdlCnv_masterUnitsToUors(rdP->datspace);
+			dspace = mdlCnv_masterUnitsToUors(rdP->datspacef);
 		
 		//if (rdP->datoffset[0] < 0)
 		//	doffs = mdlCnv_masterUnitsToUors(rbP->offset[0]);
@@ -31143,13 +31485,13 @@ UInt32 checkDrawElem(MSElementDescrCP edp,
 
 	writeLogIn(__FUNCTION__, 0);
 
-	if (readReinSpaceFromElmd(&rrelem, edp, FALSE) == SUCCESS) // отображать ReinSpace
+	if (readReinSpaceFromElmd(&urelem, edp, FALSE) == SUCCESS) // отображать ReinSpace
 	{
 		if (newEdPPP)
 		{
 			Int32 st = 3;
 			UInt32 wt = 0;
-			UInt32 cl = (UInt32)rrelem.rs.diam;
+			UInt32 cl = (UInt32)urelem.rs.diam;
 			UInt32* clP = NULL;
 
 			if (rirP->riropt[19]) clP = &cl;
@@ -31170,16 +31512,16 @@ UInt32 checkDrawElem(MSElementDescrCP edp,
 			
 	}
 
-	if (readReinBarFromElement(&rrb, edp, FALSE) == SUCCESS) // отображать ReinBar
+	if (readReinBarFromElement(&urelem, edp, FALSE) == SUCCESS) // отображать ReinBar
 	{
 		if (newEdPPP)
 		{
 			Int32 st = 0;
 			UInt32 wt = 0;
-			UInt32 cl = (UInt32)rrb.diam;
+			UInt32 cl = (UInt32)urelem.rb.diam;
 			UInt32* clP = NULL;
 
-			if (rrb.bartype == BT_AXIS) 
+			if (urelem.rb.bartype == BT_AXIS)
 				st = 2;
 			else 
 				st = 4;
@@ -31257,15 +31599,19 @@ UInt32 checkDrawElem(MSElementDescrCP edp,
 		//Element ID : 4585806
 		//Element ID : 4586430
 
+		//86 drawmode = 2, inum = 17, ref = [12], elemid = 6402223, bFromRef = 0
+		//87 drawmode = 2, inum = 17, ref = [12], elemid = 6407014, bFromRef = 0
+		//88 drawmode = 2, inum = 18, ref = [12], elemid = 6405886, bFromRef = 0
+
 		//if (rirP->riropt[19]) // временно цвет как опция для сравнения и поиска глюков
 		{
-			for (map <wstring, ReinPos>::iterator rpItP = mapBarSet.begin(); relmP && rpItP != mapBarSet.end(); ++rpItP)
+			for (map <wstring, ReinPos>::iterator rpItP = curRM->mapBarSet.begin(); relmP && rpItP != curRM->mapBarSet.end(); ++rpItP)
 			{
 				//ReinPos* rpItP = &daCurBarSet[i];
 				//if (rpItP <= 0) continue;
 
-				//if (relmP->bel.inum == 5 && relmP->bel.elemid== 205380 && rn==11)
-				//	int a = 0;
+				if (relmP->bel.inum == 17 && relmP->bel.elemid== 6402223 && aref.front() ==12)
+					int a = 0;
 
 				if (rpItP->second.bar.inum == relmP->bel.inum && 
 					rpItP->second.bar.elemid == relmP->bel.elemid &&
@@ -32303,7 +32649,7 @@ int scanPlotProcessElmd(UInt32 fpos, DgnModelRefP mrP, ReinElm* relmP, int view,
 
 		if (rirP->riropt[19]) // color by diam
 		{
-			UInt32 clr = (UInt32)relmP->bel.diam;
+			clr = (UInt32)relmP->bel.diam;
 			clrP = &clr;
 		}
 
@@ -33280,7 +33626,7 @@ ScanCriteria    *pScanCriteria
 					if (edp)
 					{
 						ReinElement relem;
-						if (readReinSpaceFromElmd(&relem, edp, FALSE) == SUCCESS) space = relem.rs.space;
+						if (readReinSpaceFromElmd(&relem, edp, FALSE) == SUCCESS) space = (int)relem.rs.space;
 						mdlElmdscr_freeAll(&edp);
 					}
 				}
@@ -34462,14 +34808,16 @@ void setPosition(ReinPos* rpP, ReinElm* relmP, ReinModel* rmP, int dirout)
 		//|| bSwap
 		)
 	{
-		rpP->file_qty_rm += len_with_lap / 1000.;
+		rpP->file_qty_rm += len_with_lap / 1000.; // mm to m
 
 		rpP->lap_qty += lapqty;
 		rpP->muft_qty[0] += mqty[0];
 		rpP->muft_qty[1] += mqty[1];
 	}
 	else
-		rpP->file_qty_rm += relmP->bel.length;
+		rpP->file_qty_rm += relmP->bel.length / 1000.; // mm to m
+
+
 
 	{
 		if (relmP->bel.noplanar == 1) rpP->bar.noplanar = 1;
@@ -34736,6 +35084,28 @@ void ReinModel::updateModelElmNumbers(bool bSkipIfLot, map<long, ReinPos>* arCur
 
 //////////////////////////////////////////////////////
 int scanFindBars(
+	MSElementDescr* edP,
+	ReinPrm* prmP,
+	ScanCriteria* pScanCriteria
+)
+{
+	ReinBar rb;
+
+	if (readReinBarFromElement(&rb, edP, FALSE) == SUCCESS)
+	{
+		if (rb.bartype != BT_AXIS && rb.elemid == prmP->prmid)
+		{
+			prmP->uints.push_back(mdlElmdscr_getFilePos(edP));
+		}
+	}
+
+
+	return SUCCESS;
+}
+
+
+//////////////////////////////////////////////////////
+int scanFindBarsSetContNum(
 MSElementDescr  *edP,
 ReinBar*         rbP,
 ScanCriteria    *pScanCriteria
@@ -34782,7 +35152,7 @@ long addConttNum(ReinBar* rbP)
 
 	pScanCriteria= mdlScanCriteria_create ();
 	status = mdlScanCriteria_setReturnType (pScanCriteria, MSSCANCRIT_ITERATE_ELMDSCR, FALSE, TRUE);
-	status = mdlScanCriteria_setElmDscrCallback (pScanCriteria, (PFScanElemDscrCallback)scanFindBars, &rb);
+	status = mdlScanCriteria_setElmDscrCallback (pScanCriteria, (PFScanElemDscrCallback)scanFindBarsSetContNum, &rb);
 	status = mdlScanCriteria_setModel (pScanCriteria, ACTIVEMODEL);
 	mdlXML_addXMLFragmentAttachmentScanTest (pScanCriteria, &appID, &appTypeReinBar);
 	status = mdlScanCriteria_scan (pScanCriteria,NULL,NULL,NULL);
@@ -36121,6 +36491,8 @@ int getBarSetInfo(MSElementDescr* edP, ReinPrm* prmP)
 
 	UInt32 fp = mdlElmdscr_getFilePos(edP);
 
+	prmP->mrP = edP->h.dgnModelRef;
+
 	oXMLFragmentList = mdlXMLFragmentList_constructFromXMLFragmentElement(edP);
 
 	wstring str = L"";
@@ -36315,6 +36687,8 @@ void posSaveFileXml(
 	char* unparsedP
 )
 {
+#if defined (MSVERSION) && (MSVERSION == 0x8b0)
+
 	string sline;
 	int res;
 	long partID = 0;
@@ -36333,7 +36707,7 @@ void posSaveFileXml(
 	}
 	else
 	{
-		int res = mdlDialog_fileCreate(fname, 0, 0, "", "*.xml", 0, "file to save");
+		res = mdlDialog_fileCreate(fname, 0, 0, "", "*.xml", 0, "file to save");
 
 		if (res != SUCCESS) return;
 	}
@@ -36498,6 +36872,7 @@ void posSaveFileXml(
 
 	f.close();
 
+#endif
 
 }
 

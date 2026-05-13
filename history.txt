@@ -161,4 +161,14 @@ Other fixes
 
 14.8.25
 Command for Bar deleting from contour - now works in linear contours
-Bar moving for linear comtours will be presented in future versions 
+Bar moving for linear contours will be presented in future versions 
+
+14.8.26
+1) Space parameter of any contour changed from integer to comma-separated (fractional part is no more than one decimal place)
+2) The direction of linear contours can be shown with arrows according value of new variable REIN_DISPLAY_LINCONT_ARROWS (0 or 1)
+3) Now contour surfaces have their own display style - "wireframe"
+and according to this comes new regeneration command - REIN RELOAD SPACES - to rebuild all of surfaces
+4) new command to prepare saved views for attaiching in drawings - vba run [arm]main.prepReinViews
+5) Important fixes for linear contours
+6) new config var REIN_BARSET_REF_NESTING (default -1) # drawing section: bar hide/unhide load data from refs nesting level - 0 no load, -1 unlim nesting, >0 nesting level
+7) Other fixes

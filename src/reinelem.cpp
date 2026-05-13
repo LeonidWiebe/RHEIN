@@ -276,6 +276,7 @@ using namespace std;
 
 void reinelement::clear(void)
 {
+	rb.clear();
 	rs.clear();
 	rd.clear();
 
@@ -369,7 +370,7 @@ int reinelement::calcSurfRevolution
 		double phi_offset = mdlCnv_masterUnitsToUors( static_cast<double>( rs.offset[0] ) ) / step_rad; // phi_offset - угол смещения в радианах // offset[0] - смещение от начала (длина)
 		int signCoef_phi = surfSwan >= 0 ? 1 : -1;
 
-		double step_arcLen = mdlCnv_masterUnitsToUors( static_cast<double>( rs.space ) ); // Длина дуги шага в uors
+		double step_arcLen = mdlCnv_masterUnitsToUors( rs.spacef ); // Длина дуги шага в uors
 		// double step_angle = (step_arcLen*180.) / fc_pi*step_rad;	// полная формула угла дуги, в градусах
 		double step_angle = step_arcLen / step_rad; // угол шага, после приведения к радианам, получилась формула: a = L/R 
 

@@ -2,7 +2,7 @@
 #define CMD_REIN_PLACE                                     0x0101000000000000UI64   /* PARAMETERS      CmdString =   1, ItemListRscId =   1 */
 #define CMD_REIN_MODIFY                                    0x0102000000000000UI64   /* PARAMETERS      CmdString =   4, ItemListRscId =   4 */
 #define CMD_REIN_NOTE                                      0x0103000000000000UI64   /* PARAMETERS      CmdString =   5, ItemListRscId =   5 */
-#define CMD_REIN_TOOLTIP                                   0x0104000000000000UI64   /* PARAMETERS      */
+#define CMD_REIN_MODE                                      0x0104000000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_TOOLBOX                                   0x0105000000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_VERSION                                   0x0106000000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_RELOAD                                    0x0107000000000000UI64   /* PARAMETERS      */
@@ -36,11 +36,12 @@
 #define CMD_REIN_POS                                       0x0122000000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_POS_CLEAR                                 0x0122010000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_POS_SAVE                                  0x0122020000000000UI64   /* PARAMETERS      */
-#define CMD_REIN_POS_DBLOAD                                0x0122030000000000UI64   /* PARAMETERS      */
+#define CMD_REIN_POS_LOAD                                  0x0122030000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_POS_DBSAVE                                0x0122040000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_POS_DRAW                                  0x0122050000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_POS_ENUM                                  0x0122060000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_POS_CATCH                                 0x0122070000000000UI64   /* PARAMETERS      */
+#define CMD_REIN_POS_SYNC                                  0x0122080000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_SAVEPLOT                                  0x0123000000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_SAVEPLOT_CLEAR                            0x0123010000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_SAVEPLOT_REFS                             0x0123020000000000UI64   /* PARAMETERS      */
@@ -51,3 +52,4 @@
 #define CMD_REIN_VISIT                                     0x0128000000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_BAROVER                                   0x0129000000000000UI64   /* PARAMETERS      */
 #define CMD_REIN_CONCRETE                                  0x012a000000000000UI64   /* PARAMETERS      */
+#define CMD_REIN_BARVIEW                                   0x012b000000000000UI64   /* PARAMETERS      */

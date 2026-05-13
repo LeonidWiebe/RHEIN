@@ -223,6 +223,18 @@ CmdItemListRsc CMD_REIN_BAROVER =
 {{0.00 * XC,7.0 * YC,0,0}, ToggleButton, TOGGLEID_BarOverGround, ON, 0, "", ""},
     }};
 
+
+
+#if defined (MSVERSION) && (MSVERSION == 0xa00) // cmd
+CmdItemListRsc ItemList_REIN_BARVIEW =
+#else
+CmdItemListRsc CMD_REIN_BARVIEW =
+#endif
+    {{
+{{05.00 * XC,0.50 * YC,0,0}, OptionButton, OPTIONBUTTONID_BarView, ON, 0, "", ""},
+    }};
+
+
 #if defined (MSVERSION) && (MSVERSION == 0xa00) // cmd
 CmdItemListRsc ItemList_REIN_MODIFY =
 #else
@@ -524,6 +536,7 @@ DialogBoxRsc    DLG_POSLIST =
     {{ 35.0*XC, 0.4*YC, 12.0*XC, 1.5*YC},   PushButton, BUTTON_POSLIST, ON, 0, "", ""},
     {{ 77.5*XC, 0.4*YC, 12.0*XC, 1.5*YC},   PushButton, BUTTON_POSNUM, ON, 0, "", ""},
     {{ 90.0*XC, 0.4*YC, 4.0*XC, 1.5*YC},   PushButton, BUTTON_DBSAVE, ON, 0, "", ""},
+//{{90.0*XC,0.4*YC,0,0}, IconCmd, ICONCMDID_PlaceLineAA, ON, 2, "", "owner=\"REIN\""},
     {{ 50.0*XC, 0.4*YC, 12.0*XC, 1.5*YC},   PushButton, BUTTON_POSDRAW, ON, 0, "", ""},
 	{{ 70.0*XC, 0.5*YC, 0, 0}, Text, 101, ON, 0, "", ""},
 	{{ 1.0*XC, 25.0*YC, 90*XC, 1.5*YC}, Label, 1, ON, ALIGN_LEFT|LABEL_FONT_BOLD|LABEL_WORDWRAP, "", ""},
@@ -963,13 +976,22 @@ DItem_TextRsc 2 =
 		"diam"
     };
 
+//DItem_TextRsc DLGITEM_TEXT_SPACE = 
+//    {
+//		NOCMD, LCMD, NOSYNONYM, NOHELP, MHELP, 
+//		HOOKID_DIALOG, NOARG, 
+//		5, "%ld", "%ld", "", "", NOMASK, TEXT_ALWAYSBEVELED, 
+//		TXT_30,
+//		"space"
+//    };
+
 DItem_TextRsc DLGITEM_TEXT_SPACE = 
     {
 		NOCMD, LCMD, NOSYNONYM, NOHELP, MHELP, 
 		HOOKID_DIALOG, NOARG, 
-		5, "%ld", "%ld", "", "", NOMASK, TEXT_ALWAYSBEVELED, 
+		5, "%.1f", "%f", "", "", NOMASK, TEXT_ALWAYSBEVELED, 
 		TXT_30,
-		"space"
+		"spacef"
     };
 
 //DItem_TextRsc DLGITEM_TEXT_SPACE_2 = 
@@ -1511,7 +1533,7 @@ DItem_ToggleButtonRsc 2 =
     "idiam"
     };
 
-DItem_ToggleButtonRsc 3 =
+DItem_ToggleButtonRsc DLGITEM_TEXT_SPACE =
     {
     NOCMD, LCMD, NOSYNONYM, NOHELP, MHELP,
     NOHOOK, NOARG, NOMASK, NOINVERT,
@@ -2268,10 +2290,18 @@ DItem_OptionButtonRsc OPTIONBUTTONID_BarOver =
 {
     NOSYNONYM, NOHELP, LHELPCMD, NOHOOK, OPTNBTNATTR_NEWSTYLE, TXT_87, "bact",
     {
-        {NOTYPE, NOICON, NOCMD, MCMD, BAROVER_ACTION_MOVE, NOMASK, ON, TXT_87_1},
+        {NOTYPE, NOICON, NOCMD, MCMD, BARVIEW_ACTION_STD, NOMASK, ON, TXT_87_1},
         //{NOTYPE, NOICON, NOCMD, MCMD, BAROVER_ACTION_GROUND, NOMASK, ON, ""},
         {NOTYPE, NOICON, NOCMD, MCMD, BAROVER_ACTION_DELETE, NOMASK, ON, TXT_87_2},
         {NOTYPE, NOICON, NOCMD, MCMD, BAROVER_ACTION_RESET, NOMASK, ON, TXT_87_3},
+    }
+};
+
+DItem_OptionButtonRsc OPTIONBUTTONID_BarView =
+{
+    NOSYNONYM, NOHELP, LHELPCMD, NOHOOK, OPTNBTNATTR_NEWSTYLE, TXT_87, "bview",
+    {
+        {NOTYPE, NOICON, NOCMD, MCMD, BARVIEW_ACTION_STD, NOMASK, ON, TXT_87_4},
     }
 };
 
@@ -2566,7 +2596,15 @@ extendedAttributes
 }}
 ;
 
-
+/*
+DItem_IconCmdRsc ICONCMDID_PlaceLineAA= 
+{ 
+	NOHELP, MHELP, 0, CMD_PLACE_LINE_ANGLE, MTASKID, "", "", 
+	{ 
+	   {{16*XC, GENY(1), 10*XC, 0}, Text, TEXTID_ActiveAngle,ON,0,"",""}, 
+	} 
+};
+*/
 
 DItem_IconCmdRsc ICONCMDID_rein_note =
 {
